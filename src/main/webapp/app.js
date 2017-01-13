@@ -9,46 +9,92 @@ socket.onopen = function() {
 
 
 
+var _renderer = PIXI.autoDetectRenderer();
+_renderer.view.style.position = "absolute";
+_renderer.view.style.display = "block";
+_renderer.autoResize = true;
+_renderer.resize(window.innerWidth, window.innerHeight);
+document.body.appendChild(_renderer.view);
 
-var renderer = PIXI.autoDetectRenderer(256, 256);
+var _stage = new PIXI.Container();
+_renderer.render(_stage);
 
-//Add the canvas to the HTML document
-document.body.appendChild(renderer.view);
+function Player() {
+    this._fullSpeed = 10;
+    this._angularSpeed = 0.1;
+    this._deceleration = 0.5;
 
-//Create a container object called the `stage`
-var stage = new PIXI.Container();
+    this.sprite = new PIXI.Sprite(PIXI.loader.resources['avatar'].texture);
+    this.sprite.component = this;
+    this.sprite.width = 34.4;
+    this.sprite.height = 40.6;
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.x = window.innerWidth / 2 - this.sprite.width / 2;
+    this.sprite.y = window.innerHeight / 2 - this.sprite.height / 2;
+    this.sprite.rotation = 0;
+    this.xVelocity = 0;
+    this.yVelocity = 0;
+    this.angularVelocity = 0;
+}
+Player.prototype.accelerate = function accelerate() {
+    this.xVelocity = this._fullSpeed * Math.sin(this.sprite.rotation);
+    this.yVelocity = - this._fullSpeed * Math.cos(this.sprite.rotation);
+};
+Player.prototype.slowDown = function slowDown() {
+    this.xVelocity -= this._deceleration;
+    if (this.xVelocity < 0) {
+        this.xVelocity = 0;
+    }
+    this.yVelocity -= this._deceleration;
+    if (this.yVelocity < 0) {
+        this.yVelocity = 0;
+    }
+};
+Player.prototype.rotate = function rotate() {
+    this.angularVelocity = 0;
+    if (key.isPressed("right")) {
+        this.angularVelocity += this._angularSpeed;
+    }
+    if (key.isPressed("left")) {
+        this.angularVelocity -= this._angularSpeed;
+    }
+};
+Player.prototype.update = function update() {
+    if (key.isPressed("up")) {
+        this.accelerate();
+    } else {
+        this.slowDown();
+    }
+    this.rotate();
 
-//Tell the `renderer` to `render` the `stage`
-renderer.render(stage);
-renderer.view.style.position = "absolute";
-renderer.view.style.display = "block";
-renderer.autoResize = true;
-renderer.resize(window.innerWidth, window.innerHeight);
+    this.sprite.x += this.xVelocity;
+    this.sprite.y += this.yVelocity;
+    this.sprite.rotation += this.angularVelocity;
+};
+Player.prototype.addToStage = function addToStage(stage) {
+    stage.addChild(this.sprite);
+};
 
-// Load image
 PIXI.loader
-    .add("plane.png")
-    .load(setup);
+    .add("avatar", "img/avatar.png")
+    .load(function() {
+        var player = new Player();
+        player.addToStage(_stage);
+        gameLoop();
+    });
 
 var sprite;
 
 function gameLoop() {
-
-    //Loop this function at 60 frames per second
     requestAnimationFrame(gameLoop);
-
-    //Move the sprite 1 pixel to the right each frame
-    sprite.x += sprite.vx;
-    sprite.y += sprite.vy;
-
-    //Render the stage to see the animation
-    renderer.render(stage);
+    for (var i = 0; i < _stage.children.length; i++) {
+        _stage.children[i].component.update();
+    }
+    _renderer.render(_stage);
 }
 
+
 function setup() {
-    sprite = new PIXI.Sprite(
-        PIXI.loader.resources["plane.png"].texture
-    );
 
     var left = keyboard(37),
         up = keyboard(38),
@@ -112,45 +158,8 @@ function setup() {
     sprite.vx = 0;
     sprite.vy = 0;
 
-    stage.addChild(sprite);
-    renderer.render(sprite);
+    _stage.addChild(sprite);
+    _renderer.render(sprite);
 
     gameLoop();
-}
-
-function keyboard(keyCode) {
-    var key = {};
-    key.code = keyCode;
-    key.isDown = false;
-    key.isUp = true;
-    key.press = undefined;
-    key.release = undefined;
-    //The `downHandler`
-    key.downHandler = function(event) {
-        if (event.keyCode === key.code) {
-            if (key.isUp && key.press) key.press();
-            key.isDown = true;
-            key.isUp = false;
-        }
-        event.preventDefault();
-    };
-
-    //The `upHandler`
-    key.upHandler = function(event) {
-        if (event.keyCode === key.code) {
-            if (key.isDown && key.release) key.release();
-            key.isDown = false;
-            key.isUp = true;
-        }
-        event.preventDefault();
-    };
-
-    //Attach event listeners
-    window.addEventListener(
-        "keydown", key.downHandler.bind(key), false
-    );
-    window.addEventListener(
-        "keyup", key.upHandler.bind(key), false
-    );
-    return key;
 }
