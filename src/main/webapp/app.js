@@ -32,9 +32,10 @@ function Player() {
     this.velocity = 0;
     this.deceleration = 0;
     this.angularVelocity = 0;
-    key('up', this.accelerate.bind(this), this.decelerate.bind(this), true);
-    key('right', this.turnRight.bind(this), this.turnLeft.bind(this), true);
-    key('left', this.turnLeft.bind(this), this.turnRight.bind(this), true);
+    key('up', this.accelerate.bind(this), this.decelerate.bind(this));
+    key('right', this.turnRight.bind(this), this.turnLeft.bind(this));
+    key('left', this.turnLeft.bind(this), this.turnRight.bind(this));
+    key('a', this.fire.bind(this)); //
 }
 Player.prototype.accelerate = function accelerate() {
     this.deceleration = 0;
@@ -49,21 +50,53 @@ Player.prototype.turnRight = function turnRight() {
 Player.prototype.turnLeft = function turnLeft() {
     this.angularVelocity -= _playerFullAngularVelocity;
 };
+Player.prototype.fire = function fire() {
+    var x = this.sprite.x + this.sprite.width * Math.sin(this.sprite.rotation);
+    var y = this.sprite.y - this.sprite.height * Math.cos(this.sprite.rotation);
+    new Laser(x, y, this.sprite.rotation).addToStage();
+};
 Player.prototype.update = function update() {
     this.velocity = Math.max(this.velocity - this.deceleration, 0);
     this.sprite.x += this.velocity * Math.sin(this.sprite.rotation);
     this.sprite.y -= this.velocity * Math.cos(this.sprite.rotation);
     this.sprite.rotation += this.angularVelocity;
 };
-Player.prototype.addToStage = function addToStage(stage) {
-    stage.addChild(this.sprite);
+Player.prototype.addToStage = function addToStage() {
+    _stage.addChild(this.sprite);
+};
+
+var _laserFullVelocity = 20;
+var _laserStartingLifespan = 50;
+function Laser(x, y, r) {
+    this.sprite = new PIXI.Sprite(PIXI.loader.resources['laser'].texture);
+    this.sprite.component = this;
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.x = x;
+    this.sprite.y = y;
+    this.sprite.rotation = r;
+    this.lifespan = _laserStartingLifespan;
+}
+Laser.prototype.update = function update() {
+    this.sprite.x += _laserFullVelocity * Math.sin(this.sprite.rotation);
+    this.sprite.y -= _laserFullVelocity * Math.cos(this.sprite.rotation);
+    this.lifespan--;
+    if (this.lifespan <= 0) {
+        this.removeFromStage();
+    }
+};
+Laser.prototype.addToStage = function addToStage() {
+    _stage.addChild(this.sprite);
+};
+Laser.prototype.removeFromStage = function removeFromStage() {
+    _stage.removeChild(this.sprite);
 };
 
 PIXI.loader
     .add("avatar", "img/avatar.png")
+    .add("laser", "img/laser.png")
     .load(function() {
         var player = new Player();
-        player.addToStage(_stage);
+        player.addToStage();
         gameLoop();
     });
 

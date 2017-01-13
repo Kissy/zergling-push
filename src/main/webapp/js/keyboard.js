@@ -37,7 +37,9 @@
 
         var keyIndex = index(_downKeys, key);
         if (event.type == 'keydown') {
-            if (keyIndex == -1) {
+            if (keyIndex >= 0) {
+                return;
+            } else {
                 _downKeys.push(key);
             }
         } else {
@@ -60,12 +62,8 @@
         for (var i = 0; i < _handlers[key].length; i++) {
             handler = _handlers[key][i];
 
-            if (handler.preventRepeat && keyIndex >= 0 && event.type == 'keydown') {
-                continue;
-            }
-
             // call the handler and stop the event if neccessary
-            if (handler[event.type + 'Listener'](event, handler) === false) {
+            if (handler[event.type + 'Listener'] && handler[event.type + 'Listener'](event, handler) === false) {
                 if (event.preventDefault) {
                     event.preventDefault();
                 } else {
@@ -82,7 +80,7 @@
     }
 
     // parse and assign shortcut
-    function assignKey(key, keydownListener, keyupListener, preventRepeat) {
+    function assignKey(key, keydownListener, keyupListener) {
         var keys = getKeys(key);
         for (var i = 0; i < keys.length; i++) {
             key = code(key);
@@ -90,7 +88,7 @@
             if (!(key in _handlers)) {
                 _handlers[key] = [];
             }
-            _handlers[key].push({key: keys[i], keydownListener: keydownListener, keyupListener: keyupListener, preventRepeat: preventRepeat || false});
+            _handlers[key].push({key: keys[i], keydownListener: keydownListener, keyupListener: keyupListener});
         }
     }
 
@@ -153,19 +151,8 @@
         dispatch(event);
     });
 
-    // store previously defined key
-    var previousKey = global.key;
-
-    // restore previously defined key and return reference to our key object
-    function noConflict() {
-        var k = global.key;
-        global.key = previousKey;
-        return k;
-    }
-
     global.key = assignKey;
     global.key.isPressed = isPressed;
     global.key.getPressedKeyCodes = getPressedKeyCodes;
-    global.key.noConflict = noConflict;
     global.key.unbind = unbindKey;
 })(this);
