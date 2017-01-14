@@ -63,7 +63,8 @@
             handler = _handlers[key][i];
 
             // call the handler and stop the event if neccessary
-            if (handler[event.type + 'Listener'] && handler[event.type + 'Listener'](event, handler) === false) {
+            var eventHandler = handler[event.type + 'Listener'];
+            if (eventHandler && eventHandler.call(event, handler) === false) {
                 if (event.preventDefault) {
                     event.preventDefault();
                 } else {
@@ -79,49 +80,6 @@
         }
     }
 
-    // parse and assign shortcut
-    function assignKey(key, keydownListener, keyupListener) {
-        var keys = getKeys(key);
-        for (var i = 0; i < keys.length; i++) {
-            key = code(key);
-            // ...store handler
-            if (!(key in _handlers)) {
-                _handlers[key] = [];
-            }
-            _handlers[key].push({key: keys[i], keydownListener: keydownListener, keyupListener: keyupListener});
-        }
-    }
-
-    // unbind all handlers for given key in current scope
-    function unbindKey(key) {
-        var multipleKeys = getKeys(key);
-        for (var j = 0; j < multipleKeys.length; j++) {
-            key = multipleKeys[j];
-            key = code(key);
-
-            if (!_handlers[key]) {
-                return;
-            }
-            for (var i = 0; i < _handlers[key].length; i++) {
-                _handlers[key][i] = {};
-            }
-        }
-    }
-
-    // Returns true if the key with code 'keyCode' is currently down
-    // Converts strings into key codes.
-    function isPressed(keyCode) {
-        if (typeof(keyCode) == 'string') {
-            keyCode = code(keyCode);
-        }
-        return index(_downKeys, keyCode) != -1;
-    }
-
-    function getPressedKeyCodes() {
-        return _downKeys.slice(0);
-    }
-
-    // abstract key logic for assign and unassign
     function getKeys(key) {
         var keys;
         key = key.replace(/\s/g, '');
@@ -132,7 +90,6 @@
         return keys;
     }
 
-    // cross-browser events
     function addEvent(object, event, callback) {
         if (object.addEventListener) {
             object.addEventListener(event, callback, false);
@@ -151,8 +108,40 @@
         dispatch(event);
     });
 
-    global.key = assignKey;
-    global.key.isPressed = isPressed;
-    global.key.getPressedKeyCodes = getPressedKeyCodes;
-    global.key.unbind = unbindKey;
-})(this);
+    global.Keyboard = {
+        bind: function bind(key, keydownListener, keyupListener) {
+            var keys = getKeys(key);
+            for (var i = 0; i < keys.length; i++) {
+                key = code(key);
+                // ...store handler
+                if (!(key in _handlers)) {
+                    _handlers[key] = [];
+                }
+                _handlers[key].push({key: keys[i], keydownListener: keydownListener, keyupListener: keyupListener});
+            }
+        },
+        unbind: function unbind(key) {
+            var multipleKeys = getKeys(key);
+            for (var j = 0; j < multipleKeys.length; j++) {
+                key = multipleKeys[j];
+                key = code(key);
+
+                if (!_handlers[key]) {
+                    return;
+                }
+                for (var i = 0; i < _handlers[key].length; i++) {
+                    _handlers[key][i] = {};
+                }
+            }
+        },
+        isKeyPressed: function isKeyPressed(keyCode) {
+            if (typeof(keyCode) == 'string') {
+                keyCode = code(keyCode);
+            }
+            return index(_downKeys, keyCode) != -1;
+        },
+        getPressedKeyCodes: function getPressedKeyCodes() {
+            return _downKeys.slice(0);
+        }
+    };
+})(window);
