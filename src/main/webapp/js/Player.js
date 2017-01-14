@@ -1,20 +1,18 @@
 (function (window) {
-    var _playerWidth = 34.4;
-    var _playerHeight = 40.6;
     var _playerFullVelocity = 10;
     var _playerFullAngularVelocity = 0.1;
     var _playerDeceleration = 0.5;
-    var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2,
-        window.innerWidth - _playerWidth / 2, window.innerHeight - _playerHeight / 2);
 
     function Player() {
         this.sprite = new PIXI.Sprite(PIXI.loader.resources['avatar'].texture);
         this.sprite.component = this;
-        this.sprite.width = _playerWidth;
-        this.sprite.height = _playerHeight;
-        this.sprite.anchor.set(0.5, 0.5);
         this.sprite.x = window.innerWidth / 2 - this.sprite.width / 2;
         this.sprite.y = window.innerHeight / 2 - this.sprite.height / 2;
+        this.sprite.scale.x = _xScale;
+        this.sprite.scale.y = _yScale;
+        this.sprite.anchor.set(0.5, 0.5);
+        this.playerPlayground = new PIXI.Rectangle(this.sprite.width / 2, this.sprite.height / 2,
+            window.innerWidth - this.sprite.width / 2, window.innerHeight - this.sprite.height / 2);
         this.sprite.rotation = 0;
         this.velocity = 0;
         this.deceleration = 0;
@@ -43,22 +41,18 @@
     Player.prototype.fire = function fire() {
         var x = this.sprite.x + this.sprite.width * Math.sin(this.sprite.rotation);
         var y = this.sprite.y - this.sprite.height * Math.cos(this.sprite.rotation);
-        new Laser(x, y, this.sprite.rotation).addToStage();
+        var laser = new Laser(x, y, this.sprite.rotation);
+        _stage.addChild(laser.sprite);
     };
     Player.prototype.update = function update() {
         this.velocity = Math.max(this.velocity - this.deceleration, 0);
 
-        this.sprite.x += this.velocity * Math.sin(this.sprite.rotation);
-        this.sprite.y -= this.velocity * Math.cos(this.sprite.rotation);
+        this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation),
+            this.playerPlayground.x, this.playerPlayground.width);
+        this.sprite.y = clamp(this.sprite.y - this.velocity * Math.cos(this.sprite.rotation),
+            this.playerPlayground.y, this.playerPlayground.height);
         this.sprite.rotation += this.angularVelocity;
-
-        this.sprite.x = Math.min(_playerPlayground.width, Math.max(_playerPlayground.x, this.sprite.x));
-        this.sprite.y = Math.min(_playerPlayground.height, Math.max(_playerPlayground.y, this.sprite.y));
     };
-    Player.prototype.addToStage = function addToStage() {
-        _stage.addChild(this.sprite);
-    };
-
 
     window.Player = Player;
 })(window);
