@@ -1,4 +1,4 @@
-(function (global) {
+(function (window) {
     var _laserFullVelocity = 20;
     var _laserStartingLifespan = 50;
 
@@ -27,5 +27,5 @@
         _stage.removeChild(this.sprite);
     };
 
-    global.Laser = Laser;
+    window.Laser = Laser;
 })(window);

@@ -1,4 +1,4 @@
-(function (global) {
+(function (window) {
     var _handlers = {},
         // special keys
         _MAP = {
@@ -108,7 +108,7 @@
         dispatch(event);
     });
 
-    global.Keyboard = {
+    window.Keyboard = {
         bind: function bind(key, keydownListener, keyupListener) {
             var keys = getKeys(key);
             for (var i = 0; i < keys.length; i++) {

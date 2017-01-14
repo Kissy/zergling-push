@@ -1,13 +1,17 @@
-(function (global) {
+(function (window) {
+    var _playerWidth = 34.4;
+    var _playerHeight = 40.6;
     var _playerFullVelocity = 10;
     var _playerFullAngularVelocity = 0.1;
     var _playerDeceleration = 0.5;
+    var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2,
+        window.innerWidth - _playerWidth / 2, window.innerHeight - _playerHeight / 2);
 
     function Player() {
         this.sprite = new PIXI.Sprite(PIXI.loader.resources['avatar'].texture);
         this.sprite.component = this;
-        this.sprite.width = 34.4;
-        this.sprite.height = 40.6;
+        this.sprite.width = _playerWidth;
+        this.sprite.height = _playerHeight;
         this.sprite.anchor.set(0.5, 0.5);
         this.sprite.x = window.innerWidth / 2 - this.sprite.width / 2;
         this.sprite.y = window.innerHeight / 2 - this.sprite.height / 2;
@@ -43,14 +47,18 @@
     };
     Player.prototype.update = function update() {
         this.velocity = Math.max(this.velocity - this.deceleration, 0);
+
         this.sprite.x += this.velocity * Math.sin(this.sprite.rotation);
         this.sprite.y -= this.velocity * Math.cos(this.sprite.rotation);
         this.sprite.rotation += this.angularVelocity;
+
+        this.sprite.x = Math.min(_playerPlayground.width, Math.max(_playerPlayground.x, this.sprite.x));
+        this.sprite.y = Math.min(_playerPlayground.height, Math.max(_playerPlayground.y, this.sprite.y));
     };
     Player.prototype.addToStage = function addToStage() {
         _stage.addChild(this.sprite);
     };
 
 
-    global.Player = Player;
+    window.Player = Player;
 })(window);
