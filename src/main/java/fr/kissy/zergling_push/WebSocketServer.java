@@ -18,14 +18,16 @@ package fr.kissy.zergling_push;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 /**
  * A WebSocket Server that respondes to requests at:
@@ -67,12 +69,11 @@ public class WebSocketServer {
              .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(final SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(
-                        new HttpRequestDecoder(),
-                        new HttpObjectAggregator(65536),
-                        new HttpResponseEncoder(),
-                        new WebSocketServerProtocolHandler("/websocket"),
-                        new CustomTextFrameHandler());
+                    ChannelPipeline pipeline = ch.pipeline();
+                    pipeline.addLast("decoder", new HttpServerCodec());
+                    pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
+                    pipeline.addLast("encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
+                    pipeline.addLast("handler", new BinaryWebSocketFrameHandler());
                 }
             });
 

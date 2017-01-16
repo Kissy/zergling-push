@@ -1,0 +1,10 @@
+namespace Event;
+file_identifier "PLCN";
+
+table PlayerConnected {
+    id: int;
+    x: float;
+    y: float;
+}
+
+root_type PlayerConnected;

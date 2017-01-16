@@ -8,8 +8,8 @@
         this.sprite.x = x;
         this.sprite.y = y;
         this.sprite.rotation = r;
-        this.sprite.scale.x = _xScale;
-        this.sprite.scale.y = _yScale;
+        this.sprite.scale.x = _scale;
+        this.sprite.scale.y = _scale;
         this.sprite.anchor.set(0.5, 0.5);
         this.lifespan = _laserStartingLifespan;
     }

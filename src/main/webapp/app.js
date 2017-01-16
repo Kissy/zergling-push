@@ -1,36 +1,62 @@
-var _websocket = new WebSocket("ws://localhost:8080/websocket");
-_websocket.onmessage = function (response) {
-    console.log(response.data);
-};
-_websocket.onopen = function () {
-    console.log('WS Connection');
-};
+var _targetWidth = 1920;
+var _targetHeight = 960;
+var _scale = (_targetWidth / _targetHeight >= window.innerWidth / window.innerHeight) ? (window.innerWidth / _targetWidth) : (window.innerHeight / _targetHeight);
+var _width = _targetWidth * _scale;
+var _height = _targetHeight * _scale;
 
-var _xScale = 0.5;
-var _yScale = 0.5;
-
-var _renderer = PIXI.autoDetectRenderer();
-_renderer.view.style.position = "absolute";
-_renderer.view.style.display = "block";
+console.log("width " + _width + ", height " + _height + ", scale " + _scale);
+var _renderer = PIXI.autoDetectRenderer(_width, _height);
 _renderer.autoResize = true;
-_renderer.resize(window.innerWidth, window.innerHeight);
 document.body.appendChild(_renderer.view);
 
 var _stage = new PIXI.Container();
 _renderer.render(_stage);
 
 var _player;
+var _players = {};
 
 PIXI.loader
     .add("avatar", "img/avatar.png")
     .add("laser", "img/laser.png")
     .add("shield_silver", "img/shield_silver.png")
-    .load(function () {
-        _player = new Player();
-        _stage.addChild(_player.sprite);
-        gameLoop();
-        powerUpFactory();
-    });
+    .load(connectToServer);
+
+var _webSocket;
+function connectToServer() {
+    _webSocket = new WebSocket("ws://localhost:8080/websocket");
+    _webSocket.binaryType = 'arraybuffer';
+    _webSocket.onmessage = processMessage;
+    _webSocket.onopen = processConnection;
+}
+
+function processConnection() {
+    _player = new ControlledPlayer();
+    _stage.addChild(_player.sprite);
+    gameLoop();
+    // powerUpFactory();
+}
+
+function processMessage(response) {
+    var event;
+    var byteBuffer = new flatbuffers.ByteBuffer(new Uint8Array(response.data));
+    if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
+        event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
+        var player = new Player();
+        _stage.addChild(player.sprite);
+        _players[event.id()] = player;
+    } else if (Event.PlayerAccelerated.bufferHasIdentifier(byteBuffer)) {
+        event = Event.PlayerAccelerated.getRootAsPlayerAccelerated(byteBuffer);
+        _players[event.id()].accelerated(event);
+    } else if (Event.PlayerDecelerated.bufferHasIdentifier(byteBuffer)) {
+        event = Event.PlayerDecelerated.getRootAsPlayerDecelerated(byteBuffer);
+        _players[event.id()].decelerated(event);
+    } else if (Event.PlayerTurned.bufferHasIdentifier(byteBuffer)) {
+        event = Event.PlayerTurned.getRootAsPlayerTurned(byteBuffer);
+        _players[event.id()].turned(event);
+    } else {
+        console.log("Unhandled message");
+    }
+}
 
 function clamp(value, min, max) {
     if (value < min) {
@@ -54,7 +80,7 @@ function collide(first, second) {
 function powerUpFactory() {
     var powerUp = new PowerUp(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
     _stage.addChild(powerUp.sprite);
-    setTimeout(powerUpFactory, Math.random() * 10000)
+    //setTimeout(powerUpFactory, Math.random() * 10000 + 5000);
 }
 
 function gameLoop() {
@@ -74,3 +100,5 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
+
+

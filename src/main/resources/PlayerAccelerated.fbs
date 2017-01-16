@@ -1,0 +1,12 @@
+namespace Event;
+file_identifier "PLAC";
+
+table PlayerAccelerated {
+    id: int;
+    x: float;
+    y: float;
+    rotation: float;
+    velocity: float;
+}
+
+root_type PlayerAccelerated;
