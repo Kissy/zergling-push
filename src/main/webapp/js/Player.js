@@ -42,11 +42,11 @@
     Player.prototype.update = function update(deltaTime) {
         this.velocity = Math.max(this.velocity - this.deceleration, 0);
 
-        this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation),
+        this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation) * deltaTime,
             this.playerPlayground.x, this.playerPlayground.width);
-        this.sprite.y = clamp(this.sprite.y - this.velocity * Math.cos(this.sprite.rotation),
+        this.sprite.y = clamp(this.sprite.y - this.velocity * Math.cos(this.sprite.rotation) * deltaTime,
             this.playerPlayground.y, this.playerPlayground.height);
-        this.sprite.rotation += this.angularVelocity;
+        this.sprite.rotation += this.angularVelocity * deltaTime;
     };
 
     window.Player = Player;

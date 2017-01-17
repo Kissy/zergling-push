@@ -1,6 +1,6 @@
 (function (window) {
-    var _laserFullVelocity = 20;
-    var _laserStartingLifespan = 50;
+    var _laserFullVelocity = 2;
+    var _laserStartingLifespan = 1000;
 
     function Laser(x, y, r) {
         this.sprite = new PIXI.Sprite(PIXI.loader.resources['laser'].texture);
@@ -15,9 +15,9 @@
     }
 
     Laser.prototype.update = function update(deltaTime) {
-        this.sprite.x += _laserFullVelocity * Math.sin(this.sprite.rotation);
-        this.sprite.y -= _laserFullVelocity * Math.cos(this.sprite.rotation);
-        this.lifespan--;
+        this.sprite.x = this.sprite.x + _laserFullVelocity * Math.sin(this.sprite.rotation) * deltaTime;
+        this.sprite.y = this.sprite.y - _laserFullVelocity * Math.cos(this.sprite.rotation) * deltaTime;
+        this.lifespan -= deltaTime;
         if (this.lifespan <= 0) {
             _stage.removeChild(this.sprite);
         }

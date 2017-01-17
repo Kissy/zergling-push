@@ -1,5 +1,5 @@
 (function (window) {
-    var _powerUpStartingLifespan = 500;
+    var _powerUpStartingLifespan = 10000;
 
     function PowerUp(x, y) {
         this.sprite = new PIXI.Sprite(PIXI.loader.resources['shield_silver'].texture);
@@ -13,7 +13,7 @@
     }
 
     PowerUp.prototype.update = function update(deltaTime) {
-        this.lifespan--;
+        this.lifespan -= deltaTime;
         if (this.lifespan <= 0) {
             _stage.removeChild(this.sprite);
         }
