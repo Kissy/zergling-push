@@ -14,7 +14,7 @@
         this.lifespan = _laserStartingLifespan;
     }
 
-    Laser.prototype.update = function update() {
+    Laser.prototype.update = function update(deltaTime) {
         this.sprite.x += _laserFullVelocity * Math.sin(this.sprite.rotation);
         this.sprite.y -= _laserFullVelocity * Math.cos(this.sprite.rotation);
         this.lifespan--;

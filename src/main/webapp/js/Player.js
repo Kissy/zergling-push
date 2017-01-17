@@ -39,7 +39,7 @@
         var laser = new Laser(x, y, this.sprite.rotation);
         _stage.addChild(laser.sprite);
     };
-    Player.prototype.update = function update() {
+    Player.prototype.update = function update(deltaTime) {
         this.velocity = Math.max(this.velocity - this.deceleration, 0);
 
         this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation),

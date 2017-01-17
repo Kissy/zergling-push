@@ -32,7 +32,7 @@ function connectToServer() {
 function processConnection() {
     _player = new ControlledPlayer();
     _stage.addChild(_player.sprite);
-    gameLoop();
+    requestAnimationFrame(gameLoop);
     // powerUpFactory();
 }
 
@@ -83,13 +83,11 @@ function powerUpFactory() {
     //setTimeout(powerUpFactory, Math.random() * 10000 + 5000);
 }
 
-function gameLoop() {
+function update(deltaTime) {
     var i;
     for (i = 0; i < _stage.children.length; i++) {
-        _stage.children[i].component.update();
+        _stage.children[i].component.update(deltaTime);
     }
-
-    _renderer.render(_stage);
 
     for (i = 0; i < _stage.children.length; i++) {
         var child = _stage.children[i];
@@ -97,8 +95,10 @@ function gameLoop() {
             _stage.removeChild(child);
         }
     }
-
-    requestAnimationFrame(gameLoop);
 }
 
+function draw() {
+    _renderer.render(_stage);
+}
 
+MainLoop.setUpdate(update).setDraw(draw).start();

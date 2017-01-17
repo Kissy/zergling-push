@@ -12,7 +12,7 @@
         this.lifespan = _powerUpStartingLifespan;
     }
 
-    PowerUp.prototype.update = function update() {
+    PowerUp.prototype.update = function update(deltaTime) {
         this.lifespan--;
         if (this.lifespan <= 0) {
             _stage.removeChild(this.sprite);

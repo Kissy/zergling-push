@@ -1,6 +1,6 @@
 (function (window) {
-    var _playerFullVelocity = 10;
-    var _playerFullAngularVelocity = 0.1;
+    var _playerFullVelocity = 0.8;
+    var _playerFullAngularVelocity = 0.006;
     var _playerDeceleration = 0.4;
 
     function ControlledPlayer() {
@@ -116,14 +116,14 @@
         var laser = new Laser(x, y, this.sprite.rotation);
         _stage.addChild(laser.sprite);
     };
-    ControlledPlayer.prototype.update = function update() {
+    ControlledPlayer.prototype.update = function update(deltaTime) {
         this.velocity = Math.max(this.velocity - this.deceleration, 0);
 
-        this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation),
+        this.sprite.x = clamp(this.sprite.x + this.velocity * Math.sin(this.sprite.rotation) * deltaTime,
             this.playerPlayground.x, this.playerPlayground.width);
-        this.sprite.y = clamp(this.sprite.y - this.velocity * Math.cos(this.sprite.rotation),
+        this.sprite.y = clamp(this.sprite.y - this.velocity * Math.cos(this.sprite.rotation) * deltaTime,
             this.playerPlayground.y, this.playerPlayground.height);
-        this.sprite.rotation += this.angularVelocity;
+        this.sprite.rotation += this.angularVelocity * deltaTime;
     };
 
     window.ControlledPlayer = ControlledPlayer;
