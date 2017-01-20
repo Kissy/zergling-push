@@ -2,9 +2,14 @@ namespace Event;
 file_identifier "PLCN";
 
 table PlayerConnected {
-    id: int;
+    id: string;
+    name: string;
     x: float;
     y: float;
+
+    velocityFactor: float;
+    angularVelocityFactor: float;
+    decelerationFactor: float;
 }
 
 root_type PlayerConnected;

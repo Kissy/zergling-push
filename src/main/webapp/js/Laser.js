@@ -1,7 +1,4 @@
 (function (window) {
-    var _laserFullVelocity = 2;
-    var _laserStartingLifespan = 1000;
-
     function Laser(x, y, r) {
         this.sprite = new PIXI.Sprite(PIXI.loader.resources['laser'].texture);
         this.sprite.component = this;

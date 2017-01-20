@@ -1,0 +1,11 @@
+namespace Event;
+file_identifier "PLJN";
+
+table PlayerJoined {
+    id: string;
+    name: string;
+    x: float;
+    y: float;
+}
+
+root_type PlayerJoined;

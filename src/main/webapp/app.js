@@ -4,6 +4,13 @@ var _scale = (_targetWidth / _targetHeight >= window.innerWidth / window.innerHe
 var _width = _targetWidth * _scale;
 var _height = _targetHeight * _scale;
 
+var _playerVelocityFactor;
+var _playerAngularVelocityFactor;
+var _playerDecelerationFactor;
+var _laserFullVelocity = 2 * _scale;
+var _laserStartingLifespan = 1000;
+var _moduloRadian = 2 * Math.PI;
+
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
 var _renderer = PIXI.autoDetectRenderer(_width, _height);
 _renderer.autoResize = true;
@@ -26,36 +33,13 @@ function connectToServer() {
     _webSocket = new WebSocket("ws://localhost:8080/websocket");
     _webSocket.binaryType = 'arraybuffer';
     _webSocket.onmessage = processMessage;
-    _webSocket.onopen = processConnection;
 }
 
-function processConnection() {
-    _player = new ControlledPlayer();
-    _stage.addChild(_player.sprite);
-    requestAnimationFrame(gameLoop);
-    // powerUpFactory();
-}
-
+var _inputQueue = [];
+var _messageQueue = [];
 function processMessage(response) {
-    var event;
     var byteBuffer = new flatbuffers.ByteBuffer(new Uint8Array(response.data));
-    if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
-        event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
-        var player = new Player();
-        _stage.addChild(player.sprite);
-        _players[event.id()] = player;
-    } else if (Event.PlayerAccelerated.bufferHasIdentifier(byteBuffer)) {
-        event = Event.PlayerAccelerated.getRootAsPlayerAccelerated(byteBuffer);
-        _players[event.id()].accelerated(event);
-    } else if (Event.PlayerDecelerated.bufferHasIdentifier(byteBuffer)) {
-        event = Event.PlayerDecelerated.getRootAsPlayerDecelerated(byteBuffer);
-        _players[event.id()].decelerated(event);
-    } else if (Event.PlayerTurned.bufferHasIdentifier(byteBuffer)) {
-        event = Event.PlayerTurned.getRootAsPlayerTurned(byteBuffer);
-        _players[event.id()].turned(event);
-    } else {
-        console.log("Unhandled message");
-    }
+    _messageQueue.push(byteBuffer);
 }
 
 function clamp(value, min, max) {
@@ -83,22 +67,76 @@ function powerUpFactory() {
     //setTimeout(powerUpFactory, Math.random() * 10000 + 5000);
 }
 
+function begin() {
+
+}
+
 function update(deltaTime) {
     var i;
+
+    // Process messages from server
+    for (i = 0; i < _messageQueue.length; i++) {
+        var event, byteBuffer = _messageQueue[i];
+        if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
+            _playerVelocityFactor = event.velocityFactor() * _scale;
+            _playerAngularVelocityFactor = event.angularVelocityFactor();
+            _playerDecelerationFactor = event.decelerationFactor();
+            console.log(_playerDecelerationFactor);
+
+            _player = new ControlledPlayer();
+            _player.id = event.id();
+            _player.name = event.name();
+            _player.sprite.x = event.x() * _scale;
+            _player.sprite.y = event.y() * _scale;
+            _stage.addChild(_player.sprite);
+            _players[event.id()] = _player;
+        } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
+            console.log("Player joined " + event.id());
+            var player = new Player();
+            player.name = event.name();
+            player.sprite.x = event.x() * _scale;
+            player.sprite.y = event.y() * _scale;
+            _stage.addChild(player.sprite);
+            _players[event.id()] = player;
+        } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
+            console.log("Player leaved " + event.id());
+            if (_players[event.id()]) {
+                _stage.removeChild(_players[event.id()].sprite);
+                delete _players[event.id()];
+            }
+        } else if (Event.PlayerMoved.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+            console.log("Player moved " + event.id());
+            _players[event.id()].moved(event);
+        } else {
+            console.log("Unhandled message");
+        }
+    }
+    _messageQueue = [];
+
     for (i = 0; i < _stage.children.length; i++) {
         _stage.children[i].component.update(deltaTime);
     }
 
-    for (i = 0; i < _stage.children.length; i++) {
+    // Send messages to server
+    for (i = 0; i < _inputQueue.length; i++) {
+        _webSocket.send(_inputQueue[i]);
+    }
+    _inputQueue = [];
+
+    /*for (i = 0; i < _stage.children.length; i++) {
         var child = _stage.children[i];
         if (child.component instanceof PowerUp && collide(_player.sprite, child)) {
             _stage.removeChild(child);
         }
-    }
+    }*/
 }
 
 function draw() {
     _renderer.render(_stage);
 }
 
-MainLoop.setUpdate(update).setDraw(draw).start();
+MainLoop.setUpdate(update).setBegin(begin).setDraw(draw).start();

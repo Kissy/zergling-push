@@ -15,8 +15,9 @@
  */
 package fr.kissy.zergling_push;
 
-import Event.PlayerAccelerated;
 import Event.PlayerConnected;
+import Event.PlayerJoined;
+import Event.PlayerLeaved;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -24,47 +25,94 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
-import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
-    private static final ChannelGroup CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static final float VELOCITY_FACTOR = 0.8f;
+    public static final float ANGULAR_VELOCITY_FACTOR = 0.006f;
+    public static final float DECELERATION_FACTOR = 0.05f;
+    private ChannelGroup allPlayers;
+    private Map<Channel, Player> players;
+    private ArrayBlockingQueue<PlayerMessage> messagesQueue;
+
+    public BinaryWebSocketFrameHandler(ChannelGroup allPlayers, Map<Channel, Player> players, ArrayBlockingQueue<PlayerMessage> messagesQueue) {
+        this.allPlayers = allPlayers;
+        this.players = players;
+        this.messagesQueue = messagesQueue;
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        super.userEventTriggered(ctx, evt);
+        if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
+            Player currentPlayer = players.get(ctx.channel());
+            allPlayers.writeAndFlush(createPlayerJoinedMessage(ctx.channel(), currentPlayer));
+            allPlayers.add(ctx.channel());
+            for (Map.Entry<Channel, Player> entry : players.entrySet()) {
+                if (entry.getKey().equals(ctx.channel())) {
+                    ctx.channel().write(createPlayerConnectedMessage(ctx.channel(), currentPlayer));
+                } else {
+                    ctx.channel().write(createPlayerJoinedMessage(entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        FlatBufferBuilder fbb = new FlatBufferBuilder();
-        int offset = PlayerConnected.createPlayerConnected(fbb, 1, 100, 100);
-        PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
-        BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
-        for (Channel channel : CHANNELS) {
-            channel.writeAndFlush(frame);
-        }
-        CHANNELS.add(ctx.channel());
-        // Iterate through players and spawn it
+        players.put(ctx.channel(), new Player());
+        System.out.println("Played joined "  + ctx.channel().id().asShortText());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        CHANNELS.remove(ctx.channel());
+        players.remove(ctx.channel());
+        allPlayers.remove(ctx.channel());
+        allPlayers.writeAndFlush(createPlayerLeavedMessage(ctx.channel()));
+        System.out.println("Played leaved " + ctx.channel().id().asShortText());
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame frame) throws Exception {
-        ByteBuffer request = frame.content().nioBuffer();
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(request);
-        BinaryWebSocketFrame responseFrame = new BinaryWebSocketFrame(byteBuf);
-        for (Channel channel : CHANNELS) {
-            if (ctx.channel().equals(channel)) {
-                continue;
-            }
-            channel.writeAndFlush(responseFrame);
-        }
+        ByteBuf message = frame.content();
+        messagesQueue.add(new PlayerMessage(ctx.channel(), message));
+        System.out.println("Message received from " + ctx.channel().id().asShortText());
+    }
+
+    private BinaryWebSocketFrame createPlayerConnectedMessage(Channel channel, Player player) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        int idOffset = fbb.createString(channel.id().asShortText());
+        int nameOffset = fbb.createString("Name");
+        int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, player.y(), player.y(),
+                VELOCITY_FACTOR, ANGULAR_VELOCITY_FACTOR, DECELERATION_FACTOR);
+        PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
+        return new BinaryWebSocketFrame(byteBuf);
+    }
+
+    private BinaryWebSocketFrame createPlayerJoinedMessage(Channel channel, Player player) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        int idOffset = fbb.createString(channel.id().asShortText());
+        int nameOffset = fbb.createString("Name");
+        int offset = PlayerJoined.createPlayerJoined(fbb, idOffset, nameOffset, player.x(), player.y());
+        PlayerJoined.finishPlayerJoinedBuffer(fbb, offset);
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
+        return new BinaryWebSocketFrame(byteBuf);
+    }
+
+    private BinaryWebSocketFrame createPlayerLeavedMessage(Channel channel) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        int idOffset = fbb.createString(channel.id().asShortText());
+        int offset = PlayerLeaved.createPlayerLeaved(fbb, idOffset);
+        PlayerLeaved.finishPlayerLeavedBuffer(fbb, offset);
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
+        return new BinaryWebSocketFrame(byteBuf);
     }
 }

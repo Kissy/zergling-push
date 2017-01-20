@@ -50,33 +50,28 @@ Event.PlayerConnected.bufferHasIdentifier = function(bb) {
 };
 
 /**
- * @returns {number}
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array}
  */
-Event.PlayerConnected.prototype.id = function() {
+Event.PlayerConnected.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
-  return offset ? this.bb.readInt32(this.bb_pos + offset) : 0;
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array}
  */
-Event.PlayerConnected.prototype.mutate_id = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeInt32(this.bb_pos + offset, value);
-  return true;
+Event.PlayerConnected.prototype.name = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
 
 /**
  * @returns {number}
  */
 Event.PlayerConnected.prototype.x = function() {
-  var offset = this.bb.__offset(this.bb_pos, 6);
+  var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
@@ -85,7 +80,7 @@ Event.PlayerConnected.prototype.x = function() {
  * @returns {boolean}
  */
 Event.PlayerConnected.prototype.mutate_x = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
+  var offset = this.bb.__offset(this.bb_pos, 8);
 
   if (offset === 0) {
     return false;
@@ -99,7 +94,7 @@ Event.PlayerConnected.prototype.mutate_x = function(value) {
  * @returns {number}
  */
 Event.PlayerConnected.prototype.y = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
@@ -108,7 +103,76 @@ Event.PlayerConnected.prototype.y = function() {
  * @returns {boolean}
  */
 Event.PlayerConnected.prototype.mutate_y = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 10);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+Event.PlayerConnected.prototype.velocityFactor = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+Event.PlayerConnected.prototype.mutate_velocityFactor = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+Event.PlayerConnected.prototype.angularVelocityFactor = function() {
+  var offset = this.bb.__offset(this.bb_pos, 14);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+Event.PlayerConnected.prototype.mutate_angularVelocityFactor = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 14);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+Event.PlayerConnected.prototype.decelerationFactor = function() {
+  var offset = this.bb.__offset(this.bb_pos, 16);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+Event.PlayerConnected.prototype.mutate_decelerationFactor = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 16);
 
   if (offset === 0) {
     return false;
@@ -122,15 +186,23 @@ Event.PlayerConnected.prototype.mutate_y = function(value) {
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerConnected.startPlayerConnected = function(builder) {
-  builder.startObject(3);
+  builder.startObject(7);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} id
+ * @param {flatbuffers.Offset} idOffset
  */
-Event.PlayerConnected.addId = function(builder, id) {
-  builder.addFieldInt32(0, id, 0);
+Event.PlayerConnected.addId = function(builder, idOffset) {
+  builder.addFieldOffset(0, idOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} nameOffset
+ */
+Event.PlayerConnected.addName = function(builder, nameOffset) {
+  builder.addFieldOffset(1, nameOffset, 0);
 };
 
 /**
@@ -138,7 +210,7 @@ Event.PlayerConnected.addId = function(builder, id) {
  * @param {number} x
  */
 Event.PlayerConnected.addX = function(builder, x) {
-  builder.addFieldFloat32(1, x, 0.0);
+  builder.addFieldFloat32(2, x, 0.0);
 };
 
 /**
@@ -146,7 +218,31 @@ Event.PlayerConnected.addX = function(builder, x) {
  * @param {number} y
  */
 Event.PlayerConnected.addY = function(builder, y) {
-  builder.addFieldFloat32(2, y, 0.0);
+  builder.addFieldFloat32(3, y, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} velocityFactor
+ */
+Event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
+  builder.addFieldFloat32(4, velocityFactor, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} angularVelocityFactor
+ */
+Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVelocityFactor) {
+  builder.addFieldFloat32(5, angularVelocityFactor, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} decelerationFactor
+ */
+Event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFactor) {
+  builder.addFieldFloat32(6, decelerationFactor, 0.0);
 };
 
 /**

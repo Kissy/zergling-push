@@ -1,8 +1,0 @@
-namespace Event;
-file_identifier "PLDN";
-
-table PlayerDisconnected {
-    id: int;
-}
-
-root_type PlayerDisconnected;

@@ -1,0 +1,14 @@
+namespace Event;
+file_identifier "PLMV";
+
+table PlayerMoved {
+    id: string;
+    time: uint;
+    x: float;
+    y: float;
+    rotation: float;
+    velocity: byte;
+    angularVelocity: byte;
+}
+
+root_type PlayerMoved;

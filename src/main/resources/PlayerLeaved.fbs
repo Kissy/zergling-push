@@ -1,0 +1,8 @@
+namespace Event;
+file_identifier "PLLV";
+
+table PlayerLeaved {
+    id: string;
+}
+
+root_type PlayerLeaved;
