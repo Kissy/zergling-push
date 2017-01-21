@@ -23,6 +23,9 @@
     ControlledPlayer.prototype.moved = function moved(event) {
         console.log("check player moved");
     };
+    ControlledPlayer.prototype.shot = function shot(event) {
+        console.log("check player shot");
+    };
     ControlledPlayer.prototype.accelerate = function accelerate() {
         this.velocity = 1;
         this.residualVelocity = 0;
@@ -46,6 +49,7 @@
         var y = this.sprite.y - this.sprite.height * Math.cos(this.sprite.rotation);
         var laser = new Laser(x, y, this.sprite.rotation);
         _stage.addChild(laser.sprite);
+        this.queuePlayerShot(laser);
     };
     ControlledPlayer.prototype.update = function update(deltaTime) {
         this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
@@ -69,6 +73,18 @@
         Event.PlayerMoved.addVelocity(builder, this.velocity);
         Event.PlayerMoved.addAngularVelocity(builder, this.angularVelocity);
         Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
+        _inputQueue.push(builder.asUint8Array());
+    };
+    ControlledPlayer.prototype.queuePlayerShot = function queuePlayerShot(laser) {
+        var builder = new flatbuffers.Builder();
+        var idOffset = builder.createString(this.id);
+        Event.PlayerShot.startPlayerShot(builder);
+        Event.PlayerShot.addId(builder, idOffset);
+        Event.PlayerShot.addTime(builder, new Date().getTime());
+        Event.PlayerShot.addX(builder, laser.sprite.x / _scale);
+        Event.PlayerShot.addY(builder, laser.sprite.y / _scale);
+        Event.PlayerShot.addRotation(builder, laser.sprite.rotation);
+        Event.PlayerShot.finishPlayerShotBuffer(builder, Event.PlayerShot.endPlayerShot(builder));
         _inputQueue.push(builder.asUint8Array());
     };
 

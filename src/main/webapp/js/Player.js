@@ -26,6 +26,10 @@
         this.velocity = event.velocity();
         this.angularVelocity = event.angularVelocity();
     };
+    Player.prototype.shot = function shot(event) {
+        var laser = new Laser(event.x() * _scale, event.y() * _scale, event.rotation());
+        _stage.addChild(laser.sprite);
+    };
     Player.prototype.fire = function fire() {
         var x = this.sprite.x + this.sprite.width * Math.sin(this.sprite.rotation);
         var y = this.sprite.y - this.sprite.height * Math.cos(this.sprite.rotation);

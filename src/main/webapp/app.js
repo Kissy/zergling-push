@@ -77,12 +77,19 @@ function update(deltaTime) {
     // Process messages from server
     for (i = 0; i < _messageQueue.length; i++) {
         var event, byteBuffer = _messageQueue[i];
-        if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
+        if (Event.PlayerMoved.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+            console.log("Player moved " + event.id());
+            _players[event.id()].moved(event);
+        } else if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
+            console.log("Player shot " + event.id());
+            _players[event.id()].shot(event);
+        } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
             _playerVelocityFactor = event.velocityFactor() * _scale;
             _playerAngularVelocityFactor = event.angularVelocityFactor();
             _playerDecelerationFactor = event.decelerationFactor();
-            console.log(_playerDecelerationFactor);
 
             _player = new ControlledPlayer();
             _player.id = event.id();
@@ -107,10 +114,6 @@ function update(deltaTime) {
                 _stage.removeChild(_players[event.id()].sprite);
                 delete _players[event.id()];
             }
-        } else if (Event.PlayerMoved.bufferHasIdentifier(byteBuffer)) {
-            event = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
-            console.log("Player moved " + event.id());
-            _players[event.id()].moved(event);
         } else {
             console.log("Unhandled message");
         }
