@@ -66,7 +66,7 @@
         var idOffset = builder.createString(this.id);
         Event.PlayerMoved.startPlayerMoved(builder);
         Event.PlayerMoved.addId(builder, idOffset);
-        Event.PlayerMoved.addTime(builder, new Date().getTime());
+        Event.PlayerMoved.addTime(builder, new Date().getTime() - _referenceTime);
         Event.PlayerMoved.addX(builder, this.sprite.x / _scale);
         Event.PlayerMoved.addY(builder, this.sprite.y / _scale);
         Event.PlayerMoved.addRotation(builder, this.sprite.rotation);
@@ -80,7 +80,7 @@
         var idOffset = builder.createString(this.id);
         Event.PlayerShot.startPlayerShot(builder);
         Event.PlayerShot.addId(builder, idOffset);
-        Event.PlayerShot.addTime(builder, new Date().getTime());
+        Event.PlayerShot.addTime(builder, new Date().getTime() - _referenceTime);
         Event.PlayerShot.addX(builder, laser.sprite.x / _scale);
         Event.PlayerShot.addY(builder, laser.sprite.y / _scale);
         Event.PlayerShot.addRotation(builder, laser.sprite.rotation);

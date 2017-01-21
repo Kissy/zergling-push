@@ -4,9 +4,16 @@ var _scale = (_targetWidth / _targetHeight >= window.innerWidth / window.innerHe
 var _width = _targetWidth * _scale;
 var _height = _targetHeight * _scale;
 
+var _referenceTime = new Date();
+_referenceTime.setHours(0,0,0,0);
+_referenceTime = _referenceTime.getTime();
+
+var _playerId;
 var _playerVelocityFactor;
 var _playerAngularVelocityFactor;
 var _playerDecelerationFactor;
+var _playerStartingXPosition;
+var _playerStartingYPosition;
 var _laserFullVelocity = 2 * _scale;
 var _laserStartingLifespan = 1000;
 var _moduloRadian = 2 * Math.PI;
@@ -85,11 +92,46 @@ function update(deltaTime) {
             event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
             console.log("Player shot " + event.id());
             _players[event.id()].shot(event);
+        } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
+            if (event.id() != _playerId) {
+                console.log("Player joined " + event.id());
+                var player = new Player();
+                player.name = event.name();
+                player.sprite.x = event.x() * _scale;
+                player.sprite.y = event.y() * _scale;
+                _stage.addChild(player.sprite);
+                _players[event.id()] = player;
+            }
+        } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
+            console.log("Player leaved " + event.id());
+            if (_players[event.id()]) {
+                _stage.removeChild(_players[event.id()].sprite);
+                delete _players[event.id()];
+            }
         } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
+            _playerId = event.id();
             _playerVelocityFactor = event.velocityFactor() * _scale;
             _playerAngularVelocityFactor = event.angularVelocityFactor();
             _playerDecelerationFactor = event.decelerationFactor();
+            _playerStartingXPosition = event.x();
+            _playerStartingYPosition = event.y();
+
+            // TODO press enter to join
+            var builder = new flatbuffers.Builder();
+            var idOffset = builder.createString(_playerId);
+            var nameOffset = builder.createString(_playerId);
+            Event.PlayerJoined.startPlayerJoined(builder);
+            Event.PlayerJoined.addId(builder, idOffset);
+            Event.PlayerJoined.addTime(builder, new Date().getTime() - _referenceTime);
+            Event.PlayerJoined.addName(builder, nameOffset);
+            Event.PlayerJoined.addX(builder, _playerStartingXPosition);
+            Event.PlayerJoined.addY(builder, _playerStartingYPosition);
+            Event.PlayerJoined.addRotation(builder, 0);
+            Event.PlayerJoined.finishPlayerJoinedBuffer(builder, Event.PlayerJoined.endPlayerJoined(builder));
+            _inputQueue.push(builder.asUint8Array());
 
             _player = new ControlledPlayer();
             _player.id = event.id();
@@ -98,22 +140,6 @@ function update(deltaTime) {
             _player.sprite.y = event.y() * _scale;
             _stage.addChild(_player.sprite);
             _players[event.id()] = _player;
-        } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
-            event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            console.log("Player joined " + event.id());
-            var player = new Player();
-            player.name = event.name();
-            player.sprite.x = event.x() * _scale;
-            player.sprite.y = event.y() * _scale;
-            _stage.addChild(player.sprite);
-            _players[event.id()] = player;
-        } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
-            event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
-            console.log("Player leaved " + event.id());
-            if (_players[event.id()]) {
-                _stage.removeChild(_players[event.id()].sprite);
-                delete _players[event.id()];
-            }
         } else {
             console.log("Unhandled message");
         }

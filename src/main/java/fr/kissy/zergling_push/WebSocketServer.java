@@ -15,8 +15,11 @@
  */
 package fr.kissy.zergling_push;
 
+import fr.kissy.zergling_push.debug.DebugFrame;
+import fr.kissy.zergling_push.infrastructure.BinaryWebSocketFrameHandler;
+import fr.kissy.zergling_push.model.Player;
+import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -34,7 +37,6 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +74,8 @@ public class WebSocketServer {
         final ChannelGroup allPlayers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         final ArrayBlockingQueue<PlayerMessage> messagesQueue = new ArrayBlockingQueue<PlayerMessage>(1024);
 
-        final MainLoop mainLoop = new MainLoop(allPlayers, players, messagesQueue);
+        final DebugFrame debugFrame = new DebugFrame(players);
+        final MainLoop mainLoop = new MainLoop(allPlayers, players, messagesQueue, debugFrame);
         ScheduledThreadPoolExecutor mainLoopExecutor = new ScheduledThreadPoolExecutor(1);
         mainLoopExecutor.scheduleAtFixedRate(mainLoop, 0, TICK_RATE, TimeUnit.MILLISECONDS);
 
@@ -89,7 +92,7 @@ public class WebSocketServer {
                             pipeline.addLast("decoder", new HttpServerCodec());
                             pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                             pipeline.addLast("encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
-                            pipeline.addLast("handler", new BinaryWebSocketFrameHandler(allPlayers, players, messagesQueue));
+                            pipeline.addLast("handler", new BinaryWebSocketFrameHandler(messagesQueue));
                         }
                     });
             final Channel ch = sb.bind(8080).sync().channel();

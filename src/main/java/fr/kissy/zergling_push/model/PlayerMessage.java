@@ -1,4 +1,4 @@
-package fr.kissy.zergling_push;
+package fr.kissy.zergling_push.model;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
