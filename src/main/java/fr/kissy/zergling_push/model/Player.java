@@ -33,12 +33,16 @@ public class Player {
     public Player(PlayerJoined event) {
         this.id = event.id();
         this.name = event.name();
-        this.x = event.y();
+        this.x = event.x();
         this.y = event.y();
     }
 
     public void moved(PlayerMoved event) {
-        this.x = event.y();
+        if (this.velocity != event.velocity()) {
+            this.residualVelocity = 1 - event.velocity();
+        }
+
+        this.x = event.x();
         this.y = event.y();
         this.rotation = event.rotation();
         this.velocity = event.velocity();
@@ -46,9 +50,9 @@ public class Player {
     }
 
     public void shot(PlayerShot event) {
-        this.x = event.y();
-        this.y = event.y();
-        this.rotation = event.rotation();
+//        this.x = event.x();
+//        this.y = event.y();
+//        this.rotation = event.rotation();
     }
 
     public void update(long deltaTime) {
@@ -61,9 +65,13 @@ public class Player {
     }
 
     private float clamp(float value, float min, float max) {
-        value = Math.max(value, min);
-        value = Math.min(value, max);
-        return value;
+        if (value < min) {
+            return min;
+        } else if (value > max) {
+            return max;
+        } else {
+            return value;
+        }
     }
 
     public ByteBuf createPlayerJoined() {
@@ -73,5 +81,21 @@ public class Player {
         int offset = PlayerJoined.createPlayerJoined(fbb, idOffset, (int) new Date().getTime(), nameOffset, x, y, rotation);
         PlayerJoined.finishPlayerJoinedBuffer(fbb, offset);
         return Unpooled.wrappedBuffer(fbb.dataBuffer());
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
     }
 }

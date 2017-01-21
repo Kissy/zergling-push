@@ -70,12 +70,9 @@ public class WebSocketServer {
     }
 
     private void run() throws Exception {
-        final Map<Channel, Player> players = new HashMap<Channel, Player>();
-        final ChannelGroup allPlayers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         final ArrayBlockingQueue<PlayerMessage> messagesQueue = new ArrayBlockingQueue<PlayerMessage>(1024);
 
-        final DebugFrame debugFrame = new DebugFrame(players);
-        final MainLoop mainLoop = new MainLoop(allPlayers, players, messagesQueue, debugFrame);
+        final MainLoop mainLoop = new MainLoop(messagesQueue);
         ScheduledThreadPoolExecutor mainLoopExecutor = new ScheduledThreadPoolExecutor(1);
         mainLoopExecutor.scheduleAtFixedRate(mainLoop, 0, TICK_RATE, TimeUnit.MILLISECONDS);
 
