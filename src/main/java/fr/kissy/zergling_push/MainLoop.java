@@ -7,9 +7,11 @@ import Event.PlayerShot;
 import fr.kissy.zergling_push.debug.DebugFrame;
 import fr.kissy.zergling_push.debug.DebugLaserList;
 import fr.kissy.zergling_push.debug.DebugPlayerMap;
+import fr.kissy.zergling_push.model.Hit;
 import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.stream.Collectors;
 
 /**
  * Created by Guillaume on 19/01/2017.
@@ -40,7 +43,7 @@ public class MainLoop implements Runnable {
         this.messagesQueue = messagesQueue;
         this.allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
         this.debugFrame = DEBUG_ENABLED ? new DebugFrame(this) : null;
-        this.players  = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
+        this.players = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
     }
 
     public void run() {
@@ -71,7 +74,21 @@ public class MainLoop implements Runnable {
     }
 
     private void detectCollisions() {
+        List<Hit> hits = players.values().stream()
+                .flatMap(player -> player.getShots().stream())
+                .flatMap(shot ->
+                        players.values().stream()
+                                .filter(player -> player.hitBy(shot))
+                                .map(player -> new Hit(player, shot))
+                                .collect(Collectors.toList()).stream()
+                )
+                .collect(Collectors.toList());
 
+        for (Hit hit : hits) {
+            ByteBuf message = hit.process();
+            allPlayers.write(new BinaryWebSocketFrame(message));
+        }
+        allPlayers.flush();
     }
 
     private void dispatchToPlayer(PlayerMessage playerMessage) {

@@ -1,0 +1,10 @@
+namespace Event;
+file_identifier "PLHT";
+
+table PlayerHit {
+    id: string;
+    time: uint;
+    shot: string;
+}
+
+root_type PlayerHit;

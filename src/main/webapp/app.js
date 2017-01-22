@@ -98,6 +98,10 @@ function update(deltaTime) {
         } else if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
             _players[event.id()].shot(event);
+        } else if (Event.PlayerHit.bufferHasIdentifier(byteBuffer)) {
+            event = Event.PlayerHit.getRootAsPlayerHit(byteBuffer);
+            _players[event.id()].hit(event);
+            console.log("Hit");
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
             var player = (event.id() == _playerId) ? new ControlledPlayer(event) : new Player(event);

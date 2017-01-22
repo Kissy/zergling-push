@@ -1,12 +1,10 @@
 package fr.kissy.zergling_push.debug;
 
 import fr.kissy.zergling_push.model.Laser;
-import fr.kissy.zergling_push.model.Player;
-import io.netty.channel.Channel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.BitSet;
+import java.util.function.Predicate;
 
 /**
  * Created by Guillaume on 22/01/2017.
@@ -28,5 +26,15 @@ public class DebugLaserList extends ArrayList<Laser> {
     public boolean remove(Object key) {
         debugFrame.removeShot((Laser) key);
         return super.remove(key);
+    }
+
+    @Override
+    public boolean removeIf(Predicate<? super Laser> filter) {
+        forEach(s -> {
+            if (filter.test(s)) {
+                debugFrame.removeShot(s);
+            }
+        });
+        return super.removeIf(filter);
     }
 }

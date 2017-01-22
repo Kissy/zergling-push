@@ -94,6 +94,8 @@ public class WebSocketServer {
                     });
             final Channel ch = sb.bind(8080).sync().channel();
             ch.closeFuture().sync();
+        } catch (Exception e) {
+            throw new RuntimeException("Error while running server", e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

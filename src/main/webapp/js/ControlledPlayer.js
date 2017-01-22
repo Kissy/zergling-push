@@ -35,6 +35,8 @@
     };
     ControlledPlayer.prototype.shot = function shot(event) {
     };
+    ControlledPlayer.prototype.hit = function hit(event) {
+    };
     ControlledPlayer.prototype.fire = function fire() {
         var laser = Object.getPrototypeOf(ControlledPlayer.prototype).fire.call(this);
         this.queuePlayerShot(laser);
