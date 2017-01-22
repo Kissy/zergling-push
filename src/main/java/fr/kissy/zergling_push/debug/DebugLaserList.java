@@ -26,7 +26,7 @@ public class DebugLaserList extends ArrayList<Laser> {
 
     @Override
     public boolean remove(Object key) {
-        debugFrame.removePlayer(((Channel) key).id());
+        debugFrame.removeShot((Laser) key);
         return super.remove(key);
     }
 }

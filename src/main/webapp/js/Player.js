@@ -36,8 +36,8 @@
         _stage.addChild(laser.sprite);
     };
     Player.prototype.fire = function fire() {
-        var x = this.sprite.x + this.sprite.width * Math.sin(this.avatarSprite.rotation);
-        var y = this.sprite.y - this.sprite.height * Math.cos(this.avatarSprite.rotation);
+        var x = this.sprite.x + _playerWidth * Math.sin(this.avatarSprite.rotation);
+        var y = this.sprite.y - _playerHeight * Math.cos(this.avatarSprite.rotation);
         var laser = new Laser(x, y, this.avatarSprite.rotation);
         _stage.addChild(laser.sprite);
         return laser;

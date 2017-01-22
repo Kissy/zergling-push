@@ -29,23 +29,24 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class MainLoop implements Runnable {
     private static final boolean DEBUG_ENABLED = true;
-    private long lastExecutionTime = System.nanoTime();
     private final ArrayBlockingQueue<PlayerMessage> messagesQueue;
     private final ChannelGroup allPlayers;
     private final DebugFrame debugFrame;
     private final Map<Channel, Player> players;
+    private long lastExecutionTime = System.nanoTime();
+    private long deltaTime;
 
     public MainLoop(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
         this.messagesQueue = messagesQueue;
         this.allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
-        this.debugFrame = DEBUG_ENABLED ? new DebugFrame() : null;
+        this.debugFrame = DEBUG_ENABLED ? new DebugFrame(this) : null;
         this.players  = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
     }
 
     public void run() {
         try {
             long currentTime = System.nanoTime();
-            long deltaTime = (currentTime - lastExecutionTime) / 1000000;
+            deltaTime = (currentTime - lastExecutionTime) / 1000000;
             lastExecutionTime = currentTime;
 
             while (!messagesQueue.isEmpty()) {
@@ -59,12 +60,18 @@ public class MainLoop implements Runnable {
                 player.update(deltaTime);
             }
 
+            detectCollisions();
+
             if (DEBUG_ENABLED) {
                 SwingUtilities.invokeLater(debugFrame::repaint);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error in main loop", e);
         }
+    }
+
+    private void detectCollisions() {
+
     }
 
     private void dispatchToPlayer(PlayerMessage playerMessage) {
@@ -91,5 +98,9 @@ public class MainLoop implements Runnable {
             return new DebugLaserList(this.debugFrame);
         }
         return new ArrayList<>();
+    }
+
+    public long getDeltaTime() {
+        return deltaTime;
     }
 }
