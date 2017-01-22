@@ -19,7 +19,7 @@ var _playerStartingYPosition;
 var _playerStartingRotation;
 var _playerWidth = 32 * _scale;
 var _playerHeight = 38 * _scale;
-var _playerNameSpace = 40;
+var _playerNameSpriteYOffset = -10;
 var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2, _width - _playerWidth / 2, _height - _playerHeight / 2);
 
 var _laserFullVelocity = 2 * _scale;

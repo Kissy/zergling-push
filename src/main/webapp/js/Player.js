@@ -15,9 +15,10 @@
         this.avatarSprite.anchor.set(0.5, 0.5);
         this.avatarSprite.rotation = event.rotation();
         this.sprite.addChild(this.avatarSprite);
-        this.nameSprite = new PIXI.Text(event.name(), {font: "20px Arial", fill: "#F7531C"});
-        this.nameSprite.position.set(- (this.nameSprite.width / 2), - (_playerHeight + this.nameSprite.height + _playerNameSpace * _scale));
-        this.nameSprite.alpha = 0.5;
+        this.nameSprite = new PIXI.Text(event.name(), {font: "15px Arial", fill: "#F7531C"});
+        console.log(this.nameSprite.height / _scale + " " + _playerHeight);
+        this.nameSprite.position.set(- (this.nameSprite.width / 2), - (_playerHeight + this.nameSprite.height / _scale + _playerNameSpriteYOffset));
+        this.nameSprite.alpha = 0.4;
         this.sprite.addChild(this.nameSprite);
     }
 
