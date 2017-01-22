@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Guillaume on 19/01/2017.
@@ -29,12 +30,14 @@ public class Player {
     private byte velocity;
     private byte angularVelocity;
     private double residualVelocity;
+    private List<Laser> lasers;
 
-    public Player(PlayerJoined event) {
+    public Player(PlayerJoined event, List<Laser> lasers) {
         this.id = event.id();
         this.name = event.name();
         this.x = event.x();
         this.y = event.y();
+        this.lasers = lasers;
     }
 
     public void moved(PlayerMoved event) {
@@ -50,9 +53,8 @@ public class Player {
     }
 
     public void shot(PlayerShot event) {
-//        this.x = event.x();
-//        this.y = event.y();
-//        this.rotation = event.rotation();
+        // Check validity ?
+        this.lasers.add(new Laser(event.x(), event.y(), event.rotation()));
     }
 
     public void update(long deltaTime) {
@@ -62,6 +64,10 @@ public class Player {
         this.x = clamp((float) (this.x + currentVelocity * Math.sin(this.rotation)), MIN_X_Y_VALUE, MAX_X_VALUE);
         this.y = clamp((float) (this.y - currentVelocity * Math.cos(this.rotation)), MIN_X_Y_VALUE, MAX_Y_VALUE);
         this.rotation = (this.rotation + this.angularVelocity * _playerAngularVelocityFactor * deltaTime) % _moduloRadian;
+
+        for (Laser laser : lasers) {
+            laser.update(deltaTime);
+        }
     }
 
     private float clamp(float value, float min, float max) {

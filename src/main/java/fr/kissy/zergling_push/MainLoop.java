@@ -5,6 +5,9 @@ import Event.PlayerLeaved;
 import Event.PlayerMoved;
 import Event.PlayerShot;
 import fr.kissy.zergling_push.debug.DebugFrame;
+import fr.kissy.zergling_push.debug.DebugLaserList;
+import fr.kissy.zergling_push.debug.DebugPlayerMap;
+import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.channel.Channel;
@@ -15,7 +18,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 import javax.swing.SwingUtilities;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -25,16 +30,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class MainLoop implements Runnable {
     private static final boolean DEBUG_ENABLED = true;
     private long lastExecutionTime = System.nanoTime();
-    private final ChannelGroup allPlayers;
     private final ArrayBlockingQueue<PlayerMessage> messagesQueue;
-    private final Map<Channel, Player> players;
+    private final ChannelGroup allPlayers;
     private final DebugFrame debugFrame;
+    private final Map<Channel, Player> players;
 
     public MainLoop(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
-        this.allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
-        this.players  = new HashMap<>();
         this.messagesQueue = messagesQueue;
+        this.allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
         this.debugFrame = DEBUG_ENABLED ? new DebugFrame() : null;
+        this.players  = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
     }
 
     public void run() {
@@ -47,11 +52,6 @@ public class MainLoop implements Runnable {
                 PlayerMessage playerMessage = messagesQueue.poll();
                 dispatchToPlayer(playerMessage);
                 allPlayers.write(new BinaryWebSocketFrame(playerMessage.getMessage()));
-
-                if (DEBUG_ENABLED) {
-                    final Player currentPlayer = players.get(playerMessage.getPlayer());
-                    SwingUtilities.invokeLater(() -> dispatchToDebugFrame(playerMessage, currentPlayer));
-                }
             }
             allPlayers.flush();
 
@@ -72,9 +72,10 @@ public class MainLoop implements Runnable {
         if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
             players.get(playerMessage.getPlayer()).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
         } else if (PlayerShot.PlayerShotBufferHasIdentifier(byteBuffer)) {
-            players.get(playerMessage.getPlayer()).shot(PlayerShot.getRootAsPlayerShot(byteBuffer));
+            PlayerShot shot = PlayerShot.getRootAsPlayerShot(byteBuffer);
+            players.get(playerMessage.getPlayer()).shot(shot);
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
-            Player currentPlayer = new Player(PlayerJoined.getRootAsPlayerJoined(byteBuffer));
+            Player currentPlayer = new Player(PlayerJoined.getRootAsPlayerJoined(byteBuffer), createNewLaserList());
             players.values().stream().map(Player::createPlayerJoined).map(BinaryWebSocketFrame::new)
                     .forEach(playerMessage.getPlayer()::write);
             players.put(playerMessage.getPlayer(), currentPlayer);
@@ -85,13 +86,10 @@ public class MainLoop implements Runnable {
         }
     }
 
-    private void dispatchToDebugFrame(PlayerMessage playerMessage, Player currentPlayer) {
-        ByteBuffer byteBuffer = playerMessage.getMessage().nioBuffer();
-        if (PlayerShot.PlayerShotBufferHasIdentifier(byteBuffer)) {
-        } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
-            debugFrame.addPlayer(playerMessage.getPlayer().id(), currentPlayer);
-        } else if (PlayerLeaved.PlayerLeavedBufferHasIdentifier(byteBuffer)) {
-            debugFrame.removePlayer(playerMessage.getPlayer().id());
+    private List<Laser> createNewLaserList() {
+        if (DEBUG_ENABLED) {
+            return new DebugLaserList(this.debugFrame);
         }
+        return new ArrayList<>();
     }
 }

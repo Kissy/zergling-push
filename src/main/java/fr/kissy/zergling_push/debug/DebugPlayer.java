@@ -2,8 +2,9 @@ package fr.kissy.zergling_push.debug;
 
 import fr.kissy.zergling_push.model.Player;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Graphics;
 
 import static fr.kissy.zergling_push.debug.DebugFrame.SCALE;
 

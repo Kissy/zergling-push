@@ -25,4 +25,12 @@ public class Laser {
             //_stage.removeChild(this.sprite);
         }
     }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
 }

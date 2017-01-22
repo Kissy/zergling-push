@@ -1,5 +1,6 @@
 package fr.kissy.zergling_push.debug;
 
+import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import io.netty.channel.ChannelId;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 public class DebugFrame extends JFrame {
     protected static final int SCALE = 2;
     private Map<ChannelId, DebugPlayer> players = new HashMap<>();
+    private Map<Laser, DebugLaser> lasers = new HashMap<>();
 
     public DebugFrame() {
         super("Zergling-Push Debug");
@@ -31,13 +33,14 @@ public class DebugFrame extends JFrame {
         remove(players.remove(id));
     }
 
+    public void addShot(Laser laser) {
+        DebugLaser debugLaser = new DebugLaser(laser);
+        lasers.put(laser, debugLaser);
+        add(debugLaser);
+        validate();
+    }
 
-
-    /*public void paint(Graphics g) {
-        //super.paint(g);
-        for (Player player : players.values()) {
-            g.setColor(Color.red);
-            g.drawRect(Math.round(player.x() / SCALE), Math.round(player.y() / SCALE), 10, 10);
-        }
-    }*/
+    public void removeShot(Laser laser) {
+        remove(lasers.remove(laser));
+    }
 }
