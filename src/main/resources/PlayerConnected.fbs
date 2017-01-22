@@ -4,9 +4,9 @@ file_identifier "PLCN";
 table PlayerConnected {
     id: string;
     name: string;
-    x: float;
-    y: float;
-
+    startingXPosition: float;
+    startingYPosition: float;
+    startingRotation: float;
     velocityFactor: float;
     angularVelocityFactor: float;
     decelerationFactor: float;

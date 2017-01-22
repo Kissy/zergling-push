@@ -19,44 +19,49 @@ public final class PlayerConnected extends Table {
   public ByteBuffer idAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
-  public float x() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateX(float x) { int o = __offset(8); if (o != 0) { bb.putFloat(o + bb_pos, x); return true; } else { return false; } }
-  public float y() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateY(float y) { int o = __offset(10); if (o != 0) { bb.putFloat(o + bb_pos, y); return true; } else { return false; } }
-  public float velocityFactor() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateVelocityFactor(float velocityFactor) { int o = __offset(12); if (o != 0) { bb.putFloat(o + bb_pos, velocityFactor); return true; } else { return false; } }
-  public float angularVelocityFactor() { int o = __offset(14); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateAngularVelocityFactor(float angularVelocityFactor) { int o = __offset(14); if (o != 0) { bb.putFloat(o + bb_pos, angularVelocityFactor); return true; } else { return false; } }
-  public float decelerationFactor() { int o = __offset(16); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateDecelerationFactor(float decelerationFactor) { int o = __offset(16); if (o != 0) { bb.putFloat(o + bb_pos, decelerationFactor); return true; } else { return false; } }
+  public float startingXPosition() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateStartingXPosition(float startingXPosition) { int o = __offset(8); if (o != 0) { bb.putFloat(o + bb_pos, startingXPosition); return true; } else { return false; } }
+  public float startingYPosition() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateStartingYPosition(float startingYPosition) { int o = __offset(10); if (o != 0) { bb.putFloat(o + bb_pos, startingYPosition); return true; } else { return false; } }
+  public float startingRotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateStartingRotation(float startingRotation) { int o = __offset(12); if (o != 0) { bb.putFloat(o + bb_pos, startingRotation); return true; } else { return false; } }
+  public float velocityFactor() { int o = __offset(14); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateVelocityFactor(float velocityFactor) { int o = __offset(14); if (o != 0) { bb.putFloat(o + bb_pos, velocityFactor); return true; } else { return false; } }
+  public float angularVelocityFactor() { int o = __offset(16); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateAngularVelocityFactor(float angularVelocityFactor) { int o = __offset(16); if (o != 0) { bb.putFloat(o + bb_pos, angularVelocityFactor); return true; } else { return false; } }
+  public float decelerationFactor() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateDecelerationFactor(float decelerationFactor) { int o = __offset(18); if (o != 0) { bb.putFloat(o + bb_pos, decelerationFactor); return true; } else { return false; } }
 
   public static int createPlayerConnected(FlatBufferBuilder builder,
       int idOffset,
       int nameOffset,
-      float x,
-      float y,
+      float startingXPosition,
+      float startingYPosition,
+      float startingRotation,
       float velocityFactor,
       float angularVelocityFactor,
       float decelerationFactor) {
-    builder.startObject(7);
+    builder.startObject(8);
     PlayerConnected.addDecelerationFactor(builder, decelerationFactor);
     PlayerConnected.addAngularVelocityFactor(builder, angularVelocityFactor);
     PlayerConnected.addVelocityFactor(builder, velocityFactor);
-    PlayerConnected.addY(builder, y);
-    PlayerConnected.addX(builder, x);
+    PlayerConnected.addStartingRotation(builder, startingRotation);
+    PlayerConnected.addStartingYPosition(builder, startingYPosition);
+    PlayerConnected.addStartingXPosition(builder, startingXPosition);
     PlayerConnected.addName(builder, nameOffset);
     PlayerConnected.addId(builder, idOffset);
     return PlayerConnected.endPlayerConnected(builder);
   }
 
-  public static void startPlayerConnected(FlatBufferBuilder builder) { builder.startObject(7); }
+  public static void startPlayerConnected(FlatBufferBuilder builder) { builder.startObject(8); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
-  public static void addX(FlatBufferBuilder builder, float x) { builder.addFloat(2, x, 0.0f); }
-  public static void addY(FlatBufferBuilder builder, float y) { builder.addFloat(3, y, 0.0f); }
-  public static void addVelocityFactor(FlatBufferBuilder builder, float velocityFactor) { builder.addFloat(4, velocityFactor, 0.0f); }
-  public static void addAngularVelocityFactor(FlatBufferBuilder builder, float angularVelocityFactor) { builder.addFloat(5, angularVelocityFactor, 0.0f); }
-  public static void addDecelerationFactor(FlatBufferBuilder builder, float decelerationFactor) { builder.addFloat(6, decelerationFactor, 0.0f); }
+  public static void addStartingXPosition(FlatBufferBuilder builder, float startingXPosition) { builder.addFloat(2, startingXPosition, 0.0f); }
+  public static void addStartingYPosition(FlatBufferBuilder builder, float startingYPosition) { builder.addFloat(3, startingYPosition, 0.0f); }
+  public static void addStartingRotation(FlatBufferBuilder builder, float startingRotation) { builder.addFloat(4, startingRotation, 0.0f); }
+  public static void addVelocityFactor(FlatBufferBuilder builder, float velocityFactor) { builder.addFloat(5, velocityFactor, 0.0f); }
+  public static void addAngularVelocityFactor(FlatBufferBuilder builder, float angularVelocityFactor) { builder.addFloat(6, angularVelocityFactor, 0.0f); }
+  public static void addDecelerationFactor(FlatBufferBuilder builder, float decelerationFactor) { builder.addFloat(7, decelerationFactor, 0.0f); }
   public static int endPlayerConnected(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

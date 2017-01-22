@@ -70,7 +70,7 @@ Event.PlayerConnected.prototype.name = function(optionalEncoding) {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.x = function() {
+Event.PlayerConnected.prototype.startingXPosition = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -79,7 +79,7 @@ Event.PlayerConnected.prototype.x = function() {
  * @param {number} value
  * @returns {boolean}
  */
-Event.PlayerConnected.prototype.mutate_x = function(value) {
+Event.PlayerConnected.prototype.mutate_startingXPosition = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 8);
 
   if (offset === 0) {
@@ -93,7 +93,7 @@ Event.PlayerConnected.prototype.mutate_x = function(value) {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.y = function() {
+Event.PlayerConnected.prototype.startingYPosition = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -102,8 +102,31 @@ Event.PlayerConnected.prototype.y = function() {
  * @param {number} value
  * @returns {boolean}
  */
-Event.PlayerConnected.prototype.mutate_y = function(value) {
+Event.PlayerConnected.prototype.mutate_startingYPosition = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 10);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+Event.PlayerConnected.prototype.startingRotation = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+Event.PlayerConnected.prototype.mutate_startingRotation = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
     return false;
@@ -117,7 +140,7 @@ Event.PlayerConnected.prototype.mutate_y = function(value) {
  * @returns {number}
  */
 Event.PlayerConnected.prototype.velocityFactor = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
@@ -126,7 +149,7 @@ Event.PlayerConnected.prototype.velocityFactor = function() {
  * @returns {boolean}
  */
 Event.PlayerConnected.prototype.mutate_velocityFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 14);
 
   if (offset === 0) {
     return false;
@@ -140,7 +163,7 @@ Event.PlayerConnected.prototype.mutate_velocityFactor = function(value) {
  * @returns {number}
  */
 Event.PlayerConnected.prototype.angularVelocityFactor = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
@@ -149,7 +172,7 @@ Event.PlayerConnected.prototype.angularVelocityFactor = function() {
  * @returns {boolean}
  */
 Event.PlayerConnected.prototype.mutate_angularVelocityFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 16);
 
   if (offset === 0) {
     return false;
@@ -163,7 +186,7 @@ Event.PlayerConnected.prototype.mutate_angularVelocityFactor = function(value) {
  * @returns {number}
  */
 Event.PlayerConnected.prototype.decelerationFactor = function() {
-  var offset = this.bb.__offset(this.bb_pos, 16);
+  var offset = this.bb.__offset(this.bb_pos, 18);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
@@ -172,7 +195,7 @@ Event.PlayerConnected.prototype.decelerationFactor = function() {
  * @returns {boolean}
  */
 Event.PlayerConnected.prototype.mutate_decelerationFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 16);
+  var offset = this.bb.__offset(this.bb_pos, 18);
 
   if (offset === 0) {
     return false;
@@ -186,7 +209,7 @@ Event.PlayerConnected.prototype.mutate_decelerationFactor = function(value) {
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerConnected.startPlayerConnected = function(builder) {
-  builder.startObject(7);
+  builder.startObject(8);
 };
 
 /**
@@ -207,18 +230,26 @@ Event.PlayerConnected.addName = function(builder, nameOffset) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} x
+ * @param {number} startingXPosition
  */
-Event.PlayerConnected.addX = function(builder, x) {
-  builder.addFieldFloat32(2, x, 0.0);
+Event.PlayerConnected.addStartingXPosition = function(builder, startingXPosition) {
+  builder.addFieldFloat32(2, startingXPosition, 0.0);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} y
+ * @param {number} startingYPosition
  */
-Event.PlayerConnected.addY = function(builder, y) {
-  builder.addFieldFloat32(3, y, 0.0);
+Event.PlayerConnected.addStartingYPosition = function(builder, startingYPosition) {
+  builder.addFieldFloat32(3, startingYPosition, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} startingRotation
+ */
+Event.PlayerConnected.addStartingRotation = function(builder, startingRotation) {
+  builder.addFieldFloat32(4, startingRotation, 0.0);
 };
 
 /**
@@ -226,7 +257,7 @@ Event.PlayerConnected.addY = function(builder, y) {
  * @param {number} velocityFactor
  */
 Event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
-  builder.addFieldFloat32(4, velocityFactor, 0.0);
+  builder.addFieldFloat32(5, velocityFactor, 0.0);
 };
 
 /**
@@ -234,7 +265,7 @@ Event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
  * @param {number} angularVelocityFactor
  */
 Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVelocityFactor) {
-  builder.addFieldFloat32(5, angularVelocityFactor, 0.0);
+  builder.addFieldFloat32(6, angularVelocityFactor, 0.0);
 };
 
 /**
@@ -242,7 +273,7 @@ Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVeloci
  * @param {number} decelerationFactor
  */
 Event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFactor) {
-  builder.addFieldFloat32(6, decelerationFactor, 0.0);
+  builder.addFieldFloat32(7, decelerationFactor, 0.0);
 };
 
 /**

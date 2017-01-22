@@ -8,15 +8,22 @@ var _referenceTime = new Date();
 _referenceTime.setHours(0,0,0,0);
 _referenceTime = _referenceTime.getTime();
 
+var _moduloRadian = 2 * Math.PI;
+
 var _playerId;
 var _playerVelocityFactor;
 var _playerAngularVelocityFactor;
 var _playerDecelerationFactor;
 var _playerStartingXPosition;
 var _playerStartingYPosition;
+var _playerStartingRotation;
+var _playerWidth = 32 * _scale;
+var _playerHeight = 38 * _scale;
+var _playerNameSpace = 40;
+var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2, _width - _playerWidth / 2, _height - _playerHeight / 2);
+
 var _laserFullVelocity = 2 * _scale;
 var _laserStartingLifespan = 1000;
-var _moduloRadian = 2 * Math.PI;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
 var _renderer = PIXI.autoDetectRenderer(_width, _height);
@@ -31,6 +38,7 @@ var _players = {};
 
 PIXI.loader
     .add("avatar", "img/avatar.png")
+    .add("hostile", "img/hostile.png")
     .add("laser", "img/laser.png")
     .add("shield_silver", "img/shield_silver.png")
     .load(connectToServer);
@@ -86,26 +94,17 @@ function update(deltaTime) {
         var event, byteBuffer = _messageQueue[i];
         if (Event.PlayerMoved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
-            console.log("Player moved " + event.id());
             _players[event.id()].moved(event);
         } else if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
-            console.log("Player shot " + event.id());
             _players[event.id()].shot(event);
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            if (event.id() != _playerId) {
-                console.log("Player joined " + event.id());
-                var player = new Player();
-                player.name = event.name();
-                player.sprite.x = event.x() * _scale;
-                player.sprite.y = event.y() * _scale;
-                _stage.addChild(player.sprite);
-                _players[event.id()] = player;
-            }
+            var player = (event.id() == _playerId) ? new ControlledPlayer(event) : new Player(event);
+            _stage.addChild(player.sprite);
+            _players[event.id()] = player;
         } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
-            console.log("Player leaved " + event.id());
             if (_players[event.id()]) {
                 _stage.removeChild(_players[event.id()].sprite);
                 delete _players[event.id()];
@@ -116,8 +115,9 @@ function update(deltaTime) {
             _playerVelocityFactor = event.velocityFactor() * _scale;
             _playerAngularVelocityFactor = event.angularVelocityFactor();
             _playerDecelerationFactor = event.decelerationFactor();
-            _playerStartingXPosition = event.x();
-            _playerStartingYPosition = event.y();
+            _playerStartingXPosition = event.startingXPosition();
+            _playerStartingYPosition = event.startingYPosition();
+            _playerStartingRotation = event.startingRotation();
 
             // TODO press enter to join
             var builder = new flatbuffers.Builder();
@@ -129,17 +129,9 @@ function update(deltaTime) {
             Event.PlayerJoined.addName(builder, nameOffset);
             Event.PlayerJoined.addX(builder, _playerStartingXPosition);
             Event.PlayerJoined.addY(builder, _playerStartingYPosition);
-            Event.PlayerJoined.addRotation(builder, 0);
+            Event.PlayerJoined.addRotation(builder, _playerStartingRotation);
             Event.PlayerJoined.finishPlayerJoinedBuffer(builder, Event.PlayerJoined.endPlayerJoined(builder));
             _inputQueue.push(builder.asUint8Array());
-
-            _player = new ControlledPlayer();
-            _player.id = event.id();
-            _player.name = event.name();
-            _player.sprite.x = event.x() * _scale;
-            _player.sprite.y = event.y() * _scale;
-            _stage.addChild(_player.sprite);
-            _players[event.id()] = _player;
         } else {
             console.log("Unhandled message");
         }

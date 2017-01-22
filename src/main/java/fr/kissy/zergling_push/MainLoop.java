@@ -63,7 +63,7 @@ public class MainLoop implements Runnable {
                 SwingUtilities.invokeLater(debugFrame::repaint);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error in main loop", e);
         }
     }
 

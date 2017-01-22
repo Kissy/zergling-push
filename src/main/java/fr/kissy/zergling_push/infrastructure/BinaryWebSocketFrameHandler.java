@@ -36,6 +36,7 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
     private static final float DECELERATION_FACTOR = 0.05f;
     private static final int STARTING_X = 1920 / 2;
     private static final int STARTING_Y = 960 / 2;
+    private static final int STARTING_ROTATION = 0;
     private ArrayBlockingQueue<PlayerMessage> messagesQueue;
 
     public BinaryWebSocketFrameHandler(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
@@ -65,8 +66,8 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
     private BinaryWebSocketFrame createPlayerConnectedMessage(Channel channel) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
         int idOffset = fbb.createString(channel.id().asShortText());
-        int nameOffset = fbb.createString("Name");
-        int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y,
+        int nameOffset = fbb.createString(channel.id().asShortText());
+        int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y, STARTING_ROTATION,
                 VELOCITY_FACTOR, ANGULAR_VELOCITY_FACTOR, DECELERATION_FACTOR);
         PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
