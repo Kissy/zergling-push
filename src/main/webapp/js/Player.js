@@ -40,6 +40,7 @@
         var y = this.sprite.y - this.sprite.height * Math.cos(this.avatarSprite.rotation);
         var laser = new Laser(x, y, this.avatarSprite.rotation);
         _stage.addChild(laser.sprite);
+        return laser;
     };
     Player.prototype.update = function update(deltaTime) {
         this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
