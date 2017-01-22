@@ -17,6 +17,7 @@ var _playerDecelerationFactor;
 var _playerStartingXPosition;
 var _playerStartingYPosition;
 var _playerStartingRotation;
+var _playerFiringRate = 15;
 var _playerWidth = 32 * _scale;
 var _playerHeight = 38 * _scale;
 var _playerNameSpriteYOffset = -10;
@@ -27,13 +28,17 @@ var _laserStartingLifespan = 1000;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
 var _renderer = PIXI.autoDetectRenderer(_width, _height);
+_renderer.plugins.interaction.destroy();
 _renderer.autoResize = true;
 document.body.appendChild(_renderer.view);
+
+var _sharedTicker = PIXI.ticker.shared;
+_sharedTicker.autoStart = false;
+_sharedTicker.stop();
 
 var _stage = new PIXI.Container();
 _renderer.render(_stage);
 
-var _player;
 var _players = {};
 
 PIXI.loader
@@ -151,13 +156,6 @@ function update(deltaTime) {
         _webSocket.send(_inputQueue[i]);
     }
     _inputQueue = [];
-
-    /*for (i = 0; i < _stage.children.length; i++) {
-        var child = _stage.children[i];
-        if (child.component instanceof PowerUp && collide(_player.sprite, child)) {
-            _stage.removeChild(child);
-        }
-    }*/
 }
 
 function draw() {

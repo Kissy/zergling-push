@@ -16,7 +16,6 @@
         this.avatarSprite.rotation = event.rotation();
         this.sprite.addChild(this.avatarSprite);
         this.nameSprite = new PIXI.Text(event.name(), {font: "15px Arial", fill: "#F7531C"});
-        console.log(this.nameSprite.height / _scale + " " + _playerHeight);
         this.nameSprite.position.set(- (this.nameSprite.width / 2), - (_playerHeight + this.nameSprite.height / _scale + _playerNameSpriteYOffset));
         this.nameSprite.alpha = 0.4;
         this.sprite.addChild(this.nameSprite);
@@ -39,13 +38,6 @@
     };
     Player.prototype.hit = function hit(event) {
         this.sprite.alpha = 0.2;
-    };
-    Player.prototype.fire = function fire() {
-        var x = this.sprite.x + _playerWidth * Math.sin(this.avatarSprite.rotation);
-        var y = this.sprite.y - _playerHeight * Math.cos(this.avatarSprite.rotation);
-        var laser = new Laser(x, y, this.avatarSprite.rotation);
-        _stage.addChild(laser.sprite);
-        return laser;
     };
     Player.prototype.update = function update(deltaTime) {
         this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
