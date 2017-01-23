@@ -34,7 +34,10 @@ public class DebugFrame extends JFrame {
     }
 
     public void removePlayer(ChannelId id) {
-        remove(players.remove(id));
+        DebugPlayer debugPlayer = players.remove(id);
+        if (debugPlayer != null) {
+            remove(debugPlayer);
+        }
     }
 
     public void addShot(Laser laser) {

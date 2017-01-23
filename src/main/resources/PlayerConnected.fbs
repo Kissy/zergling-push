@@ -10,6 +10,7 @@ table PlayerConnected {
     velocityFactor: float;
     angularVelocityFactor: float;
     decelerationFactor: float;
+    laserVelocityFactor: float;
 }
 
 root_type PlayerConnected;

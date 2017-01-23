@@ -23,7 +23,7 @@ var _playerHeight = 38 * _scale;
 var _playerNameSpriteYOffset = -10;
 var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2, _width - _playerWidth / 2, _height - _playerHeight / 2);
 
-var _laserFullVelocity = 2 * _scale;
+var _laserFullVelocity = 0.8 * _scale;
 var _laserStartingLifespan = 1000;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
@@ -32,9 +32,9 @@ _renderer.plugins.interaction.destroy();
 _renderer.autoResize = true;
 document.body.appendChild(_renderer.view);
 
-var _sharedTicker = PIXI.ticker.shared;
-_sharedTicker.autoStart = false;
-_sharedTicker.stop();
+// var _sharedTicker = PIXI.ticker.shared;
+// _sharedTicker.autoStart = false;
+// _sharedTicker.stop();
 
 var _stage = new PIXI.Container();
 _renderer.render(_stage);
@@ -50,7 +50,7 @@ PIXI.loader
 
 var _webSocket;
 function connectToServer() {
-    _webSocket = new WebSocket("ws://localhost:8080/websocket");
+    _webSocket = new WebSocket("ws://" + window.location.hostname + ":8080/websocket");
     _webSocket.binaryType = 'arraybuffer';
     _webSocket.onmessage = processMessage;
 }
@@ -85,10 +85,6 @@ function powerUpFactory() {
     var powerUp = new PowerUp(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
     _stage.addChild(powerUp.sprite);
     //setTimeout(powerUpFactory, Math.random() * 10000 + 5000);
-}
-
-function begin() {
-
 }
 
 function update(deltaTime) {
@@ -158,8 +154,8 @@ function update(deltaTime) {
     _inputQueue = [];
 }
 
-function draw() {
+PIXI.ticker.shared.add(function (deltaTime) {
+    perf = performance.now();
+    update(PIXI.ticker.shared['elapsedMS'] + deltaTime);
     _renderer.render(_stage);
-}
-
-MainLoop.setUpdate(update).setBegin(begin).setDraw(draw).start();
+});

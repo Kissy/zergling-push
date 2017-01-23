@@ -17,6 +17,7 @@ package fr.kissy.zergling_push;
 
 import fr.kissy.zergling_push.debug.DebugFrame;
 import fr.kissy.zergling_push.infrastructure.BinaryWebSocketFrameHandler;
+import fr.kissy.zergling_push.infrastructure.HttpStaticFileServerHandler;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.bootstrap.ServerBootstrap;
@@ -89,7 +90,8 @@ public class WebSocketServer {
                             pipeline.addLast("decoder", new HttpServerCodec());
                             pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                             pipeline.addLast("encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
-                            pipeline.addLast("handler", new BinaryWebSocketFrameHandler(messagesQueue));
+                            pipeline.addLast("webSocket", new BinaryWebSocketFrameHandler(messagesQueue));
+                            pipeline.addLast("http", new HttpStaticFileServerHandler());
                         }
                     });
             final Channel ch = sb.bind(8080).sync().channel();

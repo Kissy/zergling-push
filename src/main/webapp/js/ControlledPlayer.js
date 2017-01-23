@@ -52,6 +52,7 @@
     ControlledPlayer.prototype.shot = function shot(event) {
     };
     ControlledPlayer.prototype.hit = function hit(event) {
+        this.sprite.alpha = 0.2;
     };
     ControlledPlayer.prototype.queuePlayerMoved = function queuePlayerMoved() {
         var builder = new flatbuffers.Builder();

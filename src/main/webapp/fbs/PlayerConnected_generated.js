@@ -206,10 +206,33 @@ Event.PlayerConnected.prototype.mutate_decelerationFactor = function(value) {
 };
 
 /**
+ * @returns {number}
+ */
+Event.PlayerConnected.prototype.laserVelocityFactor = function() {
+  var offset = this.bb.__offset(this.bb_pos, 20);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+Event.PlayerConnected.prototype.mutate_laserVelocityFactor = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 20);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerConnected.startPlayerConnected = function(builder) {
-  builder.startObject(8);
+  builder.startObject(9);
 };
 
 /**
@@ -274,6 +297,14 @@ Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVeloci
  */
 Event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFactor) {
   builder.addFieldFloat32(7, decelerationFactor, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} laserVelocityFactor
+ */
+Event.PlayerConnected.addLaserVelocityFactor = function(builder, laserVelocityFactor) {
+  builder.addFieldFloat32(8, laserVelocityFactor, 0.0);
 };
 
 /**

@@ -31,6 +31,8 @@ public final class PlayerConnected extends Table {
   public boolean mutateAngularVelocityFactor(float angularVelocityFactor) { int o = __offset(16); if (o != 0) { bb.putFloat(o + bb_pos, angularVelocityFactor); return true; } else { return false; } }
   public float decelerationFactor() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public boolean mutateDecelerationFactor(float decelerationFactor) { int o = __offset(18); if (o != 0) { bb.putFloat(o + bb_pos, decelerationFactor); return true; } else { return false; } }
+  public float laserVelocityFactor() { int o = __offset(20); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public boolean mutateLaserVelocityFactor(float laserVelocityFactor) { int o = __offset(20); if (o != 0) { bb.putFloat(o + bb_pos, laserVelocityFactor); return true; } else { return false; } }
 
   public static int createPlayerConnected(FlatBufferBuilder builder,
       int idOffset,
@@ -40,8 +42,10 @@ public final class PlayerConnected extends Table {
       float startingRotation,
       float velocityFactor,
       float angularVelocityFactor,
-      float decelerationFactor) {
-    builder.startObject(8);
+      float decelerationFactor,
+      float laserVelocityFactor) {
+    builder.startObject(9);
+    PlayerConnected.addLaserVelocityFactor(builder, laserVelocityFactor);
     PlayerConnected.addDecelerationFactor(builder, decelerationFactor);
     PlayerConnected.addAngularVelocityFactor(builder, angularVelocityFactor);
     PlayerConnected.addVelocityFactor(builder, velocityFactor);
@@ -53,7 +57,7 @@ public final class PlayerConnected extends Table {
     return PlayerConnected.endPlayerConnected(builder);
   }
 
-  public static void startPlayerConnected(FlatBufferBuilder builder) { builder.startObject(8); }
+  public static void startPlayerConnected(FlatBufferBuilder builder) { builder.startObject(9); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addStartingXPosition(FlatBufferBuilder builder, float startingXPosition) { builder.addFloat(2, startingXPosition, 0.0f); }
@@ -62,6 +66,7 @@ public final class PlayerConnected extends Table {
   public static void addVelocityFactor(FlatBufferBuilder builder, float velocityFactor) { builder.addFloat(5, velocityFactor, 0.0f); }
   public static void addAngularVelocityFactor(FlatBufferBuilder builder, float angularVelocityFactor) { builder.addFloat(6, angularVelocityFactor, 0.0f); }
   public static void addDecelerationFactor(FlatBufferBuilder builder, float decelerationFactor) { builder.addFloat(7, decelerationFactor, 0.0f); }
+  public static void addLaserVelocityFactor(FlatBufferBuilder builder, float laserVelocityFactor) { builder.addFloat(8, laserVelocityFactor, 0.0f); }
   public static int endPlayerConnected(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

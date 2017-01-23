@@ -31,9 +31,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
-    private static final float VELOCITY_FACTOR = 0.8f;
-    private static final float ANGULAR_VELOCITY_FACTOR = 0.006f;
-    private static final float DECELERATION_FACTOR = 0.05f;
+    private static final float VELOCITY_FACTOR = 0.4f;
+    private static final float ANGULAR_VELOCITY_FACTOR = 0.002f;
+    private static final float DECELERATION_FACTOR = 0.01f;
+    private static final float LASER_VELOCITY_FACTORY = 0.01f;
     private static final int STARTING_X = 1920 / 2;
     private static final int STARTING_Y = 960 / 2;
     private static final int STARTING_ROTATION = 0;
@@ -68,7 +69,7 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
         int idOffset = fbb.createString(channel.id().asShortText());
         int nameOffset = fbb.createString(channel.id().asShortText());
         int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y, STARTING_ROTATION,
-                VELOCITY_FACTOR, ANGULAR_VELOCITY_FACTOR, DECELERATION_FACTOR);
+                VELOCITY_FACTOR, ANGULAR_VELOCITY_FACTOR, DECELERATION_FACTOR, LASER_VELOCITY_FACTORY);
         PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);
