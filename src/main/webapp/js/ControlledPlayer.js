@@ -70,9 +70,9 @@
         Event.PlayerMoved.addTime(builder, new Date().getTime() - _referenceTime);
         Event.PlayerMoved.addX(builder, this.body.x / _scale);
         Event.PlayerMoved.addY(builder, this.body.y / _scale);
-        Event.PlayerMoved.addRotation(builder, this.body.angle);
-        Event.PlayerMoved.addVelocity(builder, this.velocity);
-        Event.PlayerMoved.addAngularVelocity(builder, this.angularVelocity);
+        Event.PlayerMoved.addRotation(builder, this.body.rotation);
+        Event.PlayerMoved.addVelocity(builder, this.forwardVelocity);
+        Event.PlayerMoved.addAngularVelocity(builder, this.body.angularVelocity / _playerAngularVelocityFactor);
         Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
         _inputQueue.push(builder.asUint8Array());
     };
@@ -84,7 +84,7 @@
         Event.PlayerShot.addTime(builder, new Date().getTime() - _referenceTime);
         Event.PlayerShot.addX(builder, laser.body.x / _scale);
         Event.PlayerShot.addY(builder, laser.body.y / _scale);
-        Event.PlayerShot.addRotation(builder, laser.body.angle);
+        Event.PlayerShot.addRotation(builder, laser.rotation);
         Event.PlayerShot.finishPlayerShotBuffer(builder, Event.PlayerShot.endPlayerShot(builder));
         _inputQueue.push(builder.asUint8Array());
     };

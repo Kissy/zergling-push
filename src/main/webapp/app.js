@@ -26,7 +26,7 @@ var _playerNameSpriteYOffset = -10;
 var _laserFullVelocity = 800 * _scale;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
-var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
+var _game = new Phaser.Game(_width, _height, Phaser.AUTO, '',
     {
         preload: preload,
         create: create,
@@ -35,6 +35,7 @@ var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
     });
 
 function preload () {
+    _game.stage.disableVisibilityChange = true;
     _game.load.image('avatar', 'img/avatar.png');
     _game.load.image('hostile', 'img/hostile.png');
     _game.load.image('laser', 'img/laser.png');
@@ -77,13 +78,11 @@ function update(deltaTime) {
             _players[event.id()].hit(event);
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            var player = (event.id() == _playerId) ? new ControlledPlayer(event) : new RemotePlayer(event);
-            //_stage.addChild(player.sprite);
-            _players[event.id()] = player;
+            _players[event.id()] = (event.id() == _playerId) ? new ControlledPlayer(event) : new RemotePlayer(event);
         } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
             if (_players[event.id()]) {
-                //_stage.removeChild(_players[event.id()].sprite);
+                _players[event.id()].destroy();
                 delete _players[event.id()];
             }
         } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {

@@ -35,8 +35,6 @@
     Player.prototype.moved = function moved(event) {
     };
     Player.prototype.shot = function shot(event) {
-        var laser = new Laser(event.x() * _scale, event.y() * _scale, event.rotation());
-        _stage.addChild(laser.sprite);
     };
     Player.prototype.hit = function hit(event) {
         this.shields--;

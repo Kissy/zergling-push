@@ -12,18 +12,19 @@
     RemotePlayer.prototype.constructor = RemotePlayer;
 
     RemotePlayer.prototype.moved = function moved(event) {
-        if (this.velocity != event.velocity()) {
+        if (this.forwardVelocity != event.velocity()) {
             this.residualVelocity = 1 - event.velocity();
         }
 
-        this.velocity = event.velocity();
+        this.body.rotation = event.rotation();
+        this.forwardVelocity = event.velocity();
         this.body.x = event.x() * _scale;
         this.body.y = event.y() * _scale;
-        this.body.angle = event.rotation();
-        this.body.angularVelocity = event.angularVelocity();
+        this.body.angularVelocity = event.angularVelocity() * _playerAngularVelocityFactor;
     };
     RemotePlayer.prototype.shot = function shot(event) {
-
+        var laser = new Laser(event.x() * _scale, event.y() * _scale, event.rotation());
+        this.shots.add(laser);
     };
     RemotePlayer.prototype.hit = function hit(event) {
         this.alpha = 0.2;
