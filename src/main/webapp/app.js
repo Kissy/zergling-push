@@ -21,70 +21,43 @@ var _playerFiringRate = 15;
 var _playerWidth = 32 * _scale;
 var _playerHeight = 38 * _scale;
 var _playerNameSpriteYOffset = -10;
-var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2, _width - _playerWidth / 2, _height - _playerHeight / 2);
+//var _playerPlayground = new PIXI.Rectangle(_playerWidth / 2, _playerHeight / 2, _width - _playerWidth / 2, _height - _playerHeight / 2);
 
-var _laserFullVelocity = 0.8 * _scale;
-var _laserStartingLifespan = 1000;
+var _laserFullVelocity = 800 * _scale;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
-var _renderer = PIXI.autoDetectRenderer(_width, _height);
-_renderer.plugins.interaction.destroy();
-_renderer.autoResize = true;
-document.body.appendChild(_renderer.view);
+var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
+    {
+        preload: preload,
+        create: create,
+        update: update,
+        render: render
+    });
 
-// var _sharedTicker = PIXI.ticker.shared;
-// _sharedTicker.autoStart = false;
-// _sharedTicker.stop();
-
-var _stage = new PIXI.Container();
-_renderer.render(_stage);
-
-var _players = {};
-
-PIXI.loader
-    .add("avatar", "img/avatar.png")
-    .add("hostile", "img/hostile.png")
-    .add("laser", "img/laser.png")
-    .add("shield_silver", "img/shield_silver.png")
-    .load(connectToServer);
+function preload () {
+    _game.load.image('avatar', 'img/avatar.png');
+    _game.load.image('hostile', 'img/hostile.png');
+    _game.load.image('laser', 'img/laser.png');
+    _game.load.image('shield_silver', 'img/shield_silver.png');
+}
 
 var _webSocket;
-function connectToServer() {
-    _webSocket = new WebSocket("ws://" + window.location.hostname + ":8080/websocket");
-    _webSocket.binaryType = 'arraybuffer';
-    _webSocket.onmessage = processMessage;
-}
-
 var _inputQueue = [];
 var _messageQueue = [];
-function processMessage(response) {
-    var byteBuffer = new flatbuffers.ByteBuffer(new Uint8Array(response.data));
-    _messageQueue.push(byteBuffer);
-}
+var _players = {};
 
-function clamp(value, min, max) {
-    if (value < min) {
-        return min;
-    } else if (value > max) {
-        return max;
-    } else {
-        return value;
-    }
-}
 
-function collide(first, second) {
-    var firstBound = first.getBounds(true);
-    var secondBound = second.getBounds(true);
-    return firstBound.x < secondBound.x + secondBound.width &&
-        firstBound.x + firstBound.width > secondBound.x &&
-        firstBound.y < secondBound.y + secondBound.height &&
-        firstBound.height + firstBound.y > secondBound.y;
-}
+function create() {
+    _game.physics.startSystem(Phaser.Physics.ARCADE);
+    _game.world.setBounds(0, 0, _width, _height);
+    _game.world.sortDirection = Phaser.Physics.Arcade.SORT_NONE;
 
-function powerUpFactory() {
-    var powerUp = new PowerUp(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
-    _stage.addChild(powerUp.sprite);
-    //setTimeout(powerUpFactory, Math.random() * 10000 + 5000);
+    _webSocket = new WebSocket("ws://" + window.location.hostname + ":8080/websocket");
+    _webSocket.binaryType = 'arraybuffer';
+    _webSocket.onmessage = function processMessage(response) {
+        var byteBuffer = new flatbuffers.ByteBuffer(new Uint8Array(response.data));
+        _messageQueue.push(byteBuffer);
+    };
 }
 
 function update(deltaTime) {
@@ -102,16 +75,15 @@ function update(deltaTime) {
         } else if (Event.PlayerHit.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerHit.getRootAsPlayerHit(byteBuffer);
             _players[event.id()].hit(event);
-            console.log("Hit");
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            var player = (event.id() == _playerId) ? new ControlledPlayer(event) : new Player(event);
-            _stage.addChild(player.sprite);
+            var player = (event.id() == _playerId) ? new ControlledPlayer(event) : new RemotePlayer(event);
+            //_stage.addChild(player.sprite);
             _players[event.id()] = player;
         } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
             if (_players[event.id()]) {
-                _stage.removeChild(_players[event.id()].sprite);
+                //_stage.removeChild(_players[event.id()].sprite);
                 delete _players[event.id()];
             }
         } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
@@ -143,10 +115,6 @@ function update(deltaTime) {
     }
     _messageQueue = [];
 
-    for (i = 0; i < _stage.children.length; i++) {
-        _stage.children[i].component.update(deltaTime);
-    }
-
     // Send messages to server
     for (i = 0; i < _inputQueue.length; i++) {
         _webSocket.send(_inputQueue[i]);
@@ -154,8 +122,9 @@ function update(deltaTime) {
     _inputQueue = [];
 }
 
-PIXI.ticker.shared.add(function (deltaTime) {
-    perf = performance.now();
-    update(PIXI.ticker.shared['elapsedMS'] + deltaTime);
-    _renderer.render(_stage);
-});
+function render () {
+    if (_players[_playerId]) {
+        _game.debug.spriteInfo(_players[_playerId], 32, 32);
+        _game.debug.body(_players[_playerId]);
+    }
+}

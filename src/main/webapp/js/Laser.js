@@ -1,23 +1,24 @@
 (function (window) {
-    function Laser(x, y, r) {
-        this.sprite = new PIXI.Sprite(PIXI.loader.resources['laser'].texture);
-        this.sprite.component = this;
-        this.sprite.x = x;
-        this.sprite.y = y;
-        this.sprite.rotation = r;
-        this.sprite.scale.x = _scale;
-        this.sprite.scale.y = _scale;
-        this.sprite.anchor.set(0.5, 0.5);
-        this.lifespan = _laserStartingLifespan;
+    function Laser(x, y, rotation) {
+        Phaser.Sprite.call(this, _game, x, y, 'laser');
+
+        this.rotation = rotation;
+        this.checkWorldBounds = true;
+        this.outOfBoundsKill = true;
+
+        _game.physics.enable(this, Phaser.Physics.ARCADE);
+        _game.physics.arcade.velocityFromRotation(this.rotation - Math.PI / 2, _laserFullVelocity, this.body.velocity);
+
+        this.anchor.set(0.5);
+        this.scale.set(_scale);
+
+        _game.add.existing(this);
     }
 
-    Laser.prototype.update = function update(deltaTime) {
-        this.sprite.x = this.sprite.x + _laserFullVelocity * Math.sin(this.sprite.rotation) * deltaTime;
-        this.sprite.y = this.sprite.y - _laserFullVelocity * Math.cos(this.sprite.rotation) * deltaTime;
-        this.lifespan -= deltaTime;
-        if (this.lifespan <= 0) {
-            _stage.removeChild(this.sprite);
-        }
+    Laser.prototype = Object.create(Phaser.Sprite.prototype);
+    Laser.prototype.constructor = Laser;
+
+    Laser.prototype.update = function update() {
     };
     window.Laser = Laser;
 })(window);

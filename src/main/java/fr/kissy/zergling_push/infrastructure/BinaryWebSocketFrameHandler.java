@@ -31,10 +31,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
-    private static final float VELOCITY_FACTOR = 0.4f;
-    private static final float ANGULAR_VELOCITY_FACTOR = 0.002f;
+    private static final float VELOCITY_FACTOR = 500f;
+    private static final float ANGULAR_VELOCITY_FACTOR = 200f;
     private static final float DECELERATION_FACTOR = 0.01f;
-    private static final float LASER_VELOCITY_FACTORY = 0.01f;
+    private static final float LASER_VELOCITY_FACTORY = 500f;
     private static final int STARTING_X = 1920 / 2;
     private static final int STARTING_Y = 960 / 2;
     private static final int STARTING_ROTATION = 0;

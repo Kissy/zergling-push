@@ -33,6 +33,7 @@ public class Player {
     private byte angularVelocity;
     private double residualVelocity;
     private List<Laser> shots;
+    private int shields = 3;
 
     public Player(PlayerJoined event, List<Laser> shots) {
         this.id = event.id();
@@ -79,13 +80,14 @@ public class Player {
         return Unpooled.wrappedBuffer(fbb.dataBuffer());
     }
 
-    public boolean hitBy(Laser shot) {
+    public boolean isHitBy(Laser shot) {
         return shot.getX() > x - _playerWidth / 2 && shot.getX() < x + _playerWidth / 2
                 && shot.getY() > y - _playerHeight / 2 && shot.getY() < y + _playerHeight / 2;
     }
 
-    public void hit() {
-        // Remove one point ?
+    public boolean hit(Laser shot) {
+        shields--;
+        return shields == 0;
     }
 
     public String getId() {

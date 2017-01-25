@@ -20,8 +20,8 @@ public class Hit {
     }
 
     public ByteBuf process() {
-        shot.hit();
-        player.hit();
+        shot.hit(player);
+        boolean alive = player.hit(shot);
 
         FlatBufferBuilder fbb = new FlatBufferBuilder();
         int idOffset = fbb.createString(player.getId());

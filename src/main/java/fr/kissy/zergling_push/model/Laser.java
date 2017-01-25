@@ -1,5 +1,9 @@
 package fr.kissy.zergling_push.model;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static fr.kissy.zergling_push.model.Player.MAX_X_VALUE;
 import static fr.kissy.zergling_push.model.Player.MAX_Y_VALUE;
 import static fr.kissy.zergling_push.model.Player.MIN_X_Y_VALUE;
@@ -11,6 +15,7 @@ public class Laser {
     private static final double _laserFullVelocity = 2;
     private static final short _laserStartingLifespan = 1000;
     private final Player player;
+    private final Set<Player> playersHit;
     private float x;
     private float y;
     private double rotation;
@@ -22,6 +27,7 @@ public class Laser {
         this.y = y;
         this.rotation = rotation;
         this.lifespan = _laserStartingLifespan;
+        this.playersHit = new HashSet<>();
     }
 
     public void update(long deltaTime) {
@@ -34,8 +40,12 @@ public class Laser {
         }
     }
 
-    public void hit() {
-        player.getShots().remove(this);
+    public boolean canHit(Player player) {
+        return !this.player.equals(player) && !playersHit.contains(player);
+    }
+
+    public void hit(Player player) {
+        playersHit.add(player);
     }
 
     public boolean expired() {

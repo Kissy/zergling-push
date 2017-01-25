@@ -78,7 +78,8 @@ public class MainLoop implements Runnable {
                 .flatMap(player -> player.getShots().stream())
                 .flatMap(shot ->
                         players.values().stream()
-                                .filter(player -> player.hitBy(shot))
+                                .filter(shot::canHit)
+                                .filter(player -> player.isHitBy(shot))
                                 .map(player -> new Hit(player, shot))
                                 .collect(Collectors.toList()).stream()
                 )
