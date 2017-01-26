@@ -18,6 +18,8 @@ package fr.kissy.zergling_push.infrastructure;
 import Event.PlayerConnected;
 import Event.PlayerLeaved;
 import com.google.flatbuffers.FlatBufferBuilder;
+import fr.kissy.zergling_push.model.Laser;
+import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -31,10 +33,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
-    private static final float VELOCITY_FACTOR = 500f;
-    private static final float ANGULAR_VELOCITY_FACTOR = 200f;
-    private static final float DECELERATION_FACTOR = 0.01f;
-    private static final float LASER_VELOCITY_FACTORY = 500f;
     private static final int STARTING_X = 1920 / 2;
     private static final int STARTING_Y = 960 / 2;
     private static final int STARTING_ROTATION = 0;
@@ -69,7 +67,7 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
         int idOffset = fbb.createString(channel.id().asShortText());
         int nameOffset = fbb.createString(channel.id().asShortText());
         int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y, STARTING_ROTATION,
-                VELOCITY_FACTOR, ANGULAR_VELOCITY_FACTOR, DECELERATION_FACTOR, LASER_VELOCITY_FACTORY);
+                Player.VELOCITY_FACTOR, Player.ANGULAR_VELOCITY_FACTOR, Player.DECELERATION_FACTOR, Laser.LASER_VELOCITY_FACTOR);
         PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);

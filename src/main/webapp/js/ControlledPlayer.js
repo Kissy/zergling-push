@@ -70,7 +70,7 @@
         Event.PlayerMoved.addTime(builder, new Date().getTime() - _referenceTime);
         Event.PlayerMoved.addX(builder, this.body.x / _scale);
         Event.PlayerMoved.addY(builder, this.body.y / _scale);
-        Event.PlayerMoved.addRotation(builder, this.body.rotation);
+        Event.PlayerMoved.addRotation(builder, this.rotation);
         Event.PlayerMoved.addVelocity(builder, this.forwardVelocity);
         Event.PlayerMoved.addAngularVelocity(builder, this.body.angularVelocity / _playerAngularVelocityFactor);
         Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));

@@ -12,32 +12,24 @@ import static fr.kissy.zergling_push.model.Player.MIN_X_Y_VALUE;
  * Created by Guillaume on 21/01/2017.
  */
 public class Laser {
-    private static final double _laserFullVelocity = 2;
-    private static final short _laserStartingLifespan = 1000;
+    public static final float LASER_VELOCITY_FACTOR = 500f;
     private final Player player;
     private final Set<Player> playersHit;
     private float x;
     private float y;
     private double rotation;
-    private short lifespan;
 
     public Laser(Player player, float x, float y, double rotation) {
         this.player = player;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
-        this.lifespan = _laserStartingLifespan;
         this.playersHit = new HashSet<>();
     }
 
-    public void update(long deltaTime) {
-        this.x = (float) (this.x + _laserFullVelocity * Math.sin(this.rotation) * deltaTime);
-        this.y = (float) (this.y - _laserFullVelocity * Math.cos(this.rotation) * deltaTime);
-        if (x > MAX_X_VALUE || x < MIN_X_Y_VALUE || y > MAX_Y_VALUE || y < MIN_X_Y_VALUE) {
-            this.lifespan = 0;
-        } else {
-            this.lifespan -= deltaTime;
-        }
+    public void update(float deltaTime) {
+        this.x = (float) (this.x + LASER_VELOCITY_FACTOR * Math.sin(this.rotation) * deltaTime);
+        this.y = (float) (this.y - LASER_VELOCITY_FACTOR * Math.cos(this.rotation) * deltaTime);
     }
 
     public boolean canHit(Player player) {
@@ -49,7 +41,7 @@ public class Laser {
     }
 
     public boolean expired() {
-        return this.lifespan <= 0;
+        return x > MAX_X_VALUE || x < MIN_X_Y_VALUE || y > MAX_Y_VALUE || y < MIN_X_Y_VALUE;
     }
 
     public float getX() {

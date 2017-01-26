@@ -21,7 +21,7 @@ public class DebugDeltaTime extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        String text = "DeltaTime : " + mainLoop.getDeltaTime() + "ms";
+        String text = "DeltaTime : " + mainLoop.getDeltaTime();
         g.setColor(Color.RED);
         g.drawChars(text.toCharArray(), 0, text.length(), 5, 15);
     }

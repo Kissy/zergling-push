@@ -26,7 +26,7 @@ var _playerNameSpriteYOffset = -10;
 var _laserFullVelocity = 800 * _scale;
 
 console.log("width " + _width + ", height " + _height + ", scale " + _scale);
-var _game = new Phaser.Game(_width, _height, Phaser.AUTO, '',
+var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
     {
         preload: preload,
         create: create,

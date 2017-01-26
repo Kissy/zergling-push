@@ -24,6 +24,7 @@ public class DebugFrame extends JFrame {
         setVisible(true);
 
         getContentPane().add(new DebugDeltaTime(mainLoop));
+        validate();
     }
 
     public void addPlayer(ChannelId id, Player player) {
@@ -36,7 +37,7 @@ public class DebugFrame extends JFrame {
     public void removePlayer(ChannelId id) {
         DebugPlayer debugPlayer = players.remove(id);
         if (debugPlayer != null) {
-            remove(debugPlayer);
+            getContentPane().remove(debugPlayer);
         }
     }
 
@@ -48,6 +49,6 @@ public class DebugFrame extends JFrame {
     }
 
     public void removeShot(Laser laser) {
-        remove(lasers.remove(laser));
+        getContentPane().remove(lasers.remove(laser));
     }
 }

@@ -37,7 +37,7 @@ public class MainLoop implements Runnable {
     private final DebugFrame debugFrame;
     private final Map<Channel, Player> players;
     private long lastExecutionTime = System.nanoTime();
-    private long deltaTime;
+    private float deltaTime;
 
     public MainLoop(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
         this.messagesQueue = messagesQueue;
@@ -49,7 +49,7 @@ public class MainLoop implements Runnable {
     public void run() {
         try {
             long currentTime = System.nanoTime();
-            deltaTime = (currentTime - lastExecutionTime) / 1000000;
+            deltaTime = (currentTime - lastExecutionTime) / 1_000_000_000.f;
             lastExecutionTime = currentTime;
 
             while (!messagesQueue.isEmpty()) {
@@ -118,7 +118,7 @@ public class MainLoop implements Runnable {
         return new ArrayList<>();
     }
 
-    public long getDeltaTime() {
+    public float getDeltaTime() {
         return deltaTime;
     }
 }

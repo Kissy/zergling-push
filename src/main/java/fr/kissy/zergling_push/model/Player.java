@@ -14,14 +14,14 @@ import java.util.List;
  * Created by Guillaume on 19/01/2017.
  */
 public class Player {
+    public static final float VELOCITY_FACTOR = 500f;
+    public static final float ANGULAR_VELOCITY_FACTOR = 200f;
+    public static final float DECELERATION_FACTOR = 0.01f;
     public static final int MIN_X_Y_VALUE = 0;
     public static final int MAX_X_VALUE = 1920;
     public static final int MAX_Y_VALUE = 960;
     private static final int _playerWidth = 32;
     private static final int _playerHeight = 38;
-    private static final float _playerVelocityFactor = 0.8f;
-    private static final float _playerAngularVelocityFactor = 0.006f;
-    private static final float _playerDecelerationFactor = 0.05f;
     private static final float _moduloRadian = 2 * (float) Math.PI;
 
     private String id;
@@ -60,13 +60,13 @@ public class Player {
         this.shots.add(new Laser(this, event.x(), event.y(), event.rotation()));
     }
 
-    public void update(long deltaTime) {
-        this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
+    public void update(float deltaTime) {
+        this.residualVelocity = Math.max(this.residualVelocity - DECELERATION_FACTOR, 0);
 
-        double currentVelocity = (this.velocity + this.residualVelocity) * _playerVelocityFactor * deltaTime;
+        this.rotation = (this.rotation + this.angularVelocity * ANGULAR_VELOCITY_FACTOR * deltaTime) % _moduloRadian;
+        double currentVelocity = (this.velocity + this.residualVelocity) * VELOCITY_FACTOR * deltaTime;
         this.x = clamp((float) (this.x + currentVelocity * Math.sin(this.rotation)), MIN_X_Y_VALUE, MAX_X_VALUE);
         this.y = clamp((float) (this.y - currentVelocity * Math.cos(this.rotation)), MIN_X_Y_VALUE, MAX_Y_VALUE);
-        this.rotation = (this.rotation + this.angularVelocity * _playerAngularVelocityFactor * deltaTime) % _moduloRadian;
         this.shots.forEach(shot -> shot.update(deltaTime));
         this.shots.removeIf(Laser::expired);
     }
@@ -108,6 +108,10 @@ public class Player {
 
     public void setY(float y) {
         this.y = y;
+    }
+
+    public float getRotation() {
+        return rotation;
     }
 
     public List<Laser> getShots() {
