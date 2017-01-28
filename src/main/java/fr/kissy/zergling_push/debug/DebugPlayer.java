@@ -22,5 +22,10 @@ public class DebugPlayer extends JPanel {
     protected void paintComponent(Graphics g) {
         g.setColor(Color.blue);
         g.drawRect(Math.round(player.getX() / SCALE) - 3, Math.round(player.getY() / SCALE) - 5, 6, 10);
+
+        String text = "x : " + player.getX() + " y : " + player.getY();
+        g.drawChars(text.toCharArray(), 0, text.length(), 5, 45);
+        text = "angle : " + player.getRotation() / (2 * Math.PI) * 360 + " rotation : " + player.getRotation();
+        g.drawChars(text.toCharArray(), 0, text.length(), 5, 65);
     }
 }
