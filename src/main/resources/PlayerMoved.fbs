@@ -4,6 +4,7 @@ file_identifier "PLMV";
 table PlayerMoved {
     id: string;
     time: uint;
+    sequence: uint;
     x: float;
     y: float;
     rotation: float;

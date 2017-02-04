@@ -1,0 +1,11 @@
+include "PlayerSnapshot.fbs";
+
+namespace Event;
+file_identifier "WDSP";
+
+table WorldSnapshot {
+    time: uint;
+    players: [PlayerSnapshot];
+}
+
+root_type WorldSnapshot;

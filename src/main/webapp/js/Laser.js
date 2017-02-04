@@ -6,11 +6,11 @@
         this.checkWorldBounds = true;
         this.outOfBoundsKill = true;
 
+        this.anchor.set(0.5);
+
         _game.physics.enable(this, Phaser.Physics.ARCADE);
         _game.physics.arcade.velocityFromRotation(this.rotation - Math.PI / 2, _laserFullVelocity, this.body.velocity);
 
-        this.anchor.set(0.5);
-        this.scale.set(_scale);
 
         _game.add.existing(this);
     }

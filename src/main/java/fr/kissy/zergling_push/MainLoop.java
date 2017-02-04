@@ -4,6 +4,8 @@ import Event.PlayerJoined;
 import Event.PlayerLeaved;
 import Event.PlayerMoved;
 import Event.PlayerShot;
+import Event.WorldSnapshot;
+import com.google.flatbuffers.FlatBufferBuilder;
 import fr.kissy.zergling_push.debug.DebugFrame;
 import fr.kissy.zergling_push.debug.DebugLaserList;
 import fr.kissy.zergling_push.debug.DebugPlayerMap;
@@ -12,6 +14,7 @@ import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -32,38 +35,51 @@ import java.util.stream.Collectors;
  */
 public class MainLoop implements Runnable {
     private static final boolean DEBUG_ENABLED = true;
+    public static long serverStartTime;
+    public static long serverTime;
     private final ArrayBlockingQueue<PlayerMessage> messagesQueue;
     private final ChannelGroup allPlayers;
     private final DebugFrame debugFrame;
     private final Map<Channel, Player> players;
-    private long lastExecutionTime = System.nanoTime();
-    private float deltaTime;
+    private long lastExecutionTime;
+    private double deltaTime;
+    private int snapshotCount = 0;
 
-    public MainLoop(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
+
+    public MainLoop(ChannelGroup allPlayers, ArrayBlockingQueue<PlayerMessage> messagesQueue) {
+        this.allPlayers = allPlayers;
         this.messagesQueue = messagesQueue;
-        this.allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
         this.debugFrame = DEBUG_ENABLED ? new DebugFrame(this) : null;
         this.players = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
+        this.lastExecutionTime = System.nanoTime();
+        this.serverStartTime = System.currentTimeMillis();
+        this.serverTime = 0;
     }
 
     public void run() {
         try {
             long currentTime = System.nanoTime();
-            deltaTime = (currentTime - lastExecutionTime) / 1_000_000_000.f;
+            deltaTime = (currentTime - lastExecutionTime) / 1_000_000f;
             lastExecutionTime = currentTime;
+            serverTime = System.currentTimeMillis() - serverStartTime;
 
-            while (!messagesQueue.isEmpty()) {
-                PlayerMessage playerMessage = messagesQueue.poll();
-                dispatchToPlayer(playerMessage);
-                allPlayers.write(new BinaryWebSocketFrame(playerMessage.getMessage()));
-            }
-            allPlayers.flush();
+            messagesQueue.forEach(this::dispatch);
 
             for (Player player : players.values()) {
-                player.update(deltaTime);
+                player.update(serverTime, deltaTime);
+            }
+
+            if (++snapshotCount % 3 == 0) {
+                sendWorldSnapshot();
+                snapshotCount = 0;
             }
 
             detectCollisions();
+
+            while (!messagesQueue.isEmpty()) {
+                PlayerMessage playerMessage = messagesQueue.poll();
+                playerMessage.release();
+            }
 
             if (DEBUG_ENABLED) {
                 SwingUtilities.invokeLater(debugFrame::repaint);
@@ -71,6 +87,19 @@ public class MainLoop implements Runnable {
         } catch (Exception e) {
             throw new RuntimeException("Error in main loop", e);
         }
+    }
+
+    private void sendWorldSnapshot() {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        List<Integer> playersOffset = new ArrayList<>();
+        for (Player player : players.values()) {
+            playersOffset.add(player.createPlayerSnapshotOffset(fbb));
+        }
+        int playersVectorOffset = WorldSnapshot.createPlayersVector(fbb, playersOffset.stream().mapToInt(i -> i).toArray());
+        int offset = WorldSnapshot.createWorldSnapshot(fbb, MainLoop.serverTime, playersVectorOffset);
+        WorldSnapshot.finishWorldSnapshotBuffer(fbb, offset);
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
+        allPlayers.writeAndFlush(new BinaryWebSocketFrame(byteBuf));
     }
 
     private void detectCollisions() {
@@ -92,22 +121,26 @@ public class MainLoop implements Runnable {
         allPlayers.flush();
     }
 
-    private void dispatchToPlayer(PlayerMessage playerMessage) {
+    private void dispatch(PlayerMessage playerMessage) {
+        Channel player = playerMessage.getPlayer();
         ByteBuffer byteBuffer = playerMessage.getMessage().nioBuffer();
         if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
-            players.get(playerMessage.getPlayer()).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
+            players.get(player).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
         } else if (PlayerShot.PlayerShotBufferHasIdentifier(byteBuffer)) {
             PlayerShot shot = PlayerShot.getRootAsPlayerShot(byteBuffer);
-            players.get(playerMessage.getPlayer()).shot(shot);
+            players.get(player).shot(shot);
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
             Player currentPlayer = new Player(PlayerJoined.getRootAsPlayerJoined(byteBuffer), createNewLaserList());
             players.values().stream().map(Player::createPlayerJoined).map(BinaryWebSocketFrame::new)
-                    .forEach(playerMessage.getPlayer()::write);
-            players.put(playerMessage.getPlayer(), currentPlayer);
-            allPlayers.add(playerMessage.getPlayer());
+                    .forEach(player::write);
+            players.put(player, currentPlayer);
+            allPlayers.add(player);
+            allPlayers.writeAndFlush(new BinaryWebSocketFrame(currentPlayer.createPlayerJoined()));
+            player.flush();
         } else if (PlayerLeaved.PlayerLeavedBufferHasIdentifier(byteBuffer)) {
-            players.remove(playerMessage.getPlayer());
-            allPlayers.remove(playerMessage.getPlayer());
+            players.remove(player);
+            allPlayers.remove(player);
+            allPlayers.writeAndFlush(new BinaryWebSocketFrame(playerMessage.getMessage()));
         }
     }
 
@@ -118,7 +151,12 @@ public class MainLoop implements Runnable {
         return new ArrayList<>();
     }
 
-    public float getDeltaTime() {
+    public double getDeltaTime() {
         return deltaTime;
     }
+
+    public long getServerTime() {
+        return serverTime;
+    }
+
 }

@@ -21,11 +21,11 @@ public class DebugPlayer extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         g.setColor(Color.blue);
-        g.drawRect(Math.round(player.getX() / SCALE) - 3, Math.round(player.getY() / SCALE) - 5, 6, 10);
+        g.drawRect((int) Math.round(player.getX() / SCALE) - 3, (int) Math.round(player.getY() / SCALE) - 5, 6, 10);
 
-        String text = "x : " + player.getX() + " y : " + player.getY();
+        String text = "x : " + Math.round(player.getX() * 100) / 100.f + " y : " + Math.round(player.getY() * 100) / 100.f;
         g.drawChars(text.toCharArray(), 0, text.length(), 5, 45);
-        text = "angle : " + player.getRotation() / (2 * Math.PI) * 360 + " rotation : " + player.getRotation();
+        text = "angle : " + Math.round(player.getRotation() / (2 * Math.PI) * 360 * 10) / 10.f + " rotation : " + Math.round(player.getRotation() * 10) / 10.f;
         g.drawChars(text.toCharArray(), 0, text.length(), 5, 65);
     }
 }

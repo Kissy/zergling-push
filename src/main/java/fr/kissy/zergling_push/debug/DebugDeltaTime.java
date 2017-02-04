@@ -24,5 +24,7 @@ public class DebugDeltaTime extends JPanel {
         String text = "DeltaTime : " + mainLoop.getDeltaTime();
         g.setColor(Color.RED);
         g.drawChars(text.toCharArray(), 0, text.length(), 5, 15);
+        text = "ServerTime : " + mainLoop.getServerTime();
+        g.drawChars(text.toCharArray(), 0, text.length(), 5, 30);
     }
 }

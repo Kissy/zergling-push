@@ -1,0 +1,10 @@
+namespace Event;
+file_identifier "TSRS";
+
+table TimeSyncResponse {
+    time: uint;
+    serverTime: uint;
+    serverStartTime: uint;
+}
+
+root_type TimeSyncResponse;

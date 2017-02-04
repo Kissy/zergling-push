@@ -15,8 +15,8 @@ public class Laser {
     public static final float LASER_VELOCITY_FACTOR = 500f;
     private final Player player;
     private final Set<Player> playersHit;
-    private float x;
-    private float y;
+    private double x;
+    private double y;
     private double rotation;
 
     public Laser(Player player, float x, float y, double rotation) {
@@ -27,9 +27,9 @@ public class Laser {
         this.playersHit = new HashSet<>();
     }
 
-    public void update(float deltaTime) {
-        this.x = (float) (this.x + LASER_VELOCITY_FACTOR * Math.sin(this.rotation) * deltaTime);
-        this.y = (float) (this.y - LASER_VELOCITY_FACTOR * Math.cos(this.rotation) * deltaTime);
+    public void update(double deltaTime) {
+        this.x = this.x + LASER_VELOCITY_FACTOR * Math.sin(this.rotation) * deltaTime;
+        this.y = this.y - LASER_VELOCITY_FACTOR * Math.cos(this.rotation) * deltaTime;
     }
 
     public boolean canHit(Player player) {
@@ -44,11 +44,11 @@ public class Laser {
         return x > MAX_X_VALUE || x < MIN_X_Y_VALUE || y > MAX_Y_VALUE || y < MIN_X_Y_VALUE;
     }
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 }

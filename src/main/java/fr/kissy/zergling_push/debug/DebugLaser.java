@@ -21,6 +21,6 @@ public class DebugLaser extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         g.setColor(Color.CYAN);
-        g.drawRect(Math.round(laser.getX() / SCALE) - 3, Math.round(laser.getY() / SCALE) - 5, 6, 10);
+        g.drawRect((int) Math.round(laser.getX() / SCALE) - 3, (int) Math.round(laser.getY() / SCALE) - 5, 6, 10);
     }
 }

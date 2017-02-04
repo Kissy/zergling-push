@@ -1,0 +1,8 @@
+namespace Event;
+file_identifier "TSRQ";
+
+table TimeSyncRequest {
+    time: uint;
+}
+
+root_type TimeSyncRequest;

@@ -15,10 +15,8 @@
  */
 package fr.kissy.zergling_push;
 
-import fr.kissy.zergling_push.debug.DebugFrame;
 import fr.kissy.zergling_push.infrastructure.BinaryWebSocketFrameHandler;
 import fr.kissy.zergling_push.infrastructure.HttpStaticFileServerHandler;
-import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -35,8 +33,6 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -62,18 +58,19 @@ import java.util.concurrent.TimeUnit;
  * in the "Response From Server" area when client has connected, disconnected
  * etc.
  */
-public class WebSocketServer {
+public class MainServer {
 
     public static final long TICK_RATE = 1000L / 60L;
 
     public static void main(String[] args) throws Exception {
-        new WebSocketServer().run();
+        new MainServer().run();
     }
 
     private void run() throws Exception {
+        final ChannelGroup allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
         final ArrayBlockingQueue<PlayerMessage> messagesQueue = new ArrayBlockingQueue<PlayerMessage>(1024);
 
-        final MainLoop mainLoop = new MainLoop(messagesQueue);
+        final MainLoop mainLoop = new MainLoop(allPlayers, messagesQueue);
         ScheduledThreadPoolExecutor mainLoopExecutor = new ScheduledThreadPoolExecutor(1);
         mainLoopExecutor.scheduleAtFixedRate(mainLoop, 0, TICK_RATE, TimeUnit.MILLISECONDS);
 

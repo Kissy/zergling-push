@@ -1,0 +1,12 @@
+namespace Event;
+file_identifier "PLSP";
+
+table PlayerSnapshot {
+    id: string;
+    sequence: uint;
+    x: float;
+    y: float;
+    rotation: float;
+}
+
+root_type PlayerSnapshot;
