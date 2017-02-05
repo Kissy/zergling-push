@@ -86,7 +86,7 @@
 
         for (var j = 0; j < this.inputQueue.length; j++) {
             var currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(new flatbuffers.ByteBuffer(this.inputQueue[j]));
-            this.rotation = this.rotation + (currentEvent.angularVelocity() * _playerAngularVelocityFactor * _game.time.physicsElapsed);
+            this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * _game.time.physicsElapsed;
             this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * _game.time.physicsElapsed;
             this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * _game.time.physicsElapsed;
         }

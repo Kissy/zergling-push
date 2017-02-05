@@ -52,7 +52,13 @@
 
         if (this.targetSnapshot) {
             var timePoint = (currentTime - this.currentSnapshot.time) / (this.targetSnapshot.time - this.currentSnapshot.time);
-            this.rotation = this.targetSnapshot.rotation() + (this.currentSnapshot.rotation() - this.targetSnapshot.rotation()) * timePoint;
+            var angleDifference = this.targetSnapshot.rotation() - this.currentSnapshot.rotation();
+            if (angleDifference < -Math.PI) {
+                angleDifference += 2 * Math.PI;
+            } else if (angleDifference > Math.PI) {
+                angleDifference -= 2 * Math.PI;
+            }
+            this.rotation = this.currentSnapshot.rotation() + angleDifference * timePoint;
             this.x = this.currentSnapshot.x() + (this.targetSnapshot.x() - this.currentSnapshot.x()) * timePoint;
             this.y = this.currentSnapshot.y() + (this.targetSnapshot.y() - this.currentSnapshot.y()) * timePoint;
         }
