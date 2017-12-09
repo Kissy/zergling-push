@@ -151,10 +151,28 @@ Event.PlayerSnapshot.prototype.mutate_rotation = function(value) {
 };
 
 /**
+ * @param {number} index
+ * @param {Event.PlayerShotSnapshot=} obj
+ * @returns {Event.PlayerShotSnapshot}
+ */
+Event.PlayerSnapshot.prototype.shots = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 14);
+  return offset ? (obj || new Event.PlayerShotSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Event.PlayerSnapshot.prototype.shotsLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 14);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerSnapshot.startPlayerSnapshot = function(builder) {
-  builder.startObject(5);
+  builder.startObject(6);
 };
 
 /**
@@ -195,6 +213,35 @@ Event.PlayerSnapshot.addY = function(builder, y) {
  */
 Event.PlayerSnapshot.addRotation = function(builder, rotation) {
   builder.addFieldFloat32(4, rotation, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} shotsOffset
+ */
+Event.PlayerSnapshot.addShots = function(builder, shotsOffset) {
+  builder.addFieldOffset(5, shotsOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Event.PlayerSnapshot.createShotsVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Event.PlayerSnapshot.startShotsVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
 };
 
 /**

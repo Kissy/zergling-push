@@ -29,7 +29,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
@@ -76,7 +75,9 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
 
     private BinaryWebSocketFrame createTimeSyncResponse(TimeSyncRequest timeSyncRequest) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        int offset = TimeSyncResponse.createTimeSyncResponse(fbb, timeSyncRequest.time(), System.currentTimeMillis() - startOfDayMilli(), MainLoop.serverTime);
+        /*System.out.println("serverTime : " + MainLoop.serverTime + ", serverStartTime :" + MainLoop.serverStartTime + " time : " + (System.currentTimeMillis() - startOfDayMilli())
+        + ", referenceTime " + startOfDayMilli());*/
+        int offset = TimeSyncResponse.createTimeSyncResponse(fbb, timeSyncRequest.time(), MainLoop.serverTime, MainLoop.serverStartTime);
         TimeSyncResponse.finishTimeSyncResponseBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);
@@ -87,7 +88,7 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
         int idOffset = fbb.createString(channel.id().asShortText());
         int nameOffset = fbb.createString(channel.id().asShortText());
         int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y, STARTING_ROTATION,
-                (float) Player.VELOCITY_FACTOR, (float) Player.ANGULAR_VELOCITY_FACTOR, (float) Player.DECELERATION_FACTOR, Laser.LASER_VELOCITY_FACTOR);
+                (float) Player.VELOCITY_FACTOR, (float) Player.ANGULAR_VELOCITY_FACTOR, (float) Player.DECELERATION_FACTOR, Laser.VELOCITY_FACTOR);
         PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);

@@ -1,3 +1,5 @@
+include "PlayerShotSnapshot.fbs";
+
 namespace Event;
 file_identifier "PLSP";
 
@@ -7,6 +9,7 @@ table PlayerSnapshot {
     x: float;
     y: float;
     rotation: float;
+    shots: [PlayerShotSnapshot];
 }
 
 root_type PlayerSnapshot;

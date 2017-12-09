@@ -21,6 +21,7 @@ import fr.kissy.zergling_push.model.PlayerMessage;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
@@ -78,6 +79,7 @@ public class MainServer {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             final ServerBootstrap sb = new ServerBootstrap();
+            sb.childOption(ChannelOption.TCP_NODELAY, true);
             sb.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {

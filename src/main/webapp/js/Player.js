@@ -4,11 +4,15 @@
 
         this.id = event.id();
         this.shields = 3;
-        this.inputQueue = [];
-        this.updateQueue = [];
+        this.inputQueue = []; // Should be be useful only for controlled
+        // TODO include snapshot inside player join
+        this.snapshots = [];
         this.shots = _game.add.group();
         this.shots.enableBody = true;
-        // this.shots.physicsBodyType = Phaser.Physics.ARCADE;
+        this.shots.physicsBodyType = Phaser.Physics.ARCADE;
+        for (var i = 0; i < 20; i++) {
+            this.shots.add(new Laser(this, null));
+        }
 
         this.anchor.set(0.5);
 
@@ -50,16 +54,25 @@
         // this.y -= yVelocity * _game.time.physicsElapsed;
     };
     Player.prototype.processSnapshot = function receiveInput(event) {
-        this.updateQueue.push(event);
-
-        if(this.updateQueue.length > 120) {
-            this.updateQueue.splice(0,1);
+        // TODO remove only when current snapshot is expired
+        for (var j = this.snapshots.length - 1; j >= 0; j--) {
+            if (this.snapshots[j].time < this.game.time.clientTime) {
+                this.snapshots.splice(0, Math.max(j - 1, 0));
+                break;
+            }
         }
 
-        // console.log("snapshot received " + event.time + " " + (this.game.time.serverStartTime + this.game.time.now - 100));
+        for (var i = this.snapshots.length - 1; i >= 0; i--) {
+            if (this.snapshots[i].time < event.time) {
+                this.snapshots.splice(i + 1, 0, event);
+                break;
+            }
+        }
 
-        // this.serverX = event.x();
-        // this.serverY = event.y();
+        // TODO create player with initial snapshot instead of this
+        if (this.snapshots.length === 0) {
+            this.snapshots.push(event)
+        }
     };
     Player.prototype.applyInputQueue = function applyInputQueue(event) {
         // if (this.forwardVelocity != event.velocity()) {

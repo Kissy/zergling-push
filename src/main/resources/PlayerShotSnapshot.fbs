@@ -1,0 +1,11 @@
+namespace Event;
+file_identifier "PSSP";
+
+table PlayerShotSnapshot {
+    id: string;
+    x: float;
+    y: float;
+    rotation: float;
+}
+
+root_type PlayerShotSnapshot;

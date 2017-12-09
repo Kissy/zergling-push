@@ -34,12 +34,10 @@ import java.util.stream.Collectors;
  * Created by Guillaume on 19/01/2017.
  */
 public class MainLoop implements Runnable {
-    private static final boolean DEBUG_ENABLED = true;
-    public static long serverStartTime;
-    public static long serverTime;
+    public static long serverStartTime = System.currentTimeMillis();
+    public static long serverTime = 0;
     private final ArrayBlockingQueue<PlayerMessage> messagesQueue;
     private final ChannelGroup allPlayers;
-    private final DebugFrame debugFrame;
     private final Map<Channel, Player> players;
     private long lastExecutionTime;
     private double deltaTime;
@@ -49,11 +47,8 @@ public class MainLoop implements Runnable {
     public MainLoop(ChannelGroup allPlayers, ArrayBlockingQueue<PlayerMessage> messagesQueue) {
         this.allPlayers = allPlayers;
         this.messagesQueue = messagesQueue;
-        this.debugFrame = DEBUG_ENABLED ? new DebugFrame(this) : null;
-        this.players = DEBUG_ENABLED ? new DebugPlayerMap(this.debugFrame) : new HashMap<>();
+        this.players = new HashMap<>();
         this.lastExecutionTime = System.nanoTime();
-        this.serverStartTime = System.currentTimeMillis();
-        this.serverTime = 0;
     }
 
     public void run() {
@@ -80,10 +75,6 @@ public class MainLoop implements Runnable {
                 PlayerMessage playerMessage = messagesQueue.poll();
                 playerMessage.release();
             }
-
-            if (DEBUG_ENABLED) {
-                SwingUtilities.invokeLater(debugFrame::repaint);
-            }
         } catch (Exception e) {
             throw new RuntimeException("Error in main loop", e);
         }
@@ -96,7 +87,7 @@ public class MainLoop implements Runnable {
             playersOffset.add(player.createPlayerSnapshotOffset(fbb));
         }
         int playersVectorOffset = WorldSnapshot.createPlayersVector(fbb, playersOffset.stream().mapToInt(i -> i).toArray());
-        int offset = WorldSnapshot.createWorldSnapshot(fbb, MainLoop.serverTime, playersVectorOffset);
+        int offset = WorldSnapshot.createWorldSnapshot(fbb, serverTime, playersVectorOffset);
         WorldSnapshot.finishWorldSnapshotBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         allPlayers.writeAndFlush(new BinaryWebSocketFrame(byteBuf));
@@ -115,7 +106,9 @@ public class MainLoop implements Runnable {
                 .collect(Collectors.toList());
 
         for (Hit hit : hits) {
+            // TODO call in stream directly
             ByteBuf message = hit.process();
+            // TODO send with world snapshot
             allPlayers.write(new BinaryWebSocketFrame(message));
         }
         allPlayers.flush();
@@ -130,25 +123,17 @@ public class MainLoop implements Runnable {
             PlayerShot shot = PlayerShot.getRootAsPlayerShot(byteBuffer);
             players.get(player).shot(shot);
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
-            Player currentPlayer = new Player(PlayerJoined.getRootAsPlayerJoined(byteBuffer), createNewLaserList());
+            Player currentPlayer = new Player(PlayerJoined.getRootAsPlayerJoined(byteBuffer), new ArrayList<>());
             players.values().stream().map(Player::createPlayerJoined).map(BinaryWebSocketFrame::new)
                     .forEach(player::write);
             players.put(player, currentPlayer);
             allPlayers.add(player);
             allPlayers.writeAndFlush(new BinaryWebSocketFrame(currentPlayer.createPlayerJoined()));
-            player.flush();
         } else if (PlayerLeaved.PlayerLeavedBufferHasIdentifier(byteBuffer)) {
             players.remove(player);
             allPlayers.remove(player);
             allPlayers.writeAndFlush(new BinaryWebSocketFrame(playerMessage.getMessage()));
         }
-    }
-
-    private List<Laser> createNewLaserList() {
-        if (DEBUG_ENABLED) {
-            return new DebugLaserList(this.debugFrame);
-        }
-        return new ArrayList<>();
     }
 
     public double getDeltaTime() {

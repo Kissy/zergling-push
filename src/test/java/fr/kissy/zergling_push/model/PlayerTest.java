@@ -59,7 +59,7 @@ class PlayerTest {
     private PlayerMoved createPlayerMoved(long time, float x, float y, int rotation, byte velocity, byte angularVelocity) {
         FlatBufferBuilder builder = new FlatBufferBuilder();
         int idOffset = builder.createString("id");
-        int offset = PlayerMoved.createPlayerMoved(builder, idOffset, time, 0, x, y, rotation, velocity, angularVelocity);
+        int offset = PlayerMoved.createPlayerMoved(builder, idOffset, time, 0, velocity, angularVelocity, false);
         PlayerMoved.finishPlayerMovedBuffer(builder, offset);
         return PlayerMoved.getRootAsPlayerMoved(builder.dataBuffer());
     }

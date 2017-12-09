@@ -25,14 +25,19 @@ public final class PlayerSnapshot extends Table {
   public boolean mutateY(float y) { int o = __offset(10); if (o != 0) { bb.putFloat(o + bb_pos, y); return true; } else { return false; } }
   public float rotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public boolean mutateRotation(float rotation) { int o = __offset(12); if (o != 0) { bb.putFloat(o + bb_pos, rotation); return true; } else { return false; } }
+  public Event.PlayerShotSnapshot shots(int j) { return shots(new Event.PlayerShotSnapshot(), j); }
+  public Event.PlayerShotSnapshot shots(Event.PlayerShotSnapshot obj, int j) { int o = __offset(14); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int shotsLength() { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; }
 
   public static int createPlayerSnapshot(FlatBufferBuilder builder,
       int idOffset,
       long sequence,
       float x,
       float y,
-      float rotation) {
-    builder.startObject(5);
+      float rotation,
+      int shotsOffset) {
+    builder.startObject(6);
+    PlayerSnapshot.addShots(builder, shotsOffset);
     PlayerSnapshot.addRotation(builder, rotation);
     PlayerSnapshot.addY(builder, y);
     PlayerSnapshot.addX(builder, x);
@@ -41,12 +46,15 @@ public final class PlayerSnapshot extends Table {
     return PlayerSnapshot.endPlayerSnapshot(builder);
   }
 
-  public static void startPlayerSnapshot(FlatBufferBuilder builder) { builder.startObject(5); }
+  public static void startPlayerSnapshot(FlatBufferBuilder builder) { builder.startObject(6); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
   public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(1, (int)sequence, (int)0L); }
   public static void addX(FlatBufferBuilder builder, float x) { builder.addFloat(2, x, 0.0f); }
   public static void addY(FlatBufferBuilder builder, float y) { builder.addFloat(3, y, 0.0f); }
   public static void addRotation(FlatBufferBuilder builder, float rotation) { builder.addFloat(4, rotation, 0.0f); }
+  public static void addShots(FlatBufferBuilder builder, int shotsOffset) { builder.addOffset(5, shotsOffset, 0); }
+  public static int createShotsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
+  public static void startShotsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static int endPlayerSnapshot(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

@@ -22,7 +22,10 @@ public class Hit {
     public ByteBuf process() {
         shot.hit(player);
         boolean alive = player.hit(shot);
+        return createPlayerHit();
+    }
 
+    private ByteBuf createPlayerHit() {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
         int idOffset = fbb.createString(player.getId());
         int shotOffset = fbb.createString(shot.toString());

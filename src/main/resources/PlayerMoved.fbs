@@ -5,11 +5,9 @@ table PlayerMoved {
     id: string;
     time: uint;
     sequence: uint;
-    x: float;
-    y: float;
-    rotation: float;
     velocity: byte;
     angularVelocity: byte;
+    firing: bool;
 }
 
 root_type PlayerMoved;
