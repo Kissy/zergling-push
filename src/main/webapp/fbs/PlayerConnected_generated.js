@@ -76,41 +76,11 @@ Event.PlayerConnected.prototype.startingXPosition = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_startingXPosition = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.PlayerConnected.prototype.startingYPosition = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_startingYPosition = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
@@ -122,41 +92,11 @@ Event.PlayerConnected.prototype.startingRotation = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_startingRotation = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.PlayerConnected.prototype.velocityFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_velocityFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
@@ -168,21 +108,6 @@ Event.PlayerConnected.prototype.angularVelocityFactor = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_angularVelocityFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 16);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.PlayerConnected.prototype.decelerationFactor = function() {
@@ -191,41 +116,11 @@ Event.PlayerConnected.prototype.decelerationFactor = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_decelerationFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 18);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.PlayerConnected.prototype.laserVelocityFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 20);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerConnected.prototype.mutate_laserVelocityFactor = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 20);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
 };
 
 /**

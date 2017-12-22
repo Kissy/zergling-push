@@ -5,8 +5,8 @@
         this.id = event.id();
         this.shields = 3;
         this.inputQueue = []; // Should be be useful only for controlled
-        // TODO include snapshot inside player join
-        this.snapshots = [];
+        this.snapshots = [event];
+        this.lastSnapshotTime = 0;
         this.shots = _game.add.group();
         this.shots.enableBody = true;
         this.shots.physicsBodyType = Phaser.Physics.ARCADE;
@@ -53,7 +53,9 @@
         // this.x += xVelocity * _game.time.physicsElapsed;
         // this.y -= yVelocity * _game.time.physicsElapsed;
     };
-    Player.prototype.processSnapshot = function receiveInput(event) {
+    Player.prototype.processSnapshot = function processSnapshot(event) {
+        this.lastSnapshotTime = event.time;
+
         // TODO remove only when current snapshot is expired
         for (var j = this.snapshots.length - 1; j >= 0; j--) {
             if (this.snapshots[j].time < this.game.time.clientTime) {

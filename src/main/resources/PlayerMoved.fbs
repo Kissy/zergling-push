@@ -4,6 +4,7 @@ file_identifier "PLMV";
 table PlayerMoved {
     id: string;
     time: uint;
+    duration: float;
     sequence: uint;
     velocity: byte;
     angularVelocity: byte;

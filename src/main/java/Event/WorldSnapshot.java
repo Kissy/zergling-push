@@ -10,15 +10,13 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class WorldSnapshot extends Table {
   public static WorldSnapshot getRootAsWorldSnapshot(ByteBuffer _bb) { return getRootAsWorldSnapshot(_bb, new WorldSnapshot()); }
-  public static WorldSnapshot getRootAsWorldSnapshot(ByteBuffer _bb, WorldSnapshot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static WorldSnapshot getRootAsWorldSnapshot(ByteBuffer _bb, WorldSnapshot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean WorldSnapshotBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "WDSP"); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
-  public WorldSnapshot __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public WorldSnapshot __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public boolean mutateTime(long time) { int o = __offset(4); if (o != 0) { bb.putInt(o + bb_pos, (int)time); return true; } else { return false; } }
+  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
   public Event.PlayerSnapshot players(int j) { return players(new Event.PlayerSnapshot(), j); }
-  public Event.PlayerSnapshot players(Event.PlayerSnapshot obj, int j) { int o = __offset(6); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public Event.PlayerSnapshot players(Event.PlayerSnapshot obj, int j) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int playersLength() { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; }
 
   public static int createWorldSnapshot(FlatBufferBuilder builder,
@@ -31,7 +29,7 @@ public final class WorldSnapshot extends Table {
   }
 
   public static void startWorldSnapshot(FlatBufferBuilder builder) { builder.startObject(2); }
-  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, (int)0L); }
+  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, 0); }
   public static void addPlayers(FlatBufferBuilder builder, int playersOffset) { builder.addOffset(1, playersOffset, 0); }
   public static int createPlayersVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startPlayersVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }

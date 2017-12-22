@@ -16,7 +16,7 @@ var _playerFireRate;
 var _laserFullVelocity;
 var _remoteClientDelay = 500; // TODO send from server ?
 
-var _game = new Phaser.Game(_width, _height, Phaser.AUTO, '',
+var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
     {
         preload: preload,
         create: create,
@@ -118,12 +118,26 @@ function update(game) {
             game.time.serverTime = event.time();
             game.time.localTime = event.time() - game.time.latency;
             game.time.clientTime = event.time() - _remoteClientDelay;
-            for (var p = 0; p < event.playersLength(); p++) {
+            var p;
+            // TODO use group of player
+            for (p = 0; p < event.playersLength(); p++) {
                 var playerSnapshot = event.players(p);
-                if (_players[playerSnapshot.id()]) {
-                    playerSnapshot.time = event.time();
-                    _players[playerSnapshot.id()].processSnapshot(playerSnapshot);
+                if (!_players[playerSnapshot.id()]) {
+                    _players[playerSnapshot.id()] = new RemotePlayer(playerSnapshot);
                 }
+
+                playerSnapshot.time = event.time();
+                _players[playerSnapshot.id()].processSnapshot(playerSnapshot);
+            }
+            var playerIds = Object.keys(_players);
+            if (playerIds.length > event.playersLength()) {
+                playerIds.forEach(function (playerId) {
+                    var player = _players[playerId];
+                    if(player.lastSnapshotTime !== event.time()) {
+                        player.destroy();
+                        delete _players[playerId];
+                    }
+                });
             }
         } else if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
@@ -132,8 +146,9 @@ function update(game) {
             event = Event.PlayerHit.getRootAsPlayerHit(byteBuffer);
             _players[event.id()].hit(event);
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
+            // TODO make player joined only for controlledplayer, others should come from world snapshot
             event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            _players[event.id()] = (event.id() === _playerId) ? new ControlledPlayer(event) : new RemotePlayer(event);
+            _players[event.id()] = (event.id() === _playerId) ? new ControlledPlayer(event.snapshot()) : new RemotePlayer(event.snapshot());
         } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
             console.log("player leaved");
@@ -157,23 +172,27 @@ function update(game) {
             var playerJoinedBuilder = new flatbuffers.Builder();
             var idOffset = playerJoinedBuilder.createString(_playerId);
             var nameOffset = playerJoinedBuilder.createString(_playerId);
+            Event.PlayerSnapshot.startPlayerSnapshot(playerJoinedBuilder);
+            Event.PlayerSnapshot.addId(playerJoinedBuilder, idOffset);
+            Event.PlayerSnapshot.addX(playerJoinedBuilder, 0);
+            Event.PlayerSnapshot.addY(playerJoinedBuilder, 0);
+            Event.PlayerSnapshot.addRotation(playerJoinedBuilder, 0);
+            var playerSnapshotOffset = Event.PlayerSnapshot.endPlayerSnapshot(playerJoinedBuilder);
             Event.PlayerJoined.startPlayerJoined(playerJoinedBuilder);
             Event.PlayerJoined.addId(playerJoinedBuilder, idOffset);
             Event.PlayerJoined.addTime(playerJoinedBuilder, this.game.time.serverStartTime + this.game.time.now);
             Event.PlayerJoined.addName(playerJoinedBuilder, nameOffset);
-            Event.PlayerJoined.addX(playerJoinedBuilder, _playerStartingXPosition);
-            Event.PlayerJoined.addY(playerJoinedBuilder, _playerStartingYPosition);
-            Event.PlayerJoined.addRotation(playerJoinedBuilder, _playerStartingRotation);
+            Event.PlayerJoined.addSnapshot(playerJoinedBuilder, playerSnapshotOffset);
             Event.PlayerJoined.finishPlayerJoinedBuffer(playerJoinedBuilder, Event.PlayerJoined.endPlayerJoined(playerJoinedBuilder));
             _inputQueue.push(playerJoinedBuilder.asUint8Array());
 
-            game.time.events.loop(1000, function sendTimeSyncRequest() {
-                var timeSyncRequestBuilder = new flatbuffers.Builder();
-                Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
-                Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, game.time.time - _referenceTime);
-                Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
-                _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
-            });
+            // game.time.events.loop(1000, function sendTimeSyncRequest() {
+            //     var timeSyncRequestBuilder = new flatbuffers.Builder();
+            //     Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
+            //     Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, game.time.time - _referenceTime);
+            //     Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
+            //     _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
+            // });
         } else {
             console.log("Unhandled message");
         }

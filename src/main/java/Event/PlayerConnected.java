@@ -10,29 +10,21 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class PlayerConnected extends Table {
   public static PlayerConnected getRootAsPlayerConnected(ByteBuffer _bb) { return getRootAsPlayerConnected(_bb, new PlayerConnected()); }
-  public static PlayerConnected getRootAsPlayerConnected(ByteBuffer _bb, PlayerConnected obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static PlayerConnected getRootAsPlayerConnected(ByteBuffer _bb, PlayerConnected obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean PlayerConnectedBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "PLCN"); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
-  public PlayerConnected __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public PlayerConnected __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public String id() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer idAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public float startingXPosition() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateStartingXPosition(float startingXPosition) { int o = __offset(8); if (o != 0) { bb.putFloat(o + bb_pos, startingXPosition); return true; } else { return false; } }
   public float startingYPosition() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateStartingYPosition(float startingYPosition) { int o = __offset(10); if (o != 0) { bb.putFloat(o + bb_pos, startingYPosition); return true; } else { return false; } }
   public float startingRotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateStartingRotation(float startingRotation) { int o = __offset(12); if (o != 0) { bb.putFloat(o + bb_pos, startingRotation); return true; } else { return false; } }
   public float velocityFactor() { int o = __offset(14); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateVelocityFactor(float velocityFactor) { int o = __offset(14); if (o != 0) { bb.putFloat(o + bb_pos, velocityFactor); return true; } else { return false; } }
   public float angularVelocityFactor() { int o = __offset(16); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateAngularVelocityFactor(float angularVelocityFactor) { int o = __offset(16); if (o != 0) { bb.putFloat(o + bb_pos, angularVelocityFactor); return true; } else { return false; } }
   public float decelerationFactor() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateDecelerationFactor(float decelerationFactor) { int o = __offset(18); if (o != 0) { bb.putFloat(o + bb_pos, decelerationFactor); return true; } else { return false; } }
   public float laserVelocityFactor() { int o = __offset(20); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateLaserVelocityFactor(float laserVelocityFactor) { int o = __offset(20); if (o != 0) { bb.putFloat(o + bb_pos, laserVelocityFactor); return true; } else { return false; } }
 
   public static int createPlayerConnected(FlatBufferBuilder builder,
       int idOffset,

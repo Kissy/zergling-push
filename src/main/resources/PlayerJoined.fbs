@@ -1,3 +1,5 @@
+include "PlayerSnapshot.fbs";
+
 namespace Event;
 file_identifier "PLJN";
 
@@ -5,9 +7,7 @@ table PlayerJoined {
     id: string;
     time: uint;
     name: string;
-    x: float;
-    y: float;
-    rotation: float;
+    snapshot: PlayerSnapshot;
 }
 
 root_type PlayerJoined;

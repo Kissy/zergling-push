@@ -15,9 +15,10 @@
  */
 package fr.kissy.zergling_push;
 
-import fr.kissy.zergling_push.infrastructure.BinaryWebSocketFrameHandler;
+import fr.kissy.zergling_push.infrastructure.FlatBufferMessageHandler;
 import fr.kissy.zergling_push.infrastructure.HttpStaticFileServerHandler;
 import fr.kissy.zergling_push.model.PlayerMessage;
+import fr.kissy.zergling_push.model.World;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -32,6 +33,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -61,7 +64,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MainServer {
 
-    public static final long TICK_RATE = 1000L / 60L;
+    public static final long TICK_RATE = 1000L / 30L;
 
     public static void main(String[] args) throws Exception {
         new MainServer().run();
@@ -71,12 +74,16 @@ public class MainServer {
         final ChannelGroup allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
         final ArrayBlockingQueue<PlayerMessage> messagesQueue = new ArrayBlockingQueue<PlayerMessage>(1024);
 
-        final MainLoop mainLoop = new MainLoop(allPlayers, messagesQueue);
+        final World world = new World();
+        final MainLoop mainLoop = new MainLoop(world, allPlayers, messagesQueue);
+
         ScheduledThreadPoolExecutor mainLoopExecutor = new ScheduledThreadPoolExecutor(1);
         mainLoopExecutor.scheduleAtFixedRate(mainLoop, 0, TICK_RATE, TimeUnit.MILLISECONDS);
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventExecutorGroup executorGroup = new DefaultEventExecutorGroup(16);
+
         try {
             final ServerBootstrap sb = new ServerBootstrap();
             sb.childOption(ChannelOption.TCP_NODELAY, true);
@@ -86,11 +93,11 @@ public class MainServer {
                         @Override
                         public void initChannel(final SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast("decoder", new HttpServerCodec());
-                            pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
-                            pipeline.addLast("encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
-                            pipeline.addLast("webSocket", new BinaryWebSocketFrameHandler(messagesQueue));
-                            pipeline.addLast("http", new HttpStaticFileServerHandler());
+                            pipeline.addLast("http-decoder", new HttpServerCodec());
+                            pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
+                            pipeline.addLast("websocket-encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
+                            pipeline.addLast(executorGroup,"flatbuffer-message", new FlatBufferMessageHandler(world, messagesQueue));
+                            pipeline.addLast("http-server", new HttpStaticFileServerHandler());
                         }
                     });
             final Channel ch = sb.bind(8080).sync().channel();

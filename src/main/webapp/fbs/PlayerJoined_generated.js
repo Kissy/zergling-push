@@ -67,21 +67,6 @@ Event.PlayerJoined.prototype.time = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerJoined.prototype.mutate_time = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array}
  */
@@ -91,79 +76,19 @@ Event.PlayerJoined.prototype.name = function(optionalEncoding) {
 };
 
 /**
- * @returns {number}
+ * @param {Event.PlayerSnapshot=} obj
+ * @returns {Event.PlayerSnapshot}
  */
-Event.PlayerJoined.prototype.x = function() {
+Event.PlayerJoined.prototype.snapshot = function(obj) {
   var offset = this.bb.__offset(this.bb_pos, 10);
-  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerJoined.prototype.mutate_x = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
- * @returns {number}
- */
-Event.PlayerJoined.prototype.y = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
-  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerJoined.prototype.mutate_y = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
- * @returns {number}
- */
-Event.PlayerJoined.prototype.rotation = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
-  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerJoined.prototype.mutate_rotation = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeFloat32(this.bb_pos + offset, value);
-  return true;
+  return offset ? (obj || new Event.PlayerSnapshot).__init(this.bb.__indirect(this.bb_pos + offset), this.bb) : null;
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerJoined.startPlayerJoined = function(builder) {
-  builder.startObject(6);
+  builder.startObject(4);
 };
 
 /**
@@ -192,26 +117,10 @@ Event.PlayerJoined.addName = function(builder, nameOffset) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} x
+ * @param {flatbuffers.Offset} snapshotOffset
  */
-Event.PlayerJoined.addX = function(builder, x) {
-  builder.addFieldFloat32(3, x, 0.0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} y
- */
-Event.PlayerJoined.addY = function(builder, y) {
-  builder.addFieldFloat32(4, y, 0.0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} rotation
- */
-Event.PlayerJoined.addRotation = function(builder, rotation) {
-  builder.addFieldFloat32(5, rotation, 0.0);
+Event.PlayerJoined.addSnapshot = function(builder, snapshotOffset) {
+  builder.addFieldOffset(3, snapshotOffset, 0);
 };
 
 /**

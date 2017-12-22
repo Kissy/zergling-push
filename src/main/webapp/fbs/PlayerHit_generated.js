@@ -67,21 +67,6 @@ Event.PlayerHit.prototype.time = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerHit.prototype.mutate_time = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array}
  */

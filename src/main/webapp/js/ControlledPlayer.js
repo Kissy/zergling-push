@@ -55,7 +55,7 @@
             }
         }
 
-        // Client prediction (apply queued inputs)
+        // Client prediction (apply queued inputs) TODO do not apply input twice
         for (var j = 0; j < this.inputQueue.length; j++) {
             var currentInput = this.inputQueue[j];
             var byteBuffer = new flatbuffers.ByteBuffer(currentInput.event);
@@ -140,6 +140,7 @@
         Event.PlayerMoved.startPlayerMoved(builder);
         Event.PlayerMoved.addId(builder, idOffset);
         Event.PlayerMoved.addTime(builder, this.game.time.serverStartTime + this.game.time.now);
+        Event.PlayerMoved.addDuration(builder, this.game.time.physicsElapsedMS);
         Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
         Event.PlayerMoved.addVelocity(builder, this.cursorKeys['up'].isDown);
         Event.PlayerMoved.addAngularVelocity(builder, this.cursorKeys['right'].isDown - this.cursorKeys['left'].isDown);

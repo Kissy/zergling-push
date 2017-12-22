@@ -58,21 +58,6 @@ Event.TimeSyncResponse.prototype.time = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.TimeSyncResponse.prototype.mutate_time = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.TimeSyncResponse.prototype.serverTime = function() {
@@ -81,41 +66,11 @@ Event.TimeSyncResponse.prototype.serverTime = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.TimeSyncResponse.prototype.mutate_serverTime = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @returns {number}
  */
 Event.TimeSyncResponse.prototype.serverStartTime = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.TimeSyncResponse.prototype.mutate_serverStartTime = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
 };
 
 /**

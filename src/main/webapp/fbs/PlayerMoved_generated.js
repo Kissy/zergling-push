@@ -67,117 +67,50 @@ Event.PlayerMoved.prototype.time = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
+ * @returns {number}
  */
-Event.PlayerMoved.prototype.mutate_time = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
+Event.PlayerMoved.prototype.duration = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
 
 /**
  * @returns {number}
  */
 Event.PlayerMoved.prototype.sequence = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerMoved.prototype.mutate_sequence = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
  * @returns {number}
  */
 Event.PlayerMoved.prototype.velocity = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.readInt8(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerMoved.prototype.mutate_velocity = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeInt8(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
  * @returns {number}
  */
 Event.PlayerMoved.prototype.angularVelocity = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.readInt8(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} value
- * @returns {boolean}
- */
-Event.PlayerMoved.prototype.mutate_angularVelocity = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeInt8(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
  * @returns {boolean}
  */
 Event.PlayerMoved.prototype.firing = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? !!this.bb.readInt8(this.bb_pos + offset) : false;
-};
-
-/**
- * @param {boolean} value
- * @returns {boolean}
- */
-Event.PlayerMoved.prototype.mutate_firing = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeInt8(this.bb_pos + offset, value);
-  return true;
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerMoved.startPlayerMoved = function(builder) {
-  builder.startObject(6);
+  builder.startObject(7);
 };
 
 /**
@@ -198,10 +131,18 @@ Event.PlayerMoved.addTime = function(builder, time) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {number} duration
+ */
+Event.PlayerMoved.addDuration = function(builder, duration) {
+  builder.addFieldFloat32(2, duration, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {number} sequence
  */
 Event.PlayerMoved.addSequence = function(builder, sequence) {
-  builder.addFieldInt32(2, sequence, 0);
+  builder.addFieldInt32(3, sequence, 0);
 };
 
 /**
@@ -209,7 +150,7 @@ Event.PlayerMoved.addSequence = function(builder, sequence) {
  * @param {number} velocity
  */
 Event.PlayerMoved.addVelocity = function(builder, velocity) {
-  builder.addFieldInt8(3, velocity, 0);
+  builder.addFieldInt8(4, velocity, 0);
 };
 
 /**
@@ -217,7 +158,7 @@ Event.PlayerMoved.addVelocity = function(builder, velocity) {
  * @param {number} angularVelocity
  */
 Event.PlayerMoved.addAngularVelocity = function(builder, angularVelocity) {
-  builder.addFieldInt8(4, angularVelocity, 0);
+  builder.addFieldInt8(5, angularVelocity, 0);
 };
 
 /**
@@ -225,7 +166,7 @@ Event.PlayerMoved.addAngularVelocity = function(builder, angularVelocity) {
  * @param {boolean} firing
  */
 Event.PlayerMoved.addFiring = function(builder, firing) {
-  builder.addFieldInt8(5, +firing, +false);
+  builder.addFieldInt8(6, +firing, +false);
 };
 
 /**

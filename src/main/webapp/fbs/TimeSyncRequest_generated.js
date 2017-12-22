@@ -58,21 +58,6 @@ Event.TimeSyncRequest.prototype.time = function() {
 };
 
 /**
- * @param {number} value
- * @returns {boolean}
- */
-Event.TimeSyncRequest.prototype.mutate_time = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-
-  if (offset === 0) {
-    return false;
-  }
-
-  this.bb.writeUint32(this.bb_pos + offset, value);
-  return true;
-};
-
-/**
  * @param {flatbuffers.Builder} builder
  */
 Event.TimeSyncRequest.startTimeSyncRequest = function(builder) {

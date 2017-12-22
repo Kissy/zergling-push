@@ -10,33 +10,30 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class PlayerMoved extends Table {
   public static PlayerMoved getRootAsPlayerMoved(ByteBuffer _bb) { return getRootAsPlayerMoved(_bb, new PlayerMoved()); }
-  public static PlayerMoved getRootAsPlayerMoved(ByteBuffer _bb, PlayerMoved obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static PlayerMoved getRootAsPlayerMoved(ByteBuffer _bb, PlayerMoved obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean PlayerMovedBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "PLMV"); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
-  public PlayerMoved __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public PlayerMoved __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public String id() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer idAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
-  public long time() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public boolean mutateTime(long time) { int o = __offset(6); if (o != 0) { bb.putInt(o + bb_pos, (int)time); return true; } else { return false; } }
-  public long sequence() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public boolean mutateSequence(long sequence) { int o = __offset(8); if (o != 0) { bb.putInt(o + bb_pos, (int)sequence); return true; } else { return false; } }
-  public byte velocity() { int o = __offset(10); return o != 0 ? bb.get(o + bb_pos) : 0; }
-  public boolean mutateVelocity(byte velocity) { int o = __offset(10); if (o != 0) { bb.put(o + bb_pos, velocity); return true; } else { return false; } }
-  public byte angularVelocity() { int o = __offset(12); return o != 0 ? bb.get(o + bb_pos) : 0; }
-  public boolean mutateAngularVelocity(byte angularVelocity) { int o = __offset(12); if (o != 0) { bb.put(o + bb_pos, angularVelocity); return true; } else { return false; } }
-  public boolean firing() { int o = __offset(14); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
-  public boolean mutateFiring(boolean firing) { int o = __offset(14); if (o != 0) { bb.put(o + bb_pos, (byte)(firing ? 1 : 0)); return true; } else { return false; } }
+  public long time() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public float duration() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public long sequence() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public byte velocity() { int o = __offset(12); return o != 0 ? bb.get(o + bb_pos) : 0; }
+  public byte angularVelocity() { int o = __offset(14); return o != 0 ? bb.get(o + bb_pos) : 0; }
+  public boolean firing() { int o = __offset(16); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createPlayerMoved(FlatBufferBuilder builder,
       int idOffset,
       long time,
+      float duration,
       long sequence,
       byte velocity,
       byte angularVelocity,
       boolean firing) {
-    builder.startObject(6);
+    builder.startObject(7);
     PlayerMoved.addSequence(builder, sequence);
+    PlayerMoved.addDuration(builder, duration);
     PlayerMoved.addTime(builder, time);
     PlayerMoved.addId(builder, idOffset);
     PlayerMoved.addFiring(builder, firing);
@@ -45,13 +42,14 @@ public final class PlayerMoved extends Table {
     return PlayerMoved.endPlayerMoved(builder);
   }
 
-  public static void startPlayerMoved(FlatBufferBuilder builder) { builder.startObject(6); }
+  public static void startPlayerMoved(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
-  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(1, (int)time, (int)0L); }
-  public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(2, (int)sequence, (int)0L); }
-  public static void addVelocity(FlatBufferBuilder builder, byte velocity) { builder.addByte(3, velocity, 0); }
-  public static void addAngularVelocity(FlatBufferBuilder builder, byte angularVelocity) { builder.addByte(4, angularVelocity, 0); }
-  public static void addFiring(FlatBufferBuilder builder, boolean firing) { builder.addBoolean(5, firing, false); }
+  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(1, (int)time, 0); }
+  public static void addDuration(FlatBufferBuilder builder, float duration) { builder.addFloat(2, duration, 0.0f); }
+  public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(3, (int)sequence, 0); }
+  public static void addVelocity(FlatBufferBuilder builder, byte velocity) { builder.addByte(4, velocity, 0); }
+  public static void addAngularVelocity(FlatBufferBuilder builder, byte angularVelocity) { builder.addByte(5, angularVelocity, 0); }
+  public static void addFiring(FlatBufferBuilder builder, boolean firing) { builder.addBoolean(6, firing, false); }
   public static int endPlayerMoved(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

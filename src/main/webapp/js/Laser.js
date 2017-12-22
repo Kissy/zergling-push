@@ -22,9 +22,9 @@
     };
 
     Laser.prototype.reset = function(event) {
-        Object.getPrototypeOf(Laser.prototype).reset.call(this, event.x(), event.y());
+        Object.getPrototypeOf(Laser.prototype).reset.call(this, event.snapshot().x(), event.snapshot().y());
         this.id = event.id();
-        this.rotation = event.rotation();
+        this.rotation = event.snapshot().rotation();
         _game.physics.arcade.velocityFromRotation(event.rotation() - Math.PI / 2, _laserFullVelocity, this.body.velocity);
     };
 

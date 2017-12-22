@@ -15,15 +15,13 @@
  */
 package fr.kissy.zergling_push.infrastructure;
 
-import Event.PlayerConnected;
-import Event.PlayerLeaved;
-import Event.TimeSyncRequest;
-import Event.TimeSyncResponse;
+import Event.*;
 import com.google.flatbuffers.FlatBufferBuilder;
 import fr.kissy.zergling_push.MainLoop;
 import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
+import fr.kissy.zergling_push.model.World;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -32,25 +30,27 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
+public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
     private static final int STARTING_X = 1920 / 2;
     private static final int STARTING_Y = 960 / 2;
     private static final int STARTING_ROTATION = 0;
 
+    private World world;
     private ArrayBlockingQueue<PlayerMessage> messagesQueue;
 
-    public BinaryWebSocketFrameHandler(ArrayBlockingQueue<PlayerMessage> messagesQueue) {
+    public FlatBufferMessageHandler(World world, ArrayBlockingQueue<PlayerMessage> messagesQueue) {
+        this.world = world;
         this.messagesQueue = messagesQueue;
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
+        // TODO replace with a real connect message & button
         if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
             ctx.channel().writeAndFlush(createPlayerConnectedMessage(ctx.channel()));
         }
@@ -59,15 +59,21 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        messagesQueue.add(new PlayerMessage(ctx.channel(), createPlayerLeavedMessage(ctx.channel())));
+        world.playerLeaved(ctx.channel());
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame frame) throws Exception {
         ByteBuf message = frame.content();
-        if (TimeSyncRequest.TimeSyncRequestBufferHasIdentifier(message.nioBuffer())) {
-            TimeSyncRequest timeSyncRequest = TimeSyncRequest.getRootAsTimeSyncRequest(message.nioBuffer());
+        ByteBuffer byteBuffer = message.nioBuffer();
+        // TODO only make one time sync request ?
+        if (TimeSyncRequest.TimeSyncRequestBufferHasIdentifier(byteBuffer)) {
+            TimeSyncRequest timeSyncRequest = TimeSyncRequest.getRootAsTimeSyncRequest(byteBuffer);
             ctx.writeAndFlush(createTimeSyncResponse(timeSyncRequest));
+        } else if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
+            world.getPlayer(ctx.channel().id()).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
+        } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
+            world.playerJoined(ctx.channel(), PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         } else {
             messagesQueue.add(new PlayerMessage(ctx.channel(), message));
         }
@@ -75,8 +81,6 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
 
     private BinaryWebSocketFrame createTimeSyncResponse(TimeSyncRequest timeSyncRequest) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        /*System.out.println("serverTime : " + MainLoop.serverTime + ", serverStartTime :" + MainLoop.serverStartTime + " time : " + (System.currentTimeMillis() - startOfDayMilli())
-        + ", referenceTime " + startOfDayMilli());*/
         int offset = TimeSyncResponse.createTimeSyncResponse(fbb, timeSyncRequest.time(), MainLoop.serverTime, MainLoop.serverStartTime);
         TimeSyncResponse.finishTimeSyncResponseBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
@@ -102,7 +106,4 @@ public class BinaryWebSocketFrameHandler extends SimpleChannelInboundHandler<Bin
         return Unpooled.wrappedBuffer(fbb.dataBuffer());
     }
 
-    private static long startOfDayMilli() {
-        return LocalDate.now().atStartOfDay().toInstant(ZoneOffset.ofHours(1)).toEpochMilli();
-    }
 }

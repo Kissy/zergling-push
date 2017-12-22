@@ -7,12 +7,14 @@ import Event.PlayerSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by Guillaume on 19/01/2017.
@@ -31,6 +33,7 @@ public class Player {
     private static final int _playerHeight = 38;
     private static final double _moduloRadian = 2 * Math.PI;
 
+    private Channel channel;
     private String id;
     private String name;
     private double x;
@@ -43,14 +46,17 @@ public class Player {
     private double nextFiringTime = 0;
     private Queue<PlayerMoved> playerMovedEvents;
 
-    public Player(PlayerJoined event, List<Laser> shots) {
+    public Player(Channel channel, PlayerJoined event, List<Laser> shots) {
+        this.channel = channel;
         this.id = event.id();
         this.name = event.name();
-        this.x = event.x();
-        this.y = event.y();
+        this.x = 200; // TODO
+        this.y = 200;
+        this.rotation = event.snapshot().rotation();
         this.shots = shots;
         this.newShots = new ArrayList<>();
-        this.playerMovedEvents = new ArrayDeque<>();
+        this.playerMovedEvents = new LinkedBlockingDeque<>();
+        this.channel.writeAndFlush(new BinaryWebSocketFrame(createPlayerJoined()));
     }
 
     public void moved(PlayerMoved event) {
@@ -62,27 +68,17 @@ public class Player {
 //        this.shots.add(new Laser(this, event.x(), event.y(), event.rotation()));
     }
 
-    public boolean update(double serverTime, double deltaTime) {
+    public boolean update(double deltaTime) {
         boolean playerMoved = !playerMovedEvents.isEmpty();
-
-        /*if (playerMovedEvents.size() != 0) {
-            long eventTime = playerMovedEvents.peek().time();
-            if (eventTime < serverTime - deltaTime) {
-                System.out.println("NORMAL ServerTime " + (serverTime - deltaTime) + "/" + serverTime + " vs " + eventTime);
-            } else if (eventTime > serverTime) {
-                System.out.println("BAD ServerTime " + (serverTime - deltaTime) + "/" + serverTime + " vs " + eventTime);
-            } else {
-                System.out.println("GOOD ServerTime " + (serverTime - deltaTime) + "/" + serverTime + " vs " + eventTime);
-            }
-        }*/
-
         while (!playerMovedEvents.isEmpty()) {
+            // TODO handle input sequence
             PlayerMoved event = playerMovedEvents.poll();
-            this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * deltaTime)) % _moduloRadian;
-            this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * deltaTime;
-            this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * deltaTime;
+            this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * event.duration())) % _moduloRadian;
+            this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * event.duration();
+            this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
 
-            if (event.firing()) {
+            // TODO handle shots differently
+            /*if (event.firing()) {
                 if (serverTime >= nextFiringTime) {
                     System.out.println(event.time() + " vs  " + serverTime);
                     this.nextFiringTime = serverTime + FIRE_RATE_MS;
@@ -92,7 +88,7 @@ public class Player {
                     laser.update(serverTime - event.time());
                     this.newShots.add(laser);
                 }
-            }
+            }*/
 
             this.lastInputSequence = event.sequence();
         }
@@ -113,7 +109,8 @@ public class Player {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
         int idOffset = fbb.createString(id);
         int nameOffset = fbb.createString(name);
-        int offset = PlayerJoined.createPlayerJoined(fbb, idOffset, (int) new Date().getTime(), nameOffset, (float) x, (float) y, (float) rotation);
+        int snapshotOffset = createPlayerSnapshotOffset(fbb);
+        int offset = PlayerJoined.createPlayerJoined(fbb, idOffset, (int) new Date().getTime(), nameOffset, snapshotOffset);
         PlayerJoined.finishPlayerJoinedBuffer(fbb, offset);
         return Unpooled.wrappedBuffer(fbb.dataBuffer());
     }

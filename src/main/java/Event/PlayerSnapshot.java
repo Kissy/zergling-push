@@ -10,23 +10,18 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class PlayerSnapshot extends Table {
   public static PlayerSnapshot getRootAsPlayerSnapshot(ByteBuffer _bb) { return getRootAsPlayerSnapshot(_bb, new PlayerSnapshot()); }
-  public static PlayerSnapshot getRootAsPlayerSnapshot(ByteBuffer _bb, PlayerSnapshot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static PlayerSnapshot getRootAsPlayerSnapshot(ByteBuffer _bb, PlayerSnapshot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean PlayerSnapshotBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "PLSP"); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
-  public PlayerSnapshot __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public PlayerSnapshot __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public String id() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer idAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
-  public long sequence() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public boolean mutateSequence(long sequence) { int o = __offset(6); if (o != 0) { bb.putInt(o + bb_pos, (int)sequence); return true; } else { return false; } }
+  public long sequence() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
   public float x() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateX(float x) { int o = __offset(8); if (o != 0) { bb.putFloat(o + bb_pos, x); return true; } else { return false; } }
   public float y() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateY(float y) { int o = __offset(10); if (o != 0) { bb.putFloat(o + bb_pos, y); return true; } else { return false; } }
   public float rotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  public boolean mutateRotation(float rotation) { int o = __offset(12); if (o != 0) { bb.putFloat(o + bb_pos, rotation); return true; } else { return false; } }
   public Event.PlayerShotSnapshot shots(int j) { return shots(new Event.PlayerShotSnapshot(), j); }
-  public Event.PlayerShotSnapshot shots(Event.PlayerShotSnapshot obj, int j) { int o = __offset(14); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public Event.PlayerShotSnapshot shots(Event.PlayerShotSnapshot obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int shotsLength() { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; }
 
   public static int createPlayerSnapshot(FlatBufferBuilder builder,
@@ -48,7 +43,7 @@ public final class PlayerSnapshot extends Table {
 
   public static void startPlayerSnapshot(FlatBufferBuilder builder) { builder.startObject(6); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
-  public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(1, (int)sequence, (int)0L); }
+  public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(1, (int)sequence, 0); }
   public static void addX(FlatBufferBuilder builder, float x) { builder.addFloat(2, x, 0.0f); }
   public static void addY(FlatBufferBuilder builder, float y) { builder.addFloat(3, y, 0.0f); }
   public static void addRotation(FlatBufferBuilder builder, float rotation) { builder.addFloat(4, rotation, 0.0f); }
