@@ -64,18 +64,18 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame frame) throws Exception {
-        ByteBuf message = frame.content();
-        ByteBuffer byteBuffer = message.nioBuffer();
+        ByteBuf content = frame.content();
+        ByteBuffer byteBuffer = content.nioBuffer();
         // TODO only make one time sync request ?
         if (TimeSyncRequest.TimeSyncRequestBufferHasIdentifier(byteBuffer)) {
             TimeSyncRequest timeSyncRequest = TimeSyncRequest.getRootAsTimeSyncRequest(byteBuffer);
             ctx.writeAndFlush(createTimeSyncResponse(timeSyncRequest));
         } else if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
-            world.getPlayer(ctx.channel().id()).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
+            world.getPlayer(ctx.channel().id()).moved(content);
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
             world.playerJoined(ctx.channel(), PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         } else {
-            messagesQueue.add(new PlayerMessage(ctx.channel(), message));
+            //messagesQueue.add(new PlayerMessage(ctx.channel(), message));
         }
     }
 

@@ -101,10 +101,10 @@ public class MainLoop implements Runnable {
         ByteBuffer byteBuffer = playerMessage.getMessage().nioBuffer();
         /*if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
             players.get(player).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
-        } else*/ if (PlayerShot.PlayerShotBufferHasIdentifier(byteBuffer)) {
+        } else if (PlayerShot.PlayerShotBufferHasIdentifier(byteBuffer)) {
             PlayerShot shot = PlayerShot.getRootAsPlayerShot(byteBuffer);
-            players.get(player).shot(shot);
-        } else if (PlayerLeaved.PlayerLeavedBufferHasIdentifier(byteBuffer)) {
+            //players.get(player).shot(shot);
+        } else*/ if (PlayerLeaved.PlayerLeavedBufferHasIdentifier(byteBuffer)) {
             players.remove(player);
             allPlayers.remove(player);
             allPlayers.writeAndFlush(new BinaryWebSocketFrame(playerMessage.getMessage()));

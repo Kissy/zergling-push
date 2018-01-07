@@ -43,15 +43,16 @@ public class Player {
     private List<Laser> newShots;
     private int shields = 3;
     private long lastInputSequence = 0;
-    private double nextFiringTime = 0;
-    private Queue<PlayerMoved> playerMovedEvents;
+    private double lastFiringTime = 0;
+    // TODO Release on delete player
+    private Queue<ByteBuf> playerMovedEvents;
 
     public Player(Channel channel, PlayerJoined event, List<Laser> shots) {
         this.channel = channel;
         this.id = event.id();
         this.name = event.name();
-        this.x = 200; // TODO
-        this.y = 200;
+        this.x = 500; // TODO
+        this.y = 400;
         this.rotation = event.snapshot().rotation();
         this.shots = shots;
         this.newShots = new ArrayList<>();
@@ -59,48 +60,40 @@ public class Player {
         this.channel.writeAndFlush(new BinaryWebSocketFrame(createPlayerJoined()));
     }
 
-    public void moved(PlayerMoved event) {
+    public void moved(ByteBuf event) {
+        event.retain();
         playerMovedEvents.add(event);
     }
 
-    public void shot(PlayerShot event) {
-        // Check validity ?
-//        this.shots.add(new Laser(this, event.x(), event.y(), event.rotation()));
-    }
-
     public boolean update(double deltaTime) {
-        boolean playerMoved = !playerMovedEvents.isEmpty();
-        while (!playerMovedEvents.isEmpty()) {
-            // TODO handle input sequence
-            PlayerMoved event = playerMovedEvents.poll();
-            this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * event.duration())) % _moduloRadian;
-            this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * event.duration();
-            this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
-
-            // TODO handle shots differently
-            /*if (event.firing()) {
-                if (serverTime >= nextFiringTime) {
-                    System.out.println(event.time() + " vs  " + serverTime);
-                    this.nextFiringTime = serverTime + FIRE_RATE_MS;
-                    double shotX = this.x + _playerWidth * Math.sin(this.rotation);
-                    double shotY = this.y - _playerHeight * Math.cos(this.rotation);
-                    Laser laser = new Laser(this, String.valueOf(event.sequence()), (float) shotX, (float) shotY, this.rotation);
-                    laser.update(serverTime - event.time());
-                    this.newShots.add(laser);
-                }
-            }*/
-
-            this.lastInputSequence = event.sequence();
-        }
-
-        // Detect collision
-        if (playerMoved) {
-            this.x = clamp(this.x, 0, 1920);
-            this.y = clamp(this.y, 0, 960);
-        }
-
         this.shots.forEach(shot -> shot.update(deltaTime));
         this.shots.removeIf(Laser::expired);
+
+        while (!playerMovedEvents.isEmpty()) {
+            // TODO handle input sequence
+
+            ByteBuf content = playerMovedEvents.poll();
+            PlayerMoved event = PlayerMoved.getRootAsPlayerMoved(content.nioBuffer());
+            this.lastFiringTime += event.duration();
+            this.lastInputSequence = event.sequence();
+
+            if (event.angularVelocity() != 0) {
+                this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * event.duration())) % _moduloRadian;
+            }
+            if (event.velocity() != 0) {
+                this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * event.duration();
+                this.x = clamp(this.x, 0, 1920);
+                this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
+                this.y = clamp(this.y, 0, 960);
+            }
+            content.release();
+
+            if (event.firing() && lastFiringTime > FIRE_RATE_MS) {
+                System.out.println("shot");
+                shot();
+            }
+
+        }
 
         return false;
     }
@@ -121,7 +114,6 @@ public class Player {
         for (Laser laser : newShots) {
             newShotsOffsets.add(laser.createPlayerShotSnapshotOffset(fbb));
         }
-        shots.addAll(newShots);
         newShots.clear();
         int playerShotsVectorOffset = PlayerSnapshot.createShotsVector(fbb, newShotsOffsets.stream().mapToInt(i -> i).toArray());
         return PlayerSnapshot.createPlayerSnapshot(fbb, idOffset, this.lastInputSequence, (float) x, (float) y, (float) rotation, playerShotsVectorOffset);
@@ -163,6 +155,15 @@ public class Player {
 
     public List<Laser> getShots() {
         return shots;
+    }
+
+    private void shot() {
+        float shotX = (float) (this.x + _playerWidth * Math.sin(this.rotation));
+        float shotY = (float) (this.y - _playerHeight * Math.cos(this.rotation));
+        Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation);
+        this.shots.add(laser);
+        this.newShots.add(laser); // TODO create shot snapshot
+        this.lastFiringTime = 0;
     }
 
     private double clamp(double value, double min, double max) {

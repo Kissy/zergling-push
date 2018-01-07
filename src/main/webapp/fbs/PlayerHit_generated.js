@@ -51,7 +51,7 @@ Event.PlayerHit.bufferHasIdentifier = function(bb) {
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
- * @returns {string|Uint8Array}
+ * @returns {string|Uint8Array|null}
  */
 Event.PlayerHit.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
@@ -68,7 +68,7 @@ Event.PlayerHit.prototype.time = function() {
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
- * @returns {string|Uint8Array}
+ * @returns {string|Uint8Array|null}
  */
 Event.PlayerHit.prototype.shot = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 8);

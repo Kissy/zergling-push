@@ -10,11 +10,12 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class TimeSyncRequest extends Table {
   public static TimeSyncRequest getRootAsTimeSyncRequest(ByteBuffer _bb) { return getRootAsTimeSyncRequest(_bb, new TimeSyncRequest()); }
-  public static TimeSyncRequest getRootAsTimeSyncRequest(ByteBuffer _bb, TimeSyncRequest obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static TimeSyncRequest getRootAsTimeSyncRequest(ByteBuffer _bb, TimeSyncRequest obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean TimeSyncRequestBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "TSRQ"); }
-  public TimeSyncRequest __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public TimeSyncRequest __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createTimeSyncRequest(FlatBufferBuilder builder,
       long time) {
@@ -24,7 +25,7 @@ public final class TimeSyncRequest extends Table {
   }
 
   public static void startTimeSyncRequest(FlatBufferBuilder builder) { builder.startObject(1); }
-  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, 0); }
+  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, (int)0L); }
   public static int endTimeSyncRequest(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

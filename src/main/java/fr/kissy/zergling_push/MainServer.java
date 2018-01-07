@@ -32,7 +32,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -64,7 +68,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class MainServer {
 
+    //public static final long TICK_RATE = 1000L / 30L;
     public static final long TICK_RATE = 1000L / 30L;
+    public static final String WEBSOCKET_PATH = "/websocket";
 
     public static void main(String[] args) throws Exception {
         new MainServer().run();
@@ -95,11 +101,14 @@ public class MainServer {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast("http-decoder", new HttpServerCodec());
                             pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
-                            pipeline.addLast("websocket-encoder", new WebSocketServerProtocolHandler("/websocket", null, true));
+                            pipeline.addLast("websocket-compression", new WebSocketServerCompressionHandler());
+                            pipeline.addLast("websocket-protocol", new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
                             pipeline.addLast(executorGroup,"flatbuffer-message", new FlatBufferMessageHandler(world, messagesQueue));
                             pipeline.addLast("http-server", new HttpStaticFileServerHandler());
                         }
-                    });
+                    })
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
             final Channel ch = sb.bind(8080).sync().channel();
             ch.closeFuture().sync();
         } catch (Exception e) {

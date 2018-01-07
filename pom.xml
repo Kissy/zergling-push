@@ -13,12 +13,12 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.6.Final</version>
+            <version>4.1.19.Final</version>
         </dependency>
         <dependency>
-            <groupId>com.github.davidmoten</groupId>
+            <groupId>com.google.flatbuffers</groupId>
             <artifactId>flatbuffers-java</artifactId>
-            <version>1.4.0.1</version>
+            <version>1.8.0</version>
         </dependency>
 
         <dependency>

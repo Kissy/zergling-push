@@ -23,9 +23,10 @@
     };
     RemotePlayer.prototype.update = function update() {
         // Object.getPrototypeOf(RemotePlayer.prototype).update.call(this);
-        // TODO initialize snapshot
+
 
         // Snapshot is expired
+        /*
         if (this.targetSnapshot == null || this.game.time.clientTime >= this.targetSnapshot.time) {
             for (var i = 0; i < this.snapshots.length - 1; i++) {
                 var snapshot = this.snapshots[i];
@@ -60,6 +61,7 @@
                 }
             }
         }
+        */
     };
     // RemotePlayer.prototype.processSnapshot = function processSnapshot(event) {
     //     Object.getPrototypeOf(RemotePlayer.prototype).processSnapshot.call(this, event);

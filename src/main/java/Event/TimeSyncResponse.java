@@ -10,13 +10,14 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class TimeSyncResponse extends Table {
   public static TimeSyncResponse getRootAsTimeSyncResponse(ByteBuffer _bb) { return getRootAsTimeSyncResponse(_bb, new TimeSyncResponse()); }
-  public static TimeSyncResponse getRootAsTimeSyncResponse(ByteBuffer _bb, TimeSyncResponse obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static TimeSyncResponse getRootAsTimeSyncResponse(ByteBuffer _bb, TimeSyncResponse obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean TimeSyncResponseBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "TSRS"); }
-  public TimeSyncResponse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public TimeSyncResponse __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
-  public long serverTime() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
-  public long serverStartTime() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long time() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public long serverTime() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public long serverStartTime() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createTimeSyncResponse(FlatBufferBuilder builder,
       long time,
@@ -30,9 +31,9 @@ public final class TimeSyncResponse extends Table {
   }
 
   public static void startTimeSyncResponse(FlatBufferBuilder builder) { builder.startObject(3); }
-  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, 0); }
-  public static void addServerTime(FlatBufferBuilder builder, long serverTime) { builder.addInt(1, (int)serverTime, 0); }
-  public static void addServerStartTime(FlatBufferBuilder builder, long serverStartTime) { builder.addInt(2, (int)serverStartTime, 0); }
+  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(0, (int)time, (int)0L); }
+  public static void addServerTime(FlatBufferBuilder builder, long serverTime) { builder.addInt(1, (int)serverTime, (int)0L); }
+  public static void addServerStartTime(FlatBufferBuilder builder, long serverStartTime) { builder.addInt(2, (int)serverStartTime, (int)0L); }
   public static int endTimeSyncResponse(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

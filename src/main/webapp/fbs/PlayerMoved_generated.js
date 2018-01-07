@@ -51,7 +51,7 @@ Event.PlayerMoved.bufferHasIdentifier = function(bb) {
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
- * @returns {string|Uint8Array}
+ * @returns {string|Uint8Array|null}
  */
 Event.PlayerMoved.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);

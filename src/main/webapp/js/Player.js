@@ -2,36 +2,19 @@
     function Player(event, texture) {
         Phaser.Sprite.call(this, _game, event.x(), event.y(), texture);
 
-        this.id = event.id();
-        this.shields = 3;
-        this.inputQueue = []; // Should be be useful only for controlled
-        this.snapshots = [event];
-        this.lastSnapshotTime = 0;
+        this.name = event.id();
+        this.anchor.set(0.5);
+
+        // TODO set in RemoteObject class
+        this.snapshot = null;
+
         this.shots = _game.add.group();
         this.shots.enableBody = true;
         this.shots.physicsBodyType = Phaser.Physics.ARCADE;
         for (var i = 0; i < 20; i++) {
             this.shots.add(new Laser(this, null));
         }
-
-        this.anchor.set(0.5);
-
-        this.forwardVelocity = 0;
-        this.residualVelocity = 0;
-
-        // this.x = event.x() + this.width / 2;
-        // this.y = event.y() + this.height / 2;
-
-        /*this.avatarSprite = ;
-        this.avatarSprite.anchor.set(0.5, 0.5);
-        this.avatarSprite.rotation = event.rotation();
-        this.sprite.addChild(this.avatarSprite);*/
-        /*var textX = - (50 / 2);
-        var textY = - (_playerHeight + 20 / _scale + _playerNameSpriteYOffset);
-        this.nameSprite = new Phaser.Text(_game, textX, textY, event.name(), {font: "15px Arial", fill: "#F7531C"});
-        this.nameSprite.alpha = 0.4;
-        this.sprite.addChild(this.nameSprite);*/
-
+        this.shields = 3;
         _game.add.existing(this);
     }
 
@@ -43,8 +26,37 @@
     Player.prototype.hit = function hit(event) {
         this.shields--;
     };
-    Player.prototype.update = function update() {
-        // this.applyInputQueue();
+    Player.prototype.updateSnapshot = function updateSnapshot(playerSnapshot) {
+        this.snapshot = playerSnapshot;
+    };
+    Player.prototype.update = function update(deltaTime) {
+        // Network reconciliation
+        // TODO initialize snapshot when creating object
+        if (this.snapshot && this.snapshot.target) {
+            var currentSnapshot = this.snapshot.current;
+            var targetSnapshot = this.snapshot.target;
+            // Use linear interpolation in Phaser.Math
+            var timePoint = (this.game.time.clientTime - currentSnapshot.time) / (targetSnapshot.time - currentSnapshot.time);
+            var angleDifference = targetSnapshot.rotation() - currentSnapshot.rotation();
+            // TODO find something in Phaser.Math
+            if (angleDifference < -Math.PI) {
+                angleDifference += 2 * Math.PI;
+            } else if (angleDifference > Math.PI) {
+                angleDifference -= 2 * Math.PI;
+            }
+            this.rotation = currentSnapshot.rotation() + angleDifference * timePoint;
+            this.x = Phaser.Math.linear(currentSnapshot.x(), targetSnapshot.x(), timePoint);
+            this.y = Phaser.Math.linear(currentSnapshot.y(), targetSnapshot.y(), timePoint);
+
+            // Shots
+            for (var p = 0; p < targetSnapshot.shotsLength(); p++) {
+                var playerShotSnapshot = targetSnapshot.shots(p);
+                var shot = this.shots.getFirstExists(false);
+                if (shot) {
+                    shot.reset(playerShotSnapshot);
+                }
+            }
+        }
 
         // this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
         // var currentVelocity = (this.forwardVelocity + this.residualVelocity);
@@ -53,35 +65,13 @@
         // this.x += xVelocity * _game.time.physicsElapsed;
         // this.y -= yVelocity * _game.time.physicsElapsed;
     };
-    Player.prototype.processSnapshot = function processSnapshot(event) {
-        this.lastSnapshotTime = event.time;
-
-        // TODO remove only when current snapshot is expired
-        for (var j = this.snapshots.length - 1; j >= 0; j--) {
-            if (this.snapshots[j].time < this.game.time.clientTime) {
-                this.snapshots.splice(0, Math.max(j - 1, 0));
-                break;
-            }
+    Player.prototype.debug = function debug() {
+        if (this.snapshot && this.snapshot.current && this.snapshot.target) {
+            _game.debug.geom(new Phaser.Rectangle(this.snapshot.target.x() - (this.width / 2),
+                this.snapshot.target.y() - (this.height / 2), this.width, this.height), "green", false);
+            _game.debug.geom(new Phaser.Rectangle(this.snapshot.current.x() - (this.width / 2),
+                this.snapshot.current.y() - (this.height / 2), this.width, this.height), "red", false);
         }
-
-        for (var i = this.snapshots.length - 1; i >= 0; i--) {
-            if (this.snapshots[i].time < event.time) {
-                this.snapshots.splice(i + 1, 0, event);
-                break;
-            }
-        }
-
-        // TODO create player with initial snapshot instead of this
-        if (this.snapshots.length === 0) {
-            this.snapshots.push(event)
-        }
-    };
-    Player.prototype.applyInputQueue = function applyInputQueue(event) {
-        // if (this.forwardVelocity != event.velocity()) {
-        //     this.residualVelocity = (1 - event.velocity()) * _playerVelocityFactor;
-        // }
-        // this.forwardVelocity = event.velocity() * _playerVelocityFactor;
-        // this.angularVelocity = event.angularVelocity() * _playerAngularVelocityFactor;
     };
 
     window.Player = Player;

@@ -10,13 +10,14 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class PlayerShot extends Table {
   public static PlayerShot getRootAsPlayerShot(ByteBuffer _bb) { return getRootAsPlayerShot(_bb, new PlayerShot()); }
-  public static PlayerShot getRootAsPlayerShot(ByteBuffer _bb, PlayerShot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public static PlayerShot getRootAsPlayerShot(ByteBuffer _bb, PlayerShot obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public static boolean PlayerShotBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "PLSH"); }
-  public PlayerShot __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public PlayerShot __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public String id() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer idAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
-  public long time() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long time() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public float x() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public float y() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public float rotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
@@ -38,7 +39,7 @@ public final class PlayerShot extends Table {
 
   public static void startPlayerShot(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
-  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(1, (int)time, 0); }
+  public static void addTime(FlatBufferBuilder builder, long time) { builder.addInt(1, (int)time, (int)0L); }
   public static void addX(FlatBufferBuilder builder, float x) { builder.addFloat(2, x, 0.0f); }
   public static void addY(FlatBufferBuilder builder, float y) { builder.addFloat(3, y, 0.0f); }
   public static void addRotation(FlatBufferBuilder builder, float rotation) { builder.addFloat(4, rotation, 0.0f); }

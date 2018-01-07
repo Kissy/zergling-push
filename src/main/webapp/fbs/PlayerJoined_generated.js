@@ -51,7 +51,7 @@ Event.PlayerJoined.bufferHasIdentifier = function(bb) {
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
- * @returns {string|Uint8Array}
+ * @returns {string|Uint8Array|null}
  */
 Event.PlayerJoined.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
@@ -68,7 +68,7 @@ Event.PlayerJoined.prototype.time = function() {
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
- * @returns {string|Uint8Array}
+ * @returns {string|Uint8Array|null}
  */
 Event.PlayerJoined.prototype.name = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 8);
@@ -77,7 +77,7 @@ Event.PlayerJoined.prototype.name = function(optionalEncoding) {
 
 /**
  * @param {Event.PlayerSnapshot=} obj
- * @returns {Event.PlayerSnapshot}
+ * @returns {Event.PlayerSnapshot|null}
  */
 Event.PlayerJoined.prototype.snapshot = function(obj) {
   var offset = this.bb.__offset(this.bb_pos, 10);

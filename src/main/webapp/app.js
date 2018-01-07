@@ -14,7 +14,7 @@ var _playerStartingYPosition;
 var _playerStartingRotation;
 var _playerFireRate;
 var _laserFullVelocity;
-var _remoteClientDelay = 500; // TODO send from server ?
+var _remoteClientDelay = 250; // TODO send from server ?
 
 var _game = new Phaser.Game(_width, _height, Phaser.CANVAS, '',
     {
@@ -42,12 +42,11 @@ var _webSocket;
 var _inputQueue = [];
 var _messageQueue = [];
 var _players = {};
-
+var _world;
 
 function create(game) {
     game.time.ping = 0;
     game.time.latency = 0;
-    console.log(this.game.time);
     // game.world.setBounds(0, 0, _width, _height);
     // game.world.sortDirection = Phaser.Physics.Arcade.SORT_NONE;
 
@@ -56,7 +55,17 @@ function create(game) {
     _webSocket.onmessage = function onWebSocketMessage(response) {
         return processMessage(game, response);
     };
+    game.time.events.loop(1000, function sendTimeSyncRequest() {
+        var timeSyncRequestBuilder = new flatbuffers.Builder();
+        Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
+        Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, game.time.time - _referenceTime);
+        Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
+        _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
+    });
 
+    _world = new World(_game);
+
+    // TODO move to world ?
     var rainParticle = this.game.add.bitmapData(10, 10);
 
     rainParticle.ctx.fillStyle = '#19BBF9';
@@ -93,6 +102,16 @@ function processMessage(game, response) {
         game.time.ping = game.time.time - _referenceTime - event.time();
         game.time.latency = Math.round(game.time.ping / 2);
         game.time.serverStartTime = event.serverTime();
+        // TODO make a world class ?
+        game.time.serverTime = event.serverTime();
+        game.time.localTime = event.serverTime() - game.time.latency;
+        game.time.clientTime = event.serverTime() - _remoteClientDelay;
+    } else if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
+        _world.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
+    } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
+        _world.playerJoined(Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer));
+        //event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
+        //_players[event.id()] = (event.id() === _playerId) ? new ControlledPlayer(event.snapshot()) : new RemotePlayer(event.snapshot());
     } else {
         _messageQueue.push(byteBuffer);
     }
@@ -107,48 +126,19 @@ function update(game) {
     game.time.localTime += game.time.physicsElapsedMS;
     game.time.clientTime += game.time.physicsElapsedMS;
 
+    _world.update();
+
     var i;
 
     // Process messages from server
     for (i = 0; i < _messageQueue.length; i++) {
         var event, byteBuffer = _messageQueue[i];
-        if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
-            event = Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer);
-            // TODO make a world class ?
-            game.time.serverTime = event.time();
-            game.time.localTime = event.time() - game.time.latency;
-            game.time.clientTime = event.time() - _remoteClientDelay;
-            var p;
-            // TODO use group of player
-            for (p = 0; p < event.playersLength(); p++) {
-                var playerSnapshot = event.players(p);
-                if (!_players[playerSnapshot.id()]) {
-                    _players[playerSnapshot.id()] = new RemotePlayer(playerSnapshot);
-                }
-
-                playerSnapshot.time = event.time();
-                _players[playerSnapshot.id()].processSnapshot(playerSnapshot);
-            }
-            var playerIds = Object.keys(_players);
-            if (playerIds.length > event.playersLength()) {
-                playerIds.forEach(function (playerId) {
-                    var player = _players[playerId];
-                    if(player.lastSnapshotTime !== event.time()) {
-                        player.destroy();
-                        delete _players[playerId];
-                    }
-                });
-            }
-        } else if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
+        if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
             _players[event.id()].shot(event);
         } else if (Event.PlayerHit.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerHit.getRootAsPlayerHit(byteBuffer);
             _players[event.id()].hit(event);
-        } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
-            // TODO make player joined only for controlledplayer, others should come from world snapshot
-            event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
-            _players[event.id()] = (event.id() === _playerId) ? new ControlledPlayer(event.snapshot()) : new RemotePlayer(event.snapshot());
         } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
             event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
             console.log("player leaved");
@@ -185,14 +175,6 @@ function update(game) {
             Event.PlayerJoined.addSnapshot(playerJoinedBuilder, playerSnapshotOffset);
             Event.PlayerJoined.finishPlayerJoinedBuffer(playerJoinedBuilder, Event.PlayerJoined.endPlayerJoined(playerJoinedBuilder));
             _inputQueue.push(playerJoinedBuilder.asUint8Array());
-
-            // game.time.events.loop(1000, function sendTimeSyncRequest() {
-            //     var timeSyncRequestBuilder = new flatbuffers.Builder();
-            //     Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
-            //     Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, game.time.time - _referenceTime);
-            //     Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
-            //     _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
-            // });
         } else {
             console.log("Unhandled message");
         }
@@ -219,12 +201,11 @@ function render (game) {
 
     // _game.debug.text("serverTime : " + (_game.time.serverStartTime + _game.time.now), 10, 20);
    // _game.debug.geom(new Phaser.Line(750 - diff, 0, 750 - diff, 40), "#00FFFF");
-    var currentPlayer = _players[_playerId];
-    if (currentPlayer) {
-        game.debug.text("Snapshots : " + (currentPlayer.snapshots.length || '--'), 2, 120, "#00FFFF");
-        for (var k = currentPlayer.inputQueue.length - 1; k >= 0; k--) {
-            // _game.debug.text(currentPlayer.inputQueue[k].sequence, 2, 40 + (20 * k));
-            // _game.debug.geom(currentPlayer.inputQueue[k].sequence, 2, 40 + (20 * k));
-        }
+    game.debug.text("Snapshots : " + (_world.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
+    game.debug.text("Current SS : " + (_world.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
+    if (_world.snapshotList.snapshots[1]) {
+        game.debug.text("Target SS : " + (_world.snapshotList.snapshots[1].time() / 1000 || '--'), 2, 160, "#00FFFF");
     }
+
+    _world.debug();
 }
