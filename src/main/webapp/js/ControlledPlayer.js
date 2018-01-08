@@ -1,10 +1,9 @@
 (function (window) {
     var SAMPLE_INPUT_RATE = 32;
 
-    function ControlledPlayer(event) {
-        Player.call(this, event, 'avatar');
-        /*this.shieldSprite = new PIXI.Sprite(PIXI.loader.resources['shield_silver'].texture);
-         _stage.addChild(this.shieldSprite);*/
+    function ControlledPlayer(game, event) {
+        Player.call(this, game, event, 'avatar');
+
         this.firing = false;
         this.firingTimer = 0;
         this.nextFireTime = 0;
@@ -41,35 +40,33 @@
         // Process inputs and add it to queue
         this.processInputs();
 
-        if (this.snapshot) {
-            for (var i = 0; i < this.inputQueue.length; i++) {
-                var currentInput = this.inputQueue[i];
-                if (currentInput.sequence > this.snapshot.target.sequence()) {
-                    this.inputQueue.splice(0, i);
-                    break;
-                }
+        for (var i = 0; i < this.inputQueue.length; i++) {
+            var currentInput = this.inputQueue[i];
+            if (currentInput.sequence > this.targetSnapshot.sequence()) {
+                this.inputQueue.splice(0, i);
+                break;
             }
+        }
 
-            // Client prediction (apply queued inputs)
-            this.rotation = this.snapshot.target.rotation();
-            this.x = this.snapshot.target.x();
-            this.y = this.snapshot.target.y();
-            for (var j = 0; j < this.inputQueue.length; j++) {
-                var currentInput = this.inputQueue[j];
-                var byteBuffer = new flatbuffers.ByteBuffer(currentInput.event);
-                var currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
-                var duration = currentEvent.duration() / 1000;
-                this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * duration;
-                this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * duration;
-                this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * duration;
+        // Client prediction (apply queued inputs)
+        this.rotation = this.targetSnapshot.rotation();
+        this.x = this.targetSnapshot.x();
+        this.y = this.targetSnapshot.y();
+        for (var j = 0; j < this.inputQueue.length; j++) {
+            var currentInput = this.inputQueue[j];
+            var byteBuffer = new flatbuffers.ByteBuffer(currentInput.event);
+            var currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+            var duration = currentEvent.duration() / 1000;
+            this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * duration;
+            this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * duration;
+            this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * duration;
 
-                // if (currentEvent.firing()) {
-                //     if (_game.time.now > this.nextFireTime) {
-                //         this.nextFireTime = _game.time.now + _playerFireRate;
-                //         this.shots.add(new Laser(this, currentEvent));
-                //     }
-                // }
-            }
+            // if (currentEvent.firing()) {
+            //     if (_game.time.now > this.nextFireTime) {
+            //         this.nextFireTime = _game.time.now + _playerFireRate;
+            //         this.shots.add(new Laser(this, currentEvent));
+            //     }
+            // }
         }
 
         // Detect collision

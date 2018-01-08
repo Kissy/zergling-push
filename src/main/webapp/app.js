@@ -42,7 +42,6 @@ var _webSocket;
 var _inputQueue = [];
 var _messageQueue = [];
 var _players = {};
-var _world;
 
 function create(game) {
     game.time.ping = 0;
@@ -63,7 +62,7 @@ function create(game) {
         _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
     });
 
-    _world = new World(_game);
+    game.remoteWorld = new World(_game);
 
     // TODO move to world ?
     var rainParticle = this.game.add.bitmapData(10, 10);
@@ -107,9 +106,9 @@ function processMessage(game, response) {
         game.time.localTime = event.serverTime() - game.time.latency;
         game.time.clientTime = event.serverTime() - _remoteClientDelay;
     } else if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
-        _world.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
+        game.remoteWorld.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
     } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
-        _world.playerJoined(Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer));
+        game.remoteWorld.playerJoined(Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         //event = Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer);
         //_players[event.id()] = (event.id() === _playerId) ? new ControlledPlayer(event.snapshot()) : new RemotePlayer(event.snapshot());
     } else {
@@ -126,7 +125,7 @@ function update(game) {
     game.time.localTime += game.time.physicsElapsedMS;
     game.time.clientTime += game.time.physicsElapsedMS;
 
-    _world.update();
+    game.remoteWorld.update();
 
     var i;
 
@@ -201,11 +200,11 @@ function render (game) {
 
     // _game.debug.text("serverTime : " + (_game.time.serverStartTime + _game.time.now), 10, 20);
    // _game.debug.geom(new Phaser.Line(750 - diff, 0, 750 - diff, 40), "#00FFFF");
-    game.debug.text("Snapshots : " + (_world.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
-    game.debug.text("Current SS : " + (_world.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
-    if (_world.snapshotList.snapshots[1]) {
-        game.debug.text("Target SS : " + (_world.snapshotList.snapshots[1].time() / 1000 || '--'), 2, 160, "#00FFFF");
+    game.debug.text("Snapshots : " + (game.remoteWorld.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
+    game.debug.text("Current SS : " + (game.remoteWorld.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
+    if (game.remoteWorld.snapshotList.snapshots[1]) {
+        game.debug.text("Target SS : " + (game.remoteWorld.snapshotList.snapshots[1].time() / 1000 || '--'), 2, 160, "#00FFFF");
     }
 
-    _world.debug();
+    game.remoteWorld.debug();
 }
