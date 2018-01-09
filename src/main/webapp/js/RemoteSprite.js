@@ -19,10 +19,8 @@
 
     RemoteSprite.prototype.update = function update(deltaTime) {
         // Network reconciliation
-        // TODO Use linear interpolation in Phaser.Math
-        // TODO calculate from world
-        var angleDifference = Phaser.Math.wrapAngle(this.targetSnapshot.rotation() - this.currentSnapshot.rotation(), true);
-        this.rotation = this.currentSnapshot.rotation() + angleDifference * this.game.remoteWorld.getSnapshotCurrentTime();
+        var targetAngle = Phaser.Math.wrapAngle(this.targetSnapshot.rotation() - this.currentSnapshot.rotation(), true);
+        this.rotation = this.currentSnapshot.rotation() + targetAngle * this.game.remoteWorld.getSnapshotCurrentTime();
         this.x = Phaser.Math.linear(this.currentSnapshot.x(), this.targetSnapshot.x(), this.game.remoteWorld.getSnapshotCurrentTime());
         this.y = Phaser.Math.linear(this.currentSnapshot.y(), this.targetSnapshot.y(), this.game.remoteWorld.getSnapshotCurrentTime());
     };
