@@ -26,12 +26,10 @@
     };
 
     RemoteSprite.prototype.debug = function debug() {
-        if (this.snapshot && this.snapshot.current && this.snapshot.target) {
-            this.game.debug.geom(new Phaser.Rectangle(this.snapshot.target.x() - (this.width / 2),
-                this.snapshot.target.y() - (this.height / 2), this.width, this.height), "green", false);
-            this.game.debug.geom(new Phaser.Rectangle(this.snapshot.current.x() - (this.width / 2),
-                this.snapshot.current.y() - (this.height / 2), this.width, this.height), "red", false);
-        }
+        this.game.debug.geom(new Phaser.Rectangle(this.targetSnapshot.x() - (this.width / 2),
+            this.targetSnapshot.y() - (this.height / 2), this.width, this.height), "green", false);
+        this.game.debug.geom(new Phaser.Rectangle(this.currentSnapshot.x() - (this.width / 2),
+            this.currentSnapshot.y() - (this.height / 2), this.width, this.height), "red", false);
     };
 
     window.RemoteSprite = RemoteSprite;
