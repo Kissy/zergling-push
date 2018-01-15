@@ -20,24 +20,32 @@ import java.util.Map;
 
 public class World {
     private final Map<ChannelId, Player> players;
+    private final List<Laser> lasers;
     private final ChannelGroup allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
 
     public World() {
         this.players = new HashMap<>();
+        this.lasers = new ArrayList<>();
     }
 
     public void update(double deltaTime) {
         players.values().parallelStream().forEach(p -> p.update(deltaTime));
+        lasers.parallelStream().forEach(l -> l.update(deltaTime));
+        lasers.removeIf(Laser::expired);
     }
 
     public void playerJoined(Channel channel, PlayerJoined playerJoined) {
-        players.put(channel.id(), new Player(channel, playerJoined, new ArrayList<>()));
+        players.put(channel.id(), new Player(this, channel, playerJoined, new ArrayList<>()));
         allPlayers.add(channel);
     }
 
     public void playerLeaved(Channel channel) {
         players.remove(channel.id());
         allPlayers.remove(channel);
+    }
+
+    public void playerShot(Laser laser) {
+        lasers.add(laser);
     }
 
     public Player getPlayer(ChannelId id) {

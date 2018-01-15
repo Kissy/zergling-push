@@ -13,22 +13,15 @@ import static fr.kissy.zergling_push.model.Player.MIN_X_Y_VALUE;
 /**
  * Created by Guillaume on 21/01/2017.
  */
-public class Laser {
+public class Laser extends WorldObject {
     public static final float VELOCITY_FACTOR = 1000f;
     public static final float VELOCITY_FACTOR_MS = VELOCITY_FACTOR / 1000f;
     private final Player player;
     private final Set<Player> playersHit;
-    private String id;
-    private double x;
-    private double y;
-    private double rotation;
 
     public Laser(Player player, String id, float x, float y, double rotation) {
+        super(id, x, y, rotation);
         this.player = player;
-        this.id = id;
-        this.x = x;
-        this.y = y;
-        this.rotation = rotation;
         this.playersHit = new HashSet<>();
     }
 

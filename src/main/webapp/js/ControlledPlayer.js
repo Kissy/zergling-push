@@ -119,15 +119,6 @@
         Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
         return builder.asUint8Array();
     };
-    ControlledPlayer.prototype.createPlayerShot = function createPlayerShot() {
-        var builder = new flatbuffers.Builder();
-        var idOffset = builder.createString(this.name + "-" + new Date().getTime());
-        Event.PlayerShot.startPlayerShot(builder);
-        Event.PlayerShot.addId(builder, idOffset);
-        Event.PlayerShot.addTime(builder, this.game.time.serverStartTime + this.game.time.now);
-        Event.PlayerShot.finishPlayerShotBuffer(builder, Event.PlayerShot.endPlayerShot(builder));
-        return builder.asUint8Array();
-    };
 
 
     function clamp(value, min, max) {

@@ -2,7 +2,6 @@ package fr.kissy.zergling_push.model;
 
 import Event.PlayerJoined;
 import Event.PlayerMoved;
-import Event.PlayerShot;
 import Event.PlayerSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
@@ -19,7 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Created by Guillaume on 19/01/2017.
  */
-public class Player {
+public class Player extends WorldObject {
     public static final double VELOCITY_FACTOR = 500f; // pixel par seconds
     public static final double VELOCITY_FACTOR_MS = VELOCITY_FACTOR / 1000f; // pixel par milliseconds
     public static final double ANGULAR_VELOCITY_FACTOR = 180f; // degres par seconds
@@ -33,12 +32,9 @@ public class Player {
     private static final int _playerHeight = 38;
     private static final double _moduloRadian = 2 * Math.PI;
 
+    private World world;
     private Channel channel;
-    private String id;
     private String name;
-    private double x;
-    private double y;
-    private double rotation;
     private List<Laser> shots;
     private List<Laser> newShots;
     private int shields = 3;
@@ -47,13 +43,11 @@ public class Player {
     // TODO Release on delete player
     private Queue<ByteBuf> playerMovedEvents;
 
-    public Player(Channel channel, PlayerJoined event, List<Laser> shots) {
+    public Player(World world, Channel channel, PlayerJoined event, List<Laser> shots) {
+        super(event.id(), 500, 400, event.snapshot().rotation());
+        this.world = world;
         this.channel = channel;
-        this.id = event.id();
         this.name = event.name();
-        this.x = 500; // TODO
-        this.y = 400;
-        this.rotation = event.snapshot().rotation();
         this.shots = shots;
         this.newShots = new ArrayList<>();
         this.playerMovedEvents = new LinkedBlockingDeque<>();
@@ -66,8 +60,6 @@ public class Player {
     }
 
     public boolean update(double deltaTime) {
-        this.shots.forEach(shot -> shot.update(deltaTime));
-        this.shots.removeIf(Laser::expired);
 
         while (!playerMovedEvents.isEmpty()) {
             // TODO handle input sequence
@@ -86,13 +78,11 @@ public class Player {
                 this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
                 this.y = clamp(this.y, 0, 960);
             }
-            content.release();
-
             if (event.firing() && lastFiringTime > FIRE_RATE_MS) {
-                System.out.println("shot");
                 shot();
             }
 
+            content.release();
         }
 
         return false;
@@ -161,8 +151,7 @@ public class Player {
         float shotX = (float) (this.x + _playerWidth * Math.sin(this.rotation));
         float shotY = (float) (this.y - _playerHeight * Math.cos(this.rotation));
         Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation);
-        this.shots.add(laser);
-        this.newShots.add(laser); // TODO create shot snapshot
+        this.world.playerShot(laser);
         this.lastFiringTime = 0;
     }
 
