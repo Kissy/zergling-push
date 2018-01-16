@@ -1,0 +1,12 @@
+namespace Event;
+file_identifier "PJSP";
+
+table ProjectileSnapshot {
+    id: string;
+    x: float;
+    y: float;
+    rotation: float;
+    time: uint;
+}
+
+root_type ProjectileSnapshot;

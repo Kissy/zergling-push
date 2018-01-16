@@ -55,6 +55,7 @@ public class Player extends WorldObject {
     }
 
     public void moved(ByteBuf event) {
+        // TODO maybe apply directly move event ?
         event.retain();
         playerMovedEvents.add(event);
     }
@@ -101,9 +102,6 @@ public class Player extends WorldObject {
     public int createPlayerSnapshotOffset(FlatBufferBuilder fbb) {
         int idOffset = fbb.createString(id);
         List<Integer> newShotsOffsets = new ArrayList<>();
-        for (Laser laser : newShots) {
-            newShotsOffsets.add(laser.createPlayerShotSnapshotOffset(fbb));
-        }
         newShots.clear();
         int playerShotsVectorOffset = PlayerSnapshot.createShotsVector(fbb, newShotsOffsets.stream().mapToInt(i -> i).toArray());
         return PlayerSnapshot.createPlayerSnapshot(fbb, idOffset, this.lastInputSequence, (float) x, (float) y, (float) rotation, playerShotsVectorOffset);
@@ -148,9 +146,10 @@ public class Player extends WorldObject {
     }
 
     private void shot() {
+        System.out.println("shot");
         float shotX = (float) (this.x + _playerWidth * Math.sin(this.rotation));
         float shotY = (float) (this.y - _playerHeight * Math.cos(this.rotation));
-        Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation);
+        Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation, new Date().getTime());
         this.world.playerShot(laser);
         this.lastFiringTime = 0;
     }

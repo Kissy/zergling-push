@@ -1,32 +1,25 @@
-(function (window) {
-    function Laser(player, event) {
-        // Phaser.Sprite.call(this, _game, event.x(), event.y(), 'laser');
-        Phaser.Sprite.call(this, _game, 0, 0, 'laser');
+var ZerglingPush = ZerglingPush || {};
 
-        // this.id = event.id();
-        // this.rotation = event.rotation();
+ZerglingPush.Projectile = function (game, event) {
+    Phaser.Sprite.call(this, game, event.x(), event.y(), 'laser');
+    this.id = event.id();
+    this.name = event.id();
+    this.anchor.set(0.5);
+    this.scale.set(3);
+    this.rotation = event.rotation();
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.checkWorldBounds = true;
+    this.outOfBoundsKill = true;
+    // TODO render with few ms in advance
+    _game.physics.arcade.velocityFromRotation(event.rotation() - Math.PI / 2, _laserFullVelocity, this.body.velocity);
+};
 
-        this.anchor.set(0.5);
+ZerglingPush.Projectile.prototype = Object.create(Phaser.Sprite.prototype);
+ZerglingPush.Projectile.prototype.constructor = ZerglingPush.Projectile;
 
-        _game.physics.enable(this, Phaser.Physics.ARCADE);
+// ZerglingPush.Projectile.prototype.update = function start(deltaTime) {
+// };
 
-        this.checkWorldBounds = true;
-        this.outOfBoundsKill = true;
-        this.kill();
-    }
-
-    Laser.prototype = Object.create(Phaser.Sprite.prototype);
-    Laser.prototype.constructor = Laser;
-
-    Laser.prototype.update = function update() {
-    };
-
-    Laser.prototype.reset = function(event) {
-        Object.getPrototypeOf(Laser.prototype).reset.call(this, event.x(), event.y());
-        this.id = event.id();
-        this.rotation = event.rotation();
-        _game.physics.arcade.velocityFromRotation(event.rotation() - Math.PI / 2, _laserFullVelocity, this.body.velocity);
-    };
-
-    window.Laser = Laser;
-})(window);
+ZerglingPush.Projectile.prototype.start = function start() {
+    this.visible = true;
+};

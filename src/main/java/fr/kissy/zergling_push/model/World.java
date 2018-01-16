@@ -1,7 +1,6 @@
 package fr.kissy.zergling_push.model;
 
 import Event.PlayerJoined;
-import Event.PlayerLeaved;
 import Event.WorldSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
@@ -20,18 +19,18 @@ import java.util.Map;
 
 public class World {
     private final Map<ChannelId, Player> players;
-    private final List<Laser> lasers;
+    private final List<Laser> projectiles;
     private final ChannelGroup allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
 
     public World() {
         this.players = new HashMap<>();
-        this.lasers = new ArrayList<>();
+        this.projectiles = new ArrayList<>();
     }
 
     public void update(double deltaTime) {
         players.values().parallelStream().forEach(p -> p.update(deltaTime));
-        lasers.parallelStream().forEach(l -> l.update(deltaTime));
-        lasers.removeIf(Laser::expired);
+        projectiles.parallelStream().forEach(l -> l.update(deltaTime));
+        projectiles.removeIf(Laser::expired);
     }
 
     public void playerJoined(Channel channel, PlayerJoined playerJoined) {
@@ -45,7 +44,7 @@ public class World {
     }
 
     public void playerShot(Laser laser) {
-        lasers.add(laser);
+        projectiles.add(laser);
     }
 
     public Player getPlayer(ChannelId id) {
@@ -54,12 +53,17 @@ public class World {
 
     public void sendWorldSnapshot(long serverTime) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        List<Integer> playersOffset = new ArrayList<>();
+        List<Integer> playersOffsets = new ArrayList<>();
         for (Player player : players.values()) {
-            playersOffset.add(player.createPlayerSnapshotOffset(fbb));
+            playersOffsets.add(player.createPlayerSnapshotOffset(fbb));
         }
-        int playersVectorOffset = WorldSnapshot.createPlayersVector(fbb, playersOffset.stream().mapToInt(i -> i).toArray());
-        int offset = WorldSnapshot.createWorldSnapshot(fbb, serverTime, playersVectorOffset);
+        List<Integer> projectilesOffsets = new ArrayList<>();
+        for (Laser laser : projectiles) {
+            projectilesOffsets.add(laser.createPlayerShotSnapshotOffset(fbb));
+        }
+        int playersVectorOffset = WorldSnapshot.createPlayersVector(fbb, playersOffsets.stream().mapToInt(i -> i).toArray());
+        int projectilesVectorOffset = WorldSnapshot.createProjectilesVector(fbb, projectilesOffsets.stream().mapToInt(i -> i).toArray());
+        int offset = WorldSnapshot.createWorldSnapshot(fbb, serverTime, playersVectorOffset, projectilesVectorOffset);
         WorldSnapshot.finishWorldSnapshotBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         allPlayers.writeAndFlush(new BinaryWebSocketFrame(byteBuf));

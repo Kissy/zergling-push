@@ -76,10 +76,28 @@ Event.WorldSnapshot.prototype.playersLength = function() {
 };
 
 /**
+ * @param {number} index
+ * @param {Event.ProjectileSnapshot=} obj
+ * @returns {Event.ProjectileSnapshot}
+ */
+Event.WorldSnapshot.prototype.projectiles = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? (obj || new Event.ProjectileSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Event.WorldSnapshot.prototype.projectilesLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Event.WorldSnapshot.startWorldSnapshot = function(builder) {
-  builder.startObject(2);
+  builder.startObject(3);
 };
 
 /**
@@ -116,6 +134,35 @@ Event.WorldSnapshot.createPlayersVector = function(builder, data) {
  * @param {number} numElems
  */
 Event.WorldSnapshot.startPlayersVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} projectilesOffset
+ */
+Event.WorldSnapshot.addProjectiles = function(builder, projectilesOffset) {
+  builder.addFieldOffset(2, projectilesOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Event.WorldSnapshot.createProjectilesVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Event.WorldSnapshot.startProjectilesVector = function(builder, numElems) {
   builder.startVector(4, numElems, 4);
 };
 

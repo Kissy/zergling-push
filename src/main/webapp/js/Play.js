@@ -2,27 +2,28 @@ var ZerglingPush = ZerglingPush || {};
 
 ZerglingPush.PlayState = {
     preload: function() {
-        this.game.load.image('avatar', 'img/avatar.png');
-        this.game.load.image('hostile', 'img/hostile.png');
+        this.game.load.image('avatar', 'img/ship1.png');
+        this.game.load.image('hostile', 'img/ship1-enemy.png');
         this.game.load.image('laser', 'img/laser.png');
         this.game.load.image('shield_silver', 'img/shield_silver.png');
+        this.game.load.spritesheet('fire', 'img/fire-sprite.png', 10, 30, 3);
 
-        this.game.webSocket.onmessage = this.onWebSocketMessage.bind(this);
+        this.game.net.webSocket.onmessage = this.onWebSocketMessage.bind(this);
     },
     create: function() {
         this.game.time.ping = 0;
         this.game.time.latency = 0;
         this.game.time.advancedTiming = true;
 
-        this.game.time.events.loop(1000, function sendTimeSyncRequest() {
-            var timeSyncRequestBuilder = new flatbuffers.Builder();
-            Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
-            Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, this.game.time.time - _referenceTime);
-            Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
-            _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
-        }.bind(this));
+        this.sendTimeSyncRequest();
+        this.game.time.events.loop(1000, this.sendTimeSyncRequest, this);
 
         this.world = new World(this);
+
+        var playerConnectBuilder = new flatbuffers.Builder();
+        Event.PlayerConnect.startPlayerConnect(playerConnectBuilder);
+        Event.PlayerConnect.finishPlayerConnectBuffer(playerConnectBuilder, Event.PlayerConnect.endPlayerConnect(playerConnectBuilder));
+        this.game.net.webSocket.send(playerConnectBuilder.asUint8Array());
     },
     update: function() {
         // var performanceNow = performance.now();
@@ -91,7 +92,7 @@ ZerglingPush.PlayState = {
 
         // Send global messages to server
         for (i = 0; i < _inputQueue.length; i++) {
-            this.game.webSocket.send(_inputQueue[i]);
+            this.game.net.webSocket.send(_inputQueue[i]);
         }
         _inputQueue = [];
     },
@@ -108,15 +109,22 @@ ZerglingPush.PlayState = {
 
         // _game.debug.text("serverTime : " + (_game.time.serverStartTime + _game.time.now), 10, 20);
         // _game.debug.geom(new Phaser.Line(750 - diff, 0, 750 - diff, 40), "#00FFFF");
-        this.game.debug.text("Snapshots : " + (this.world.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
-        this.game.debug.text("Current SS : " + (this.world.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
-        if (this.world.snapshotList.snapshots[1]) {
+        //this.game.debug.text("Snapshots : " + (this.world.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
+        //this.game.debug.text("Current SS : " + (this.world.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
+        /*if (this.world.snapshotList.snapshots[1]) {
             this.game.debug.text("Target SS : " + (this.world.snapshotList.snapshots[1].time() / 1000 || '--'), 2, 160, "#00FFFF");
-        }
+        }*/
 
         this.world.debug();
     },
-    onWebSocketMessage: function(response) {
+    sendTimeSyncRequest: function sendTimeSyncRequest() {
+        var timeSyncRequestBuilder = new flatbuffers.Builder();
+        Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
+        Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, this.game.time.time - _referenceTime);
+        Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
+        _inputQueue.push(timeSyncRequestBuilder.asUint8Array());
+    },
+    onWebSocketMessage: function onWebSocketMessage(response) {
         var byteBuffer = new flatbuffers.ByteBuffer(new Uint8Array(response.data));
         if (Event.TimeSyncResponse.bufferHasIdentifier(byteBuffer)) {
             var event = Event.TimeSyncResponse.getRootAsTimeSyncResponse(byteBuffer);

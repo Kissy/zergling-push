@@ -1,0 +1,7 @@
+namespace Event;
+file_identifier "PLCO";
+
+table PlayerConnect {
+}
+
+root_type PlayerConnect;

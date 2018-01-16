@@ -48,15 +48,6 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        super.userEventTriggered(ctx, evt);
-        // TODO replace with a real connect message & button
-        if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-            ctx.channel().writeAndFlush(createPlayerConnectedMessage(ctx.channel()));
-        }
-    }
-
-    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         world.playerLeaved(ctx.channel());
@@ -74,6 +65,8 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
             world.getPlayer(ctx.channel().id()).moved(content);
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
             world.playerJoined(ctx.channel(), PlayerJoined.getRootAsPlayerJoined(byteBuffer));
+        } else if (PlayerConnect.PlayerConnectBufferHasIdentifier(byteBuffer)) {
+            ctx.channel().writeAndFlush(createPlayerConnectedMessage(ctx.channel()));
         } else {
             //messagesQueue.add(new PlayerMessage(ctx.channel(), message));
         }

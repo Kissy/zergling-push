@@ -91,7 +91,7 @@
             sequence: this.inputSequence
         });
         // TODO send only at 30 fps
-        this.game.webSocket.send(event);
+        this.game.net.webSocket.send(event);
         /*if (this.cursorKeys.isDown) {
              if (_game.time.now > this.nextFireTime) {
                  this.nextFireTime = _game.time.now + _playerFireRate;

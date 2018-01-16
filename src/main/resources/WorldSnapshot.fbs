@@ -1,4 +1,5 @@
 include "PlayerSnapshot.fbs";
+include "ProjectileSnapshot.fbs";
 
 namespace Event;
 file_identifier "WDSP";
@@ -6,6 +7,7 @@ file_identifier "WDSP";
 table WorldSnapshot {
     time: uint;
     players: [PlayerSnapshot];
+    projectiles: [ProjectileSnapshot];
 }
 
 root_type WorldSnapshot;

@@ -4,6 +4,7 @@
     function World(state) {
         this.game = state.game;
         this.players = this.game.add.group(null, "players", true);
+        this.projectiles = this.game.add.group(null, "projectiles", true);
         this.snapshotList = new SnapshotList(this.game);
         this.snapshotCurrentTime = 0;
     }
@@ -31,7 +32,14 @@
                 }
             });
             for (var i in playerSnapshots) {
-                this.players.add(new Player(this.game, playerSnapshots[i], 'hostile'));
+                this.players.add(new Player(this.game, this, playerSnapshots[i], 'hostile'));
+            }
+            for (var i = 0; i < targetSnapshot.projectilesLength(); i++) {
+                var projectileSnapshot = targetSnapshot.projectiles(i);
+                // TODO only create once
+                if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
+                    this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
+                }
             }
         }
 
