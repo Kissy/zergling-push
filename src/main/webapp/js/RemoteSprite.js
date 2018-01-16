@@ -1,8 +1,10 @@
 (function (window) {
-    function RemoteSprite(game, event, texture) {
+    function RemoteSprite(game, remoteWorld, event, texture) {
         Phaser.Sprite.call(this, game, event.x(), event.y(), texture);
+        console.log(this);
 
         this.game = game;
+        this.remoteWorld = remoteWorld;
         this.name = event.id();
         this.anchor.set(0.5);
         this.currentSnapshot = event;
@@ -20,9 +22,9 @@
     RemoteSprite.prototype.update = function update(deltaTime) {
         // Network reconciliation
         var targetAngle = Phaser.Math.wrapAngle(this.targetSnapshot.rotation() - this.currentSnapshot.rotation(), true);
-        this.rotation = this.currentSnapshot.rotation() + targetAngle * this.game.remoteWorld.getSnapshotCurrentTime();
-        this.x = Phaser.Math.linear(this.currentSnapshot.x(), this.targetSnapshot.x(), this.game.remoteWorld.getSnapshotCurrentTime());
-        this.y = Phaser.Math.linear(this.currentSnapshot.y(), this.targetSnapshot.y(), this.game.remoteWorld.getSnapshotCurrentTime());
+        this.rotation = this.currentSnapshot.rotation() + targetAngle * this.remoteWorld.getSnapshotCurrentTime();
+        this.x = Phaser.Math.linear(this.currentSnapshot.x(), this.targetSnapshot.x(), this.remoteWorld.getSnapshotCurrentTime());
+        this.y = Phaser.Math.linear(this.currentSnapshot.y(), this.targetSnapshot.y(), this.remoteWorld.getSnapshotCurrentTime());
     };
 
     RemoteSprite.prototype.debug = function debug() {

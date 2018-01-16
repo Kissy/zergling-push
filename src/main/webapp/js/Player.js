@@ -1,6 +1,6 @@
 (function (window) {
-    function Player(game, event, texture) {
-        RemoteSprite.call(this, game, event, texture);
+    function Player(game, remoteWorld, event, texture) {
+        RemoteSprite.call(this, game, remoteWorld, event, texture);
 
         this.shields = 3;
     }

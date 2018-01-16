@@ -1,10 +1,10 @@
 (function (window) {
 
-    // TODO rename RemoteWorld
-    function World(game) {
-        this.game = game;
-        this.players = game.add.group(null, "players", true);
-        this.snapshotList = new SnapshotList(game);
+    // TODO rename GameWorld
+    function World(state) {
+        this.game = state.game;
+        this.players = this.game.add.group(null, "players", true);
+        this.snapshotList = new SnapshotList(this.game);
         this.snapshotCurrentTime = 0;
     }
 
@@ -40,7 +40,7 @@
     };
 
     World.prototype.playerJoined = function playerJoined(playerJoined) {
-        this.players.add(new ControlledPlayer(this.game, playerJoined.snapshot(), 'avatar'));
+        this.players.add(new ControlledPlayer(this.game, this, playerJoined.snapshot()));
     };
 
     World.prototype.receiveSnapshot = function receiveSnapshot(worldSnapshot) {

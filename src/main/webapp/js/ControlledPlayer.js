@@ -1,8 +1,8 @@
 (function (window) {
     var SAMPLE_INPUT_RATE = 32;
 
-    function ControlledPlayer(game, event) {
-        Player.call(this, game, event, 'avatar');
+    function ControlledPlayer(game, remoteWorld, event) {
+        Player.call(this, game, remoteWorld, event, 'avatar');
 
         this.firing = false;
         this.firingTimer = 0;
@@ -91,7 +91,7 @@
             sequence: this.inputSequence
         });
         // TODO send only at 30 fps
-        _webSocket.send(event);
+        this.game.webSocket.send(event);
         /*if (this.cursorKeys.isDown) {
              if (_game.time.now > this.nextFireTime) {
                  this.nextFireTime = _game.time.now + _playerFireRate;
