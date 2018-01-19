@@ -42,7 +42,6 @@
                 }
             }
         }
-
         this.snapshotCurrentTime = (this.game.time.clientTime - this.snapshotList.getCurrentSnapshot().time())
             / (this.snapshotList.getTargetSnapshot().time() - this.snapshotList.getCurrentSnapshot().time());
     };

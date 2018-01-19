@@ -4,6 +4,7 @@ import Event.PlayerJoined;
 import Event.PlayerMoved;
 import Event.PlayerSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
+import fr.kissy.zergling_push.MainLoop;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -19,12 +20,12 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by Guillaume on 19/01/2017.
  */
 public class Player extends WorldObject {
-    public static final double VELOCITY_FACTOR = 500f; // pixel par seconds
+    public static final double VELOCITY_FACTOR = 300f; // pixel par seconds
     public static final double VELOCITY_FACTOR_MS = VELOCITY_FACTOR / 1000f; // pixel par milliseconds
     public static final double ANGULAR_VELOCITY_FACTOR = 180f; // degres par seconds
     public static final double ANGULAR_VELOCITY_FACTOR_RAD_MS = ANGULAR_VELOCITY_FACTOR * 2f * Math.PI / 360f / 1000f; // radian par milliseconds
     public static final double DECELERATION_FACTOR = 5010f;
-    public static final double FIRE_RATE_MS = 150f;
+    public static final double FIRE_RATE_MS = 1000f;
     public static final int MIN_X_Y_VALUE = 0;
     public static final int MAX_X_VALUE = 1920;
     public static final int MAX_Y_VALUE = 1960;
@@ -80,7 +81,7 @@ public class Player extends WorldObject {
                 this.y = clamp(this.y, 0, 960);
             }
             if (event.firing() && lastFiringTime > FIRE_RATE_MS) {
-                shot();
+                shot(event.time());
             }
 
             content.release();
@@ -145,11 +146,10 @@ public class Player extends WorldObject {
         return shots;
     }
 
-    private void shot() {
-        System.out.println("shot");
-        float shotX = (float) (this.x + _playerWidth * Math.sin(this.rotation));
-        float shotY = (float) (this.y - _playerHeight * Math.cos(this.rotation));
-        Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation, new Date().getTime());
+    private void shot(long time) {
+        float shotX = (float) (this.x + (_playerHeight + 10) * Math.sin(this.rotation));
+        float shotY = (float) (this.y - (_playerHeight + 10) * Math.cos(this.rotation));
+        Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation, time);
         this.world.playerShot(laser);
         this.lastFiringTime = 0;
     }

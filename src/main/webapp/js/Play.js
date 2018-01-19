@@ -79,7 +79,7 @@ ZerglingPush.PlayState = {
                 var playerSnapshotOffset = Event.PlayerSnapshot.endPlayerSnapshot(playerJoinedBuilder);
                 Event.PlayerJoined.startPlayerJoined(playerJoinedBuilder);
                 Event.PlayerJoined.addId(playerJoinedBuilder, idOffset);
-                Event.PlayerJoined.addTime(playerJoinedBuilder, this.game.time.serverStartTime + this.game.time.now);
+                Event.PlayerJoined.addTime(playerJoinedBuilder, this.game.time.localTime);
                 Event.PlayerJoined.addName(playerJoinedBuilder, nameOffset);
                 Event.PlayerJoined.addSnapshot(playerJoinedBuilder, playerSnapshotOffset);
                 Event.PlayerJoined.finishPlayerJoinedBuffer(playerJoinedBuilder, Event.PlayerJoined.endPlayerJoined(playerJoinedBuilder));
@@ -130,7 +130,6 @@ ZerglingPush.PlayState = {
             var event = Event.TimeSyncResponse.getRootAsTimeSyncResponse(byteBuffer);
             this.game.time.ping = this.game.time.time - _referenceTime - event.time();
             this.game.time.latency = Math.round(this.game.time.ping / 2);
-            this.game.time.serverStartTime = event.serverTime();
             // TODO make a world class ?
             this.game.time.serverTime = event.serverTime();
             this.game.time.localTime = event.serverTime() - this.game.time.latency;

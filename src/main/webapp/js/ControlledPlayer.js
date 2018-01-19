@@ -110,7 +110,7 @@
         var idOffset = builder.createString(this.name);
         Event.PlayerMoved.startPlayerMoved(builder);
         Event.PlayerMoved.addId(builder, idOffset);
-        Event.PlayerMoved.addTime(builder, this.game.time.serverStartTime + this.game.time.now);
+        Event.PlayerMoved.addTime(builder, this.game.time.localTime);
         Event.PlayerMoved.addDuration(builder, this.game.time.physicsElapsedMS);
         Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
         Event.PlayerMoved.addVelocity(builder, this.cursorKeys['up'].isDown);

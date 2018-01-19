@@ -22,7 +22,7 @@ var _game = new Phaser.Game({
     width: 1920,
     height: 960,
     renderer: Phaser.CANVAS,
-    antialias: false,
+    antialias: true,
     scaleMode: Phaser.ScaleManager.SHOW_ALL,
     disableVisibilityChange: true,
     backgroundColor: "#1E0835"
