@@ -40,6 +40,7 @@
         // Process inputs and add it to queue
         this.processInputs();
 
+        // TODO do it when snapshot arrives
         for (var i = 0; i < this.inputQueue.length; i++) {
             var currentInput = this.inputQueue[i];
             if (currentInput.sequence > this.targetSnapshot.sequence()) {
@@ -58,15 +59,32 @@
             var currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
             var duration = currentEvent.duration() / 1000;
             this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * duration;
+            if (currentInput.done !== true && currentEvent.firing() === true) {
+                console.log(this.rotation);
+                currentInput.done = true;
+            }
             this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * duration;
             this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * duration;
 
-            // if (currentEvent.firing()) {
-            //     if (_game.time.now > this.nextFireTime) {
-            //         this.nextFireTime = _game.time.now + _playerFireRate;
-            //         this.shots.add(new Laser(this, currentEvent));
-            //     }
-            // }
+            if (currentEvent.firing()) {
+                 if (_game.time.now > this.nextFireTime) {
+                     this.nextFireTime = _game.time.now + _playerFireRate;
+                     var x = this.x + (this.height + 10) * Math.sin(this.rotation);
+                     currentEvent.x = function() {
+                         return x;
+                     };
+                     var y = this.y - (this.height + 10) * Math.cos(this.rotation);
+                     currentEvent.y = function() {
+                         return y;
+                     };
+                     var rotation = this.rotation;
+                     currentEvent.rotation = function() {
+                         return rotation;
+                     };
+                     console.log(this.game.time);
+                     ZerglingPush.PlayState.world.projectiles.add(new ZerglingPush.Projectile(this.game, currentEvent));
+                 }
+             }
         }
 
         // Detect collision
@@ -110,7 +128,7 @@
         var idOffset = builder.createString(this.name);
         Event.PlayerMoved.startPlayerMoved(builder);
         Event.PlayerMoved.addId(builder, idOffset);
-        Event.PlayerMoved.addTime(builder, this.game.time.localTime);
+        Event.PlayerMoved.addTime(builder, this.game.time.clientTime);
         Event.PlayerMoved.addDuration(builder, this.game.time.physicsElapsedMS);
         Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
         Event.PlayerMoved.addVelocity(builder, this.cursorKeys['up'].isDown);

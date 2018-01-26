@@ -40,9 +40,7 @@ public class Player extends WorldObject {
     private List<Laser> newShots;
     private int shields = 3;
     private long lastInputSequence = 0;
-    private double lastFiringTime = 0;
-    // TODO Release on delete player
-    private Queue<ByteBuf> playerMovedEvents;
+    private double lastFiringTime = FIRE_RATE_MS;
 
     public Player(World world, Channel channel, PlayerJoined event, List<Laser> shots) {
         super(event.id(), 500, 400, event.snapshot().rotation());
@@ -51,43 +49,29 @@ public class Player extends WorldObject {
         this.name = event.name();
         this.shots = shots;
         this.newShots = new ArrayList<>();
-        this.playerMovedEvents = new LinkedBlockingDeque<>();
         this.channel.writeAndFlush(new BinaryWebSocketFrame(createPlayerJoined()));
     }
 
-    public void moved(ByteBuf event) {
-        // TODO maybe apply directly move event ?
-        event.retain();
-        playerMovedEvents.add(event);
-    }
-
-    public boolean update(double deltaTime) {
-
-        while (!playerMovedEvents.isEmpty()) {
-            // TODO handle input sequence
-
-            ByteBuf content = playerMovedEvents.poll();
-            PlayerMoved event = PlayerMoved.getRootAsPlayerMoved(content.nioBuffer());
-            this.lastFiringTime += event.duration();
-            this.lastInputSequence = event.sequence();
-
-            if (event.angularVelocity() != 0) {
-                this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * event.duration())) % _moduloRadian;
-            }
-            if (event.velocity() != 0) {
-                this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * event.duration();
-                this.x = clamp(this.x, 0, 1920);
-                this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
-                this.y = clamp(this.y, 0, 960);
-            }
-            if (event.firing() && lastFiringTime > FIRE_RATE_MS) {
-                shot(event.time());
-            }
-
-            content.release();
+    public void moved(PlayerMoved event) {
+        if (event.angularVelocity() != 0) {
+            this.rotation = (this.rotation + (event.angularVelocity() * ANGULAR_VELOCITY_FACTOR_RAD_MS * event.duration())) % _moduloRadian;
+        }
+        if (event.velocity() != 0) {
+            this.x += event.velocity() * VELOCITY_FACTOR_MS * Math.sin(this.rotation) * event.duration();
+            this.x = clamp(this.x, 0, 1920);
+            this.y -= event.velocity() * VELOCITY_FACTOR_MS * Math.cos(this.rotation) * event.duration();
+            this.y = clamp(this.y, 0, 960);
         }
 
-        return false;
+        if (event.firing()) {
+            System.out.println(this.rotation);
+        }
+        if (event.firing() && lastFiringTime >= FIRE_RATE_MS) {
+            shot(event.time());
+        }
+
+        this.lastFiringTime += event.duration();
+        this.lastInputSequence = event.sequence();
     }
 
     public ByteBuf createPlayerJoined() {
@@ -151,6 +135,7 @@ public class Player extends WorldObject {
         float shotY = (float) (this.y - (_playerHeight + 10) * Math.cos(this.rotation));
         Laser laser = new Laser(this, String.valueOf(lastInputSequence), shotX, shotY, this.rotation, time);
         this.world.playerShot(laser);
+        System.out.println("Shot " + this.rotation);
         this.lastFiringTime = 0;
     }
 

@@ -15,7 +15,7 @@ import static fr.kissy.zergling_push.model.Player.MIN_X_Y_VALUE;
  * Created by Guillaume on 21/01/2017.
  */
 public class Laser extends WorldObject {
-    public static final float VELOCITY_FACTOR = 1000f;
+    public static final float VELOCITY_FACTOR = 10f;
     public static final float VELOCITY_FACTOR_MS = VELOCITY_FACTOR / 1000f;
     private double originX;
     private double originY;

@@ -62,7 +62,7 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
             TimeSyncRequest timeSyncRequest = TimeSyncRequest.getRootAsTimeSyncRequest(byteBuffer);
             ctx.writeAndFlush(createTimeSyncResponse(timeSyncRequest));
         } else if (PlayerMoved.PlayerMovedBufferHasIdentifier(byteBuffer)) {
-            world.getPlayer(ctx.channel().id()).moved(content);
+            world.getPlayer(ctx.channel().id()).moved(PlayerMoved.getRootAsPlayerMoved(byteBuffer));
         } else if (PlayerJoined.PlayerJoinedBufferHasIdentifier(byteBuffer)) {
             world.playerJoined(ctx.channel(), PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         } else if (PlayerConnect.PlayerConnectBufferHasIdentifier(byteBuffer)) {
@@ -90,13 +90,4 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);
     }
-
-    private ByteBuf createPlayerLeavedMessage(Channel channel) {
-        FlatBufferBuilder fbb = new FlatBufferBuilder();
-        int idOffset = fbb.createString(channel.id().asShortText());
-        int offset = PlayerLeaved.createPlayerLeaved(fbb, idOffset);
-        PlayerLeaved.finishPlayerLeavedBuffer(fbb, offset);
-        return Unpooled.wrappedBuffer(fbb.dataBuffer());
-    }
-
 }

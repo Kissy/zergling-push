@@ -5,7 +5,7 @@
         this.game = state.game;
         this.players = this.game.add.group(null, "players", true);
         this.projectiles = this.game.add.group(null, "projectiles", true);
-        this.snapshotList = new SnapshotList(this.game);
+        this.snapshotList = new ZerglingPush.SnapshotList(this.game);
         this.snapshotCurrentTime = 0;
     }
 
@@ -38,7 +38,7 @@
                 var projectileSnapshot = targetSnapshot.projectiles(i);
                 // TODO only create once
                 if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
-                    this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
+                    //this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
                 }
             }
         }

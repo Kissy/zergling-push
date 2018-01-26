@@ -16,7 +16,7 @@ var _playerStartingYPosition;
 var _playerStartingRotation;
 var _playerFireRate;
 var _laserFullVelocity;
-var _remoteClientDelay = 100; // TODO send from server ?
+var _remoteClientDelay = 500; // TODO send from server ?
 
 var _game = new Phaser.Game({
     width: 1920,

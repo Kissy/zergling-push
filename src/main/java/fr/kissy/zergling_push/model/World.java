@@ -28,7 +28,6 @@ public class World {
     }
 
     public void update(double deltaTime) {
-        players.values().parallelStream().forEach(p -> p.update(deltaTime));
         projectiles.parallelStream().forEach(l -> l.update(deltaTime));
         projectiles.removeIf(Laser::expired);
     }
