@@ -1,20 +1,37 @@
-(function (window) {
-    function RemoteSprite(game, remoteWorld, event, texture) {
-        Phaser.Sprite.call(this, game, event.x(), event.y(), texture);
+var RemoteSprite = new Phaser.Class({
+    Extends: Phaser.GameObjects.Sprite,
+    initialize: function RemoteSprite(scene, event, texture) {
+        Phaser.GameObjects.Sprite.call(this, scene, event.x(), event.y(), texture);
 
-        this.remoteWorld = remoteWorld;
         this.name = event.id();
+        //this.setOrigin(0.5);
         this.currentSnapshot = event;
         this.targetSnapshot = event;
-    }
+    },
+    update: function (time, delta) {
+        // Network reconciliation
+        var targetAngle = Phaser.Math.wrapAngle(this.targetSnapshot.rotation() - this.currentSnapshot.rotation(), true);
+        this.rotation = this.currentSnapshot.rotation() + targetAngle * this.scene.getSnapshotCurrentTime();
+        this.x = Phaser.Math.linear(this.currentSnapshot.x(), this.targetSnapshot.x(), this.scene.getSnapshotCurrentTime());
+        this.y = Phaser.Math.linear(this.currentSnapshot.y(), this.targetSnapshot.y(), this.scene.getSnapshotCurrentTime());
+    },
 
-    RemoteSprite.prototype = Object.create(Phaser.Sprite.prototype);
-    RemoteSprite.prototype.constructor = RemoteSprite;
-
-    RemoteSprite.prototype.updateTargetSnapshot = function updateTargetSnapshot(playerSnapshot) {
+    updateTargetSnapshot: function updateTargetSnapshot(playerSnapshot) {
         this.currentSnapshot = this.targetSnapshot;
         this.targetSnapshot = playerSnapshot;
-    };
+    }
+});
+
+/*
+(function (window) {
+    function RemoteSprite(game, event, texture) {
+
+        this.game = game;
+    }
+
+    RemoteSprite.prototype = Object.create(Phaser.GameObjects.Sprite.prototype);
+    RemoteSprite.prototype.constructor = RemoteSprite;
+
 
     RemoteSprite.prototype.update = function update(deltaTime) {
         // Network reconciliation
@@ -33,3 +50,4 @@
 
     window.RemoteSprite = RemoteSprite;
 })(window);
+*/

@@ -1,9 +1,11 @@
-(function (window) {
-    var SAMPLE_INPUT_RATE = 32;
+var SAMPLE_INPUT_RATE = 32;
 
-    function ControlledPlayer(game, remoteWorld, event) {
-        Player.call(this, game, remoteWorld, event, 'avatar');
+var ControlledPlayer = new Phaser.Class({
+    Extends: RemoteSprite,
+    initialize: function ControlledPlayer(scene, event) {
+        RemoteSprite.call(this, scene, event, 'avatar');
 
+        this.alive = true;
         this.firing = false;
         this.firingTimer = 0;
         this.nextFireTime = 0;
@@ -16,26 +18,19 @@
         this.inputQueue = [];
         this.inputSequence = 0;
         // this.cursorKeys = this.game.input.keyboard.createCursorKeys();
-        this.cursorKeys = this.game.input.keyboard.addKeys({
-            'up': Phaser.KeyCode.UP,
-            'left': Phaser.KeyCode.LEFT,
-            'right': Phaser.KeyCode.RIGHT,
-            'space': Phaser.KeyCode.SPACEBAR
+        this.cursorKeys = this.scene.input.keyboard.addKeys({
+            'up': Phaser.UP,
+            'left': Phaser.LEFT,
+            'right': Phaser.RIGHT,
+            'space': Phaser.SPACEBAR
         });
 
         // this.spaceKey = _game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         // this.spaceKey.onDown.add(this.fire, this);
-    }
-
-    ControlledPlayer.prototype = Object.create(Player.prototype);
-
-    ControlledPlayer.prototype.shot = function shot(event) {
-    };
-    ControlledPlayer.prototype.hit = function hit(event) {
-        this.alpha = 0.2;
-    };
-    ControlledPlayer.prototype.update = function update(deltaTime) {
-        Object.getPrototypeOf(ControlledPlayer.prototype).update.call(this, deltaTime);
+    },
+    update: function (time, delta) {
+        console.log(time);
+        Object.getPrototypeOf(ControlledPlayer.prototype).update.call(this, time, delta);
 
         // Process inputs and add it to queue
         this.processInputs();
@@ -92,15 +87,17 @@
             this.x = clamp(this.x, 0, 1920);
             this.y = clamp(this.y, 0, 960);
         }
-    };
-    ControlledPlayer.prototype.processInputs = function processInputs() {
+    },
+
+    processInputs: function processInputs() {
         // if (_game.time.now < this.nextProcessInputTime) {
-            // console.log("skipping " + _game.time.now);
-            // return;
+        // console.log("skipping " + _game.time.now);
+        // return;
         // }
 
         // console.log("sampling " + _game.time.now);
-        this.nextProcessInputTime = _game.time.now + SAMPLE_INPUT_RATE;
+        this.nextProcessInputTime = this.time.now + SAMPLE_INPUT_RATE;
+        console.log(this.nextProcessInputTime);
 
         // var self = this, event;
         var event = this.createPlayerMoved();
@@ -109,7 +106,7 @@
             sequence: this.inputSequence
         });
         // TODO send only at 30 fps
-        this.game.net.webSocket.send(event);
+        //_webSocket.send(event);
         /*if (this.cursorKeys.isDown) {
              if (_game.time.now > this.nextFireTime) {
                  this.nextFireTime = _game.time.now + _playerFireRate;
@@ -122,8 +119,9 @@
                  _webSocket.send(event);
              }
          }*/
-    };
-    ControlledPlayer.prototype.createPlayerMoved = function queuePlayerMoved() {
+    },
+
+    createPlayerMoved: function queuePlayerMoved() {
         var builder = new flatbuffers.Builder();
         var idOffset = builder.createString(this.name);
         Event.PlayerMoved.startPlayerMoved(builder);
@@ -136,19 +134,37 @@
         Event.PlayerMoved.addFiring(builder, this.cursorKeys['space'].isDown);
         Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
         return builder.asUint8Array();
-    };
-
-
-    function clamp(value, min, max) {
-        if (value < min) {
-            return min;
-        } else if (value > max) {
-            return max;
-        } else {
-            return value;
-        }
     }
+});
+
+function clamp(value, min, max) {
+    if (value < min) {
+        return min;
+    } else if (value > max) {
+        return max;
+    } else {
+        return value;
+    }
+}
+/*
+(function (window) {
+
+    function ControlledPlayer(game, event) {
+        Player.call(this, game, event, 'avatar');
+
+    }
+
+    ControlledPlayer.prototype = Object.create(Player.prototype);
+
+    ControlledPlayer.prototype.shot = function shot(event) {
+    };
+    ControlledPlayer.prototype.hit = function hit(event) {
+        this.alpha = 0.2;
+    };
+    ControlledPlayer.prototype.update = function update(deltaTime) {
+
+    };
 
     ControlledPlayer.prototype.constructor = ControlledPlayer;
     window.ControlledPlayer = ControlledPlayer;
-})(window);
+})(window);*/
