@@ -1,10 +1,9 @@
 package fr.kissy.zergling_push.model;
 
-import Event.PlayerJoined;
-import Event.PlayerMoved;
-import Event.PlayerSnapshot;
+import fr.kissy.zergling_push.event.PlayerJoined;
+import fr.kissy.zergling_push.event.PlayerMoved;
+import fr.kissy.zergling_push.event.PlayerSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
-import fr.kissy.zergling_push.MainLoop;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -13,8 +12,6 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by Guillaume on 19/01/2017.

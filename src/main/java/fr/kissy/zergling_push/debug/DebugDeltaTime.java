@@ -2,12 +2,9 @@ package fr.kissy.zergling_push.debug;
 
 import fr.kissy.zergling_push.MainLoop;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics;
-
-import static fr.kissy.zergling_push.debug.DebugFrame.SCALE;
 
 /**
  * Created by Guillaume on 21/01/2017.

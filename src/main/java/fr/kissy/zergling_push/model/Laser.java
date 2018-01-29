@@ -1,7 +1,6 @@
 package fr.kissy.zergling_push.model;
 
-import Event.PlayerShotSnapshot;
-import Event.ProjectileSnapshot;
+import fr.kissy.zergling_push.event.ProjectileSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
 
 import java.util.HashSet;

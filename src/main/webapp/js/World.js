@@ -173,10 +173,6 @@ var World = new Phaser.Class({
         this.snapshotList.receiveSnapshot(worldSnapshot);
     },
 
-    playerJoined: function playerJoined(playerJoined) {
-        this.players.add(new ControlledPlayer(this, playerJoined.snapshot(), 'avatar'), true);
-    },
-
     getSnapshotCurrentTime: function getSnapshotCurrentTime() {
         return this.snapshotCurrentTime;
     },

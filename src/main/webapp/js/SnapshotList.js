@@ -28,8 +28,8 @@ var SnapshotList = new Phaser.Class({
         return false;
     },
     receiveSnapshot: function (newSnapshot) {
-        for (var i = this.snapshots.length - 1; i >= 0; i--) {
-            var currentSnapshot = this.snapshots[i];
+        for (let i = this.snapshots.length - 1; i >= 0; i--) {
+            let currentSnapshot = this.snapshots[i];
             if (currentSnapshot.time() < newSnapshot.time()) {
                 this.snapshots.splice(i, 0, newSnapshot);
                 break;
@@ -43,3 +43,5 @@ var SnapshotList = new Phaser.Class({
         return this.snapshots[1];
     }
 });
+
+export default SnapshotList;

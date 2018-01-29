@@ -1,3 +1,82 @@
+import * as Phaser from "phaser";
+import RemotePlayer from "./RemotePlayer";
+
+class ControlledPlayer extends RemotePlayer {
+    constructor(scene, x, y, key) {
+        super(scene, x, y, key);
+
+        this.inputSequence = 0;
+        this.inputQueue = [];
+
+        this.cursorKeys = this.scene.input.keyboard.addKeys({
+            up:  Phaser.Input.Keyboard.KeyCodes.UP,
+            left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+            right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+            space: Phaser.Input.Keyboard.KeyCodes.SPACE
+        });
+    }
+
+    preUpdate (time, delta) {
+        super.preUpdate(time, delta);
+
+        // if (_game.time.now < this.nextProcessInputTime) {
+        // console.log("skipping " + _game.time.now);
+        // return;
+        // }
+
+        // console.log("sampling " + _game.time.now);
+        //this.nextProcessInputTime = this.time.now + SAMPLE_INPUT_RATE;
+        //console.log(this.nextProcessInputTime);
+
+        // var self = this, event;
+        const event = this.createPlayerMoved(delta);
+        this.inputQueue.push({
+            event: event,
+            sequence: this.inputSequence
+        });
+
+        // TODO send only at 30 fps
+        this.scene.network.send(event);
+
+        /*if (this.cursorKeys.isDown) {
+             if (_game.time.now > this.nextFireTime) {
+                 this.nextFireTime = _game.time.now + _playerFireRate;
+                 event = this.createPlayerShot();
+
+                 var byteBuffer = new flatbuffers.ByteBuffer(event);
+                 var currentEvent = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
+                 this.shots.add(new Laser(this, currentEvent));
+
+                 _webSocket.send(event);
+             }
+         }*/
+    }
+
+    update (time, delta) {
+        super.update(time, delta);
+    }
+
+    createPlayerMoved(delta) {
+        const builder = new flatbuffers.Builder();
+        const idOffset = builder.createString(this.name);
+        Event.PlayerMoved.startPlayerMoved(builder);
+        Event.PlayerMoved.addId(builder, idOffset);
+        //Event.PlayerMoved.addTime(builder, this.time.now);
+        Event.PlayerMoved.addDuration(builder, delta);
+        Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
+        Event.PlayerMoved.addVelocity(builder, this.cursorKeys.up.isDown);
+        Event.PlayerMoved.addAngularVelocity(builder, this.cursorKeys.right.isDown - this.cursorKeys.left.isDown);
+        Event.PlayerMoved.addFiring(builder, this.cursorKeys.space.isDown);
+        Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
+        return builder;
+    }
+}
+
+export default ControlledPlayer
+
+
+/*
+
 var SAMPLE_INPUT_RATE = 32;
 
 var ControlledPlayer = new Phaser.Class({
@@ -15,7 +94,6 @@ var ControlledPlayer = new Phaser.Class({
         this.lastSnapshot = null;
 
         // TODO make InputList class
-        this.inputQueue = [];
         this.inputSequence = 0;
         // this.cursorKeys = this.game.input.keyboard.createCursorKeys();
         this.cursorKeys = this.scene.input.keyboard.addKeys({
@@ -90,50 +168,6 @@ var ControlledPlayer = new Phaser.Class({
     },
 
     processInputs: function processInputs() {
-        // if (_game.time.now < this.nextProcessInputTime) {
-        // console.log("skipping " + _game.time.now);
-        // return;
-        // }
-
-        // console.log("sampling " + _game.time.now);
-        this.nextProcessInputTime = this.time.now + SAMPLE_INPUT_RATE;
-        console.log(this.nextProcessInputTime);
-
-        // var self = this, event;
-        var event = this.createPlayerMoved();
-        this.inputQueue.push({
-            event: event,
-            sequence: this.inputSequence
-        });
-        // TODO send only at 30 fps
-        //_webSocket.send(event);
-        /*if (this.cursorKeys.isDown) {
-             if (_game.time.now > this.nextFireTime) {
-                 this.nextFireTime = _game.time.now + _playerFireRate;
-                 event = this.createPlayerShot();
-
-                 var byteBuffer = new flatbuffers.ByteBuffer(event);
-                 var currentEvent = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
-                 this.shots.add(new Laser(this, currentEvent));
-
-                 _webSocket.send(event);
-             }
-         }*/
-    },
-
-    createPlayerMoved: function queuePlayerMoved() {
-        var builder = new flatbuffers.Builder();
-        var idOffset = builder.createString(this.name);
-        Event.PlayerMoved.startPlayerMoved(builder);
-        Event.PlayerMoved.addId(builder, idOffset);
-        Event.PlayerMoved.addTime(builder, this.game.time.clientTime);
-        Event.PlayerMoved.addDuration(builder, this.game.time.physicsElapsedMS);
-        Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
-        Event.PlayerMoved.addVelocity(builder, this.cursorKeys['up'].isDown);
-        Event.PlayerMoved.addAngularVelocity(builder, this.cursorKeys['right'].isDown - this.cursorKeys['left'].isDown);
-        Event.PlayerMoved.addFiring(builder, this.cursorKeys['space'].isDown);
-        Event.PlayerMoved.finishPlayerMovedBuffer(builder, Event.PlayerMoved.endPlayerMoved(builder));
-        return builder.asUint8Array();
     }
 });
 
@@ -146,25 +180,5 @@ function clamp(value, min, max) {
         return value;
     }
 }
-/*
-(function (window) {
 
-    function ControlledPlayer(game, event) {
-        Player.call(this, game, event, 'avatar');
-
-    }
-
-    ControlledPlayer.prototype = Object.create(Player.prototype);
-
-    ControlledPlayer.prototype.shot = function shot(event) {
-    };
-    ControlledPlayer.prototype.hit = function hit(event) {
-        this.alpha = 0.2;
-    };
-    ControlledPlayer.prototype.update = function update(deltaTime) {
-
-    };
-
-    ControlledPlayer.prototype.constructor = ControlledPlayer;
-    window.ControlledPlayer = ControlledPlayer;
-})(window);*/
+*/

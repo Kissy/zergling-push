@@ -3,7 +3,6 @@ package fr.kissy.zergling_push.debug;
 import fr.kissy.zergling_push.model.Laser;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.function.Predicate;
 
 /**

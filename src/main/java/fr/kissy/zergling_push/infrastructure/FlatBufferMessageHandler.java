@@ -15,9 +15,9 @@
  */
 package fr.kissy.zergling_push.infrastructure;
 
-import Event.*;
 import com.google.flatbuffers.FlatBufferBuilder;
 import fr.kissy.zergling_push.MainLoop;
+import fr.kissy.zergling_push.event.*;
 import fr.kissy.zergling_push.model.Laser;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
@@ -28,7 +28,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;

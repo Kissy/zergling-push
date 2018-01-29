@@ -1,3 +1,41 @@
+import * as Phaser from "phaser";
+import RemoteSprite from "./RemoteSprite";
+
+class RemotePlayer extends RemoteSprite {
+    constructor(scene, x, y, key) {
+        super(scene, x, y, key);
+
+        //this.anchor.set(0.5);
+
+        //this.thruster = new ZerglingPush.Thruster(this.game, 1, 48);
+        //this.addChild(this.thruster);
+
+        /*this.thruster1 = new ZerglingPush.Thruster(this.game, 26, 38);
+        this.thruster1.scale.set(0.7);
+        this.addChild(this.thruster1);
+        this.thruster2 = new ZerglingPush.Thruster(this.game, -26, 38);
+        this.thruster2.scale.set(0.7);
+        this.addChild(this.thruster2);
+
+        this.shields = 3;
+        this.display = true;*/
+    }
+
+    update (time, delta) {
+        super.update(time, delta);
+    }
+
+    updateTargetSnapshot (playerSnapshot) {
+        this.currentSnapshot = this.targetSnapshot;
+        this.targetSnapshot = playerSnapshot;
+    }
+}
+
+export default RemotePlayer
+
+
+
+/*
 var ZerglingPush = ZerglingPush || {};
 
 (function (window) {
@@ -51,3 +89,4 @@ var ZerglingPush = ZerglingPush || {};
 
     window.Player = Player;
 })(window);
+*/

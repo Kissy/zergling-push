@@ -6,7 +6,6 @@ import fr.kissy.zergling_push.model.Player;
 import io.netty.channel.ChannelId;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;

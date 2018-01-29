@@ -1,23 +1,16 @@
 package fr.kissy.zergling_push;
 
-import Event.PlayerJoined;
-import Event.PlayerLeaved;
-import Event.PlayerMoved;
-import Event.PlayerShot;
-import Event.WorldSnapshot;
-import com.google.flatbuffers.FlatBufferBuilder;
-import fr.kissy.zergling_push.model.Hit;
+import fr.kissy.zergling_push.event.PlayerLeaved;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
+import fr.kissy.zergling_push.model.Hit;
 import fr.kissy.zergling_push.model.World;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

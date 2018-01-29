@@ -1,7 +1,7 @@
 package fr.kissy.zergling_push.model;
 
-import Event.PlayerJoined;
-import Event.WorldSnapshot;
+import fr.kissy.zergling_push.event.PlayerJoined;
+import fr.kissy.zergling_push.event.WorldSnapshot;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

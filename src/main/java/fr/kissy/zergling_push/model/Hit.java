@@ -1,6 +1,6 @@
 package fr.kissy.zergling_push.model;
 
-import Event.PlayerHit;
+import fr.kissy.zergling_push.event.PlayerHit;
 import com.google.flatbuffers.FlatBufferBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
