@@ -3,44 +3,33 @@ var ZerglingPush = ZerglingPush || {};
 var EMPTY_SNAPSHOT= {
     time: function () {
         return 0;
-    }, players: function () {
-        return [];
+    },
+    playersLength: function () {
+        return 0;
+    },
+    projectilesLength: function() {
+        return 0;
     }
 };
 
 var SnapshotList = new Phaser.Class({
     initialize: function SnapshotList(time) {
         this.time = time;
-        this.snapshots = [EMPTY_SNAPSHOT, EMPTY_SNAPSHOT];
-    },
-    preload: function () {
-    },
-    create: function() {
+        this.currentSnapshot = EMPTY_SNAPSHOT;
+        this.targetSnapshot = EMPTY_SNAPSHOT;
     },
     update: function (time, delta) {
-        // remove old snapshots
-        for (var i = 1; i < this.snapshots.length; i++) {
-            var currentSnapshot = this.snapshots[i];
-            if (currentSnapshot.time() > this.time.clientTime) {
-                return this.snapshots.splice(0, i - 1).length > 0;
-            }
-        }
         return false;
     },
     receiveSnapshot: function (newSnapshot) {
-        for (let i = this.snapshots.length - 1; i >= 0; i--) {
-            let currentSnapshot = this.snapshots[i];
-            if (currentSnapshot.time() < newSnapshot.time()) {
-                this.snapshots.splice(i, 0, newSnapshot);
-                break;
-            }
-        }
+        this.currentSnapshot = this.targetSnapshot;
+        this.targetSnapshot = newSnapshot;
     },
     getCurrentSnapshot: function getCurrentSnapshot() {
-        return this.snapshots[0];
+        return this.currentSnapshot;
     },
     getTargetSnapshot: function getTargetSnapshot() {
-        return this.snapshots[1];
+        return this.targetSnapshot;
     }
 });
 

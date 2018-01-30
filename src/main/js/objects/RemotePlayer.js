@@ -24,11 +24,6 @@ class RemotePlayer extends RemoteSprite {
     update (time, delta) {
         super.update(time, delta);
     }
-
-    updateTargetSnapshot (playerSnapshot) {
-        this.currentSnapshot = this.targetSnapshot;
-        this.targetSnapshot = playerSnapshot;
-    }
 }
 
 export default RemotePlayer

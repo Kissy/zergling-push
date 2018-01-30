@@ -21,6 +21,10 @@ class RemoteSprite extends Phaser.GameObjects.Sprite {
         this.currentSnapshot = this.targetSnapshot;
         this.targetSnapshot = playerSnapshot;
     }
+
+    getId() {
+        return this.currentSnapshot.id();
+    }
 }
 
 export default RemoteSprite

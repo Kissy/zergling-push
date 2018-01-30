@@ -32,7 +32,7 @@ class MainScene extends Phaser.Scene {
 
     create() {
         this.network = NetworkManager.get(this.sys.game);
-        this.network.on('message', this.onNetworkMessage.bind(this));
+        this.network.on('message', this.onNetworkMessage, this);
 
         this.snapshotList = new SnapshotList(this.time);
         this.players = this.add.group({
@@ -40,14 +40,7 @@ class MainScene extends Phaser.Scene {
             runChildUpdate: true
         });
 
-        this.sendTimeSyncRequest();
-
-        //this.game.time.ping = 0;
-        //this.game.time.latency = 0;
-        //this.game.time.advancedTiming = true;
-
-        //
-        //this.game.time.events.loop(1000, this.sendTimeSyncRequest, this);
+        this.time.addEvent({ delay: 1000, callback: this.sendTimeSyncRequest, callbackScope: this, loop: true });
 
         //this.world = new World(this);
 
@@ -58,13 +51,11 @@ class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.snapshotCurrentTime = (time - this.snapshotList.getCurrentSnapshot().time())
+        console.log(this.localTime + " " + this.serverTime);
+        this.snapshotCurrentTime = (this.localTime - this.snapshotList.getCurrentSnapshot().time())
             / (this.snapshotList.getTargetSnapshot().time() - this.snapshotList.getCurrentSnapshot().time());
 
         // var performanceNow = performance.now();
-        // game.time.physicsElapsed = (performanceNow - game.time.performanceTime) / 1000;
-        // game.time.physicsElapsedMS = game.time.physicsElapsed * 1000;
-        // game.time.performanceTime = performanceNow;
         // TODO Check times
         /*this.game.time.serverTime += this.game.time.physicsElapsedMS;
         this.game.time.localTime += this.game.time.physicsElapsedMS;
@@ -155,49 +146,38 @@ class MainScene extends Phaser.Scene {
         this.world.debug();
     }
 
-    sendTimeSyncRequest() {
-        let timeSyncRequestBuilder = new flatbuffers.Builder();
-        Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
-        Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, this.time.now);
-        Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
-        this.network.send(timeSyncRequestBuilder);
-    }
-
     onNetworkMessage(byteBuffer) {
         if (Event.TimeSyncResponse.bufferHasIdentifier(byteBuffer)) {
+            // TODO make a RemoteClock class ?
             let event = Event.TimeSyncResponse.getRootAsTimeSyncResponse(byteBuffer);
-            console.log(event.serverTime() + " " + event.time() + " " + this.time.now);
-            //this.time.now = event.serverTime();
-            /*this.game.time.ping = this.game.time.time - _referenceTime - event.time();
-            this.game.time.latency = Math.round(this.game.time.ping / 2);
-            // TODO make a world class ?
-            this.game.time.serverTime = event.serverTime();
-            this.game.time.localTime = event.serverTime() - this.game.time.latency;
-            this.game.time.clientTime = event.serverTime() - _remoteClientDelay;
-            */
+            this.latency = Math.round((this.time.now - event.time()) / 2);
+            this.serverTime = event.serverTime();
+            this.localTime = event.serverTime() - this.latency;
+            this.catchUpTime = this.localTime - this.time.now;
+            console.log(this.catchUpTime);
         } else if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
             this.snapshotList.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
 
-            /*var playerSnapshots = {};
+            var playerSnapshots = {};
             var targetSnapshot = this.snapshotList.getTargetSnapshot();
             for (i = 0; i < targetSnapshot.playersLength(); i++) {
                 var playerSnapshot = targetSnapshot.players(i);
-                if (!playerSnapshots[playerSnapshot.id()]) {
-                    playerSnapshots[playerSnapshot.id()] = {};
-                }
                 playerSnapshots[playerSnapshot.id()] = playerSnapshot;
             }
             this.players.getChildren().forEach(function (player) { // TODO use named function
-                var playerSnapshot = playerSnapshots[player.name];
+                var playerSnapshot = playerSnapshots[player.getId()];
                 if (playerSnapshot) {
                     player.updateTargetSnapshot(playerSnapshot);
-                    delete playerSnapshots[player.name];
+                    delete playerSnapshots[player.getId()];
                 } else {
-                    player.kill();
+                    //player.kill();
                 }
             });
             for (var i in playerSnapshots) {
-                this.players.add(new Player(this.game, this, playerSnapshots[i], 'hostile'));
+                var remotePlayer = new RemotePlayer(this, playerSnapshots[i].x(), playerSnapshots[i].y(), 'hostile');
+                remotePlayer.updateTargetSnapshot(playerSnapshots[i]);
+                remotePlayer.updateTargetSnapshot(playerSnapshots[i]);
+                this.players.add(remotePlayer);
             }
             for (var i = 0; i < targetSnapshot.projectilesLength(); i++) {
                 var projectileSnapshot = targetSnapshot.projectiles(i);
@@ -205,7 +185,7 @@ class MainScene extends Phaser.Scene {
                 if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
                     //this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
                 }
-            }*/
+            }
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             this.playerJoined(Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
@@ -213,6 +193,14 @@ class MainScene extends Phaser.Scene {
         } else {
             console.log(byteBuffer);
         }
+    }
+
+    sendTimeSyncRequest() {
+        let timeSyncRequestBuilder = new flatbuffers.Builder();
+        Event.TimeSyncRequest.startTimeSyncRequest(timeSyncRequestBuilder);
+        Event.TimeSyncRequest.addTime(timeSyncRequestBuilder, this.time.now);
+        Event.TimeSyncRequest.finishTimeSyncRequestBuffer(timeSyncRequestBuilder, Event.TimeSyncRequest.endTimeSyncRequest(timeSyncRequestBuilder));
+        this.network.send(timeSyncRequestBuilder);
     }
 
     playerConnected(event) {
