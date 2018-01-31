@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Created by Guillaume on 19/01/2017.
  */
 public class MainLoop implements Runnable {
-    public static long serverStartTime = System.currentTimeMillis();
+    public static final long serverStartTime = System.currentTimeMillis();
     public static long serverTime = 0;
     private final ArrayBlockingQueue<PlayerMessage> messagesQueue;
     private World world;
@@ -45,7 +45,7 @@ public class MainLoop implements Runnable {
             long currentTime = System.nanoTime();
             deltaTime = (currentTime - lastExecutionTime) / 1_000_000f;
             lastExecutionTime = currentTime;
-            serverTime = System.currentTimeMillis() - serverStartTime;
+            serverTime = System.nanoTime() - serverStartTime;
 
             messagesQueue.forEach(this::dispatch);
 

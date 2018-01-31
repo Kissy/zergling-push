@@ -73,7 +73,8 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
 
     private BinaryWebSocketFrame createTimeSyncResponse(TimeSyncRequest timeSyncRequest) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        int offset = TimeSyncResponse.createTimeSyncResponse(fbb, timeSyncRequest.time(), MainLoop.serverTime, MainLoop.serverStartTime);
+        long serverTime = (System.currentTimeMillis() - MainLoop.serverStartTime);
+        int offset = TimeSyncResponse.createTimeSyncResponse(fbb, timeSyncRequest.time(), serverTime, MainLoop.serverStartTime);
         TimeSyncResponse.finishTimeSyncResponseBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);

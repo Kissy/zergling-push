@@ -5,6 +5,7 @@ import NetworkManager from "./../NetworkManager";
 import ControlledPlayer from "../objects/ControlledPlayer";
 import SnapshotList from "../../webapp/js/SnapshotList";
 import RemotePlayer from "../objects/RemotePlayer";
+import RemoteClock from "../RemoteClock";
 
 var _playerId;
 var _playerVelocityFactor;
@@ -31,16 +32,18 @@ class MainScene extends Phaser.Scene {
     }
 
     create() {
+        this.remoteClock = new RemoteClock(this);
+
         this.network = NetworkManager.get(this.sys.game);
         this.network.on('message', this.onNetworkMessage, this);
+
+        this.time.addEvent({ delay: 1000, callback: this.sendTimeSyncRequest, callbackScope: this, loop: true });
 
         this.snapshotList = new SnapshotList(this.time);
         this.players = this.add.group({
             classType: RemotePlayer,
             runChildUpdate: true
         });
-
-        this.time.addEvent({ delay: 1000, callback: this.sendTimeSyncRequest, callbackScope: this, loop: true });
 
         //this.world = new World(this);
 
@@ -51,7 +54,8 @@ class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        console.log(this.localTime + " " + this.serverTime);
+        this.remoteClock.update(time, delta);
+
         this.snapshotCurrentTime = (this.localTime - this.snapshotList.getCurrentSnapshot().time())
             / (this.snapshotList.getTargetSnapshot().time() - this.snapshotList.getCurrentSnapshot().time());
 
@@ -148,13 +152,7 @@ class MainScene extends Phaser.Scene {
 
     onNetworkMessage(byteBuffer) {
         if (Event.TimeSyncResponse.bufferHasIdentifier(byteBuffer)) {
-            // TODO make a RemoteClock class ?
-            let event = Event.TimeSyncResponse.getRootAsTimeSyncResponse(byteBuffer);
-            this.latency = Math.round((this.time.now - event.time()) / 2);
-            this.serverTime = event.serverTime();
-            this.localTime = event.serverTime() - this.latency;
-            this.catchUpTime = this.localTime - this.time.now;
-            console.log(this.catchUpTime);
+            this.remoteClock.onTimeSyncResponse(byteBuffer);
         } else if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
             this.snapshotList.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
 
