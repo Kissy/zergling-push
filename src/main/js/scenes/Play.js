@@ -6,6 +6,7 @@ import ControlledPlayer from "../objects/ControlledPlayer";
 import SnapshotList from "../SnapshotList";
 import RemotePlayer from "../objects/RemotePlayer";
 import RemoteClock from "../RemoteClock";
+import Projectile from "../objects/Projectile";
 
 var _playerId;
 export var _playerVelocityFactor;
@@ -42,6 +43,10 @@ class MainScene extends Phaser.Scene {
         this.snapshotList = new SnapshotList(this);
         this.players = this.add.group({
             classType: RemotePlayer,
+            runChildUpdate: true
+        });
+        this.projectiles = this.add.group({
+            classType: Projectile,
             runChildUpdate: true
         });
 

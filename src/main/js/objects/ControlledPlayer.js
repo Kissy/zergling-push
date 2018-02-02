@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import RemotePlayer from "./RemotePlayer";
 import {_playerAngularVelocityFactor, _playerVelocityFactor} from "../scenes/Play";
+import Projectile from "./Projectile";
 
 class ControlledPlayer extends RemotePlayer {
     constructor(scene, x, y, texture) {
@@ -8,6 +9,7 @@ class ControlledPlayer extends RemotePlayer {
 
         this.inputSequence = 0;
         this.inputQueue = [];
+        this.nextFireTime = 0;
 
         this.cursorKeys = this.scene.input.keyboard.addKeys({
             up:  Phaser.Input.Keyboard.KeyCodes.UP,
@@ -61,10 +63,10 @@ class ControlledPlayer extends RemotePlayer {
         this.x = this.targetSnapshot.x();
         this.y = this.targetSnapshot.y();
         for (let j = 0; j < this.inputQueue.length; j++) {
-            var currentInput = this.inputQueue[j];
-            var byteBuffer = new flatbuffers.ByteBuffer(currentInput.event.asUint8Array());
-            var currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
-            var duration = currentEvent.duration() / 1000;
+            const currentInput = this.inputQueue[j];
+            const byteBuffer = new flatbuffers.ByteBuffer(currentInput.event.asUint8Array());
+            const currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+            let duration = currentEvent.duration() / 1000;
             this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * duration;
             if (currentInput.done !== true && currentEvent.firing() === true) {
                 currentInput.done = true;
@@ -72,25 +74,18 @@ class ControlledPlayer extends RemotePlayer {
             this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * duration;
             this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * duration;
 
-            /*if (currentEvent.firing()) {
-                if (_game.time.now > this.nextFireTime) {
-                    this.nextFireTime = _game.time.now + _playerFireRate;
-                    var x = this.x + (this.height + 10) * Math.sin(this.rotation);
-                    currentEvent.x = function() {
-                        return x;
-                    };
-                    var y = this.y - (this.height + 10) * Math.cos(this.rotation);
-                    currentEvent.y = function() {
-                        return y;
-                    };
-                    var rotation = this.rotation;
-                    currentEvent.rotation = function() {
-                        return rotation;
-                    };
-                    console.log(this.game.time);
-                    ZerglingPush.PlayState.world.projectiles.add(new ZerglingPush.Projectile(this.game, currentEvent));
+            if (currentEvent.firing()) {
+                if (time > this.nextFireTime) {
+                    console.log("firing");
+                    this.nextFireTime = time + 2000;
+                    let x = this.x + (this.height + 10) * Math.sin(this.rotation);
+                    let y = this.y - (this.height + 10) * Math.cos(this.rotation);
+                    let projectile = new Projectile(this.scene, x, y, 'laser');
+                    projectile.setRotation(this.rotation);
+                    projectile.setTime(time); // TODO find right time
+                    this.scene.projectiles.add(projectile, true);
                 }
-            }*/
+            }
         }
 
         // Detect collision
