@@ -3,13 +3,13 @@
 import * as Phaser from "phaser";
 import NetworkManager from "./../NetworkManager";
 import ControlledPlayer from "../objects/ControlledPlayer";
-import SnapshotList from "../../webapp/js/SnapshotList";
+import SnapshotList from "../SnapshotList";
 import RemotePlayer from "../objects/RemotePlayer";
 import RemoteClock from "../RemoteClock";
 
 var _playerId;
-var _playerVelocityFactor;
-var _playerAngularVelocityFactor;
+export var _playerVelocityFactor;
+export var _playerAngularVelocityFactor;
 var _playerDecelerationFactor;
 var _playerStartingXPosition;
 var _playerStartingYPosition;
@@ -39,7 +39,7 @@ class MainScene extends Phaser.Scene {
 
         this.time.addEvent({ delay: 1000, callback: this.sendTimeSyncRequest, callbackScope: this, loop: true });
 
-        this.snapshotList = new SnapshotList(this.time);
+        this.snapshotList = new SnapshotList(this);
         this.players = this.add.group({
             classType: RemotePlayer,
             runChildUpdate: true
@@ -55,99 +55,40 @@ class MainScene extends Phaser.Scene {
 
     update(time, delta) {
         this.remoteClock.update(time, delta);
-
-        this.snapshotCurrentTime = (this.localTime - this.snapshotList.getCurrentSnapshot().time())
-            / (this.snapshotList.getTargetSnapshot().time() - this.snapshotList.getCurrentSnapshot().time());
-
-        // var performanceNow = performance.now();
-        // TODO Check times
-        /*this.game.time.serverTime += this.game.time.physicsElapsedMS;
-        this.game.time.localTime += this.game.time.physicsElapsedMS;
-        this.game.time.clientTime += this.game.time.physicsElapsedMS;
-
-        this.world.update();
-
-        var i;
-
-        // Process messages from server
-        for (i = 0; i < _messageQueue.length; i++) {
-            var event, byteBuffer = _messageQueue[i];
-            if (Event.PlayerShot.bufferHasIdentifier(byteBuffer)) {
-                event = Event.PlayerShot.getRootAsPlayerShot(byteBuffer);
-                _players[event.id()].shot(event);
-            } else if (Event.PlayerHit.bufferHasIdentifier(byteBuffer)) {
-                event = Event.PlayerHit.getRootAsPlayerHit(byteBuffer);
-                _players[event.id()].hit(event);
-            } else if (Event.PlayerLeaved.bufferHasIdentifier(byteBuffer)) {
-                event = Event.PlayerLeaved.getRootAsPlayerLeaved(byteBuffer);
-                console.log("player leaved");
-                if (_players[event.id()]) {
-                    _players[event.id()].destroy();
-                    delete _players[event.id()];
+        let updated = this.snapshotList.update(time, delta);
+        if (updated) {
+            const playerSnapshots = {};
+            const targetSnapshot = this.snapshotList.getTargetSnapshot();
+            for (let i = 0; i < targetSnapshot.playersLength(); i++) {
+                const playerSnapshot = targetSnapshot.players(i);
+                playerSnapshots[playerSnapshot.id()] = playerSnapshot;
+            }
+            this.players.getChildren().forEach(function (player) { // TODO use named function
+                const playerSnapshot = playerSnapshots[player.getId()];
+                if (playerSnapshot) {
+                    player.receiveSnapshot(playerSnapshot);
+                    delete playerSnapshots[player.getId()];
+                } else {
+                    //player.kill();
                 }
-            } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
-                event = Event.PlayerConnected.getRootAsPlayerConnected(byteBuffer);
-                _playerId = event.id();
-                _playerVelocityFactor = event.velocityFactor();
-                _playerAngularVelocityFactor = event.angularVelocityFactor() * 2 * Math.PI / 360;
-                _playerDecelerationFactor = event.decelerationFactor();
-                _playerStartingXPosition = event.startingXPosition();
-                _playerStartingYPosition = event.startingYPosition();
-                _playerStartingRotation = event.startingRotation();
-                _playerFireRate = 500;
-                _laserFullVelocity = 1000;
-
-                // TODO press enter to join
-                var playerJoinedBuilder = new flatbuffers.Builder();
-                var idOffset = playerJoinedBuilder.createString(_playerId);
-                var nameOffset = playerJoinedBuilder.createString(_playerId);
-                Event.PlayerSnapshot.startPlayerSnapshot(playerJoinedBuilder);
-                Event.PlayerSnapshot.addId(playerJoinedBuilder, idOffset);
-                Event.PlayerSnapshot.addX(playerJoinedBuilder, 0);
-                Event.PlayerSnapshot.addY(playerJoinedBuilder, 0);
-                Event.PlayerSnapshot.addRotation(playerJoinedBuilder, 0);
-                var playerSnapshotOffset = Event.PlayerSnapshot.endPlayerSnapshot(playerJoinedBuilder);
-                Event.PlayerJoined.startPlayerJoined(playerJoinedBuilder);
-                Event.PlayerJoined.addId(playerJoinedBuilder, idOffset);
-                Event.PlayerJoined.addTime(playerJoinedBuilder, this.game.time.localTime);
-                Event.PlayerJoined.addName(playerJoinedBuilder, nameOffset);
-                Event.PlayerJoined.addSnapshot(playerJoinedBuilder, playerSnapshotOffset);
-                Event.PlayerJoined.finishPlayerJoinedBuffer(playerJoinedBuilder, Event.PlayerJoined.endPlayerJoined(playerJoinedBuilder));
-                _inputQueue.push(playerJoinedBuilder.asUint8Array());
-            } else {
-                console.log("Unhandled message");
+            });
+            for (let i in playerSnapshots) {
+                let remotePlayer = new RemotePlayer(this, playerSnapshots[i].x(), playerSnapshots[i].y(), 'hostile');
+                remotePlayer.receiveSnapshot(playerSnapshots[i]);
+                remotePlayer.receiveSnapshot(playerSnapshots[i]);
+                this.players.add(remotePlayer, true);
+            }
+            for (let i = 0; i < targetSnapshot.projectilesLength(); i++) {
+                var projectileSnapshot = targetSnapshot.projectiles(i);
+                // TODO only create once
+                //if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
+                    //this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
+                //}
             }
         }
-        _messageQueue = [];
 
-        // Send global messages to server
-        for (i = 0; i < _inputQueue.length; i++) {
-            this.game.net.webSocket.send(_inputQueue[i]);
-        }
-        _inputQueue = [];
-        */
-    }
-
-    render() {
-        /*this.game.debug.text("FPS : " + (this.game.time.fps || '--'), 2, 15, "#00ff00");
-
-        this.game.debug.text("Ping    : " + this.game.time.ping, 2, 30, "#FFFF00");
-        this.game.debug.text("Latency : " + this.game.time.latency, 2, 45, "#FFFF00");
-
-        this.game.debug.text("Server Time : " + (this.game.time.serverTime / 1000 || '--'), 2, 75, "#00FFFF");
-        this.game.debug.text("Local Time  : " + (this.game.time.localTime / 1000 || '--'), 2, 60, "#00FFFF");
-        this.game.debug.text("Client Time : " + (this.game.time.clientTime / 1000 || '--'), 2, 90, "#00FFFF");
-        // game.debug.text("Server Time Start : " + (game.time.serverStartTime || '--'), 2, 75, "#00FFFF");
-
-        // _game.debug.text("serverTime : " + (_game.time.serverStartTime + _game.time.now), 10, 20);
-        // _game.debug.geom(new Phaser.Line(750 - diff, 0, 750 - diff, 40), "#00FFFF");
-        //this.game.debug.text("Snapshots : " + (this.world.snapshotList.snapshots.length || '--'), 2, 120, "#00FFFF");
-        //this.game.debug.text("Current SS : " + (this.world.snapshotList.snapshots[0].time() / 1000 || '--'), 2, 140, "#00FFFF");
-        /*if (this.world.snapshotList.snapshots[1]) {
-            this.game.debug.text("Target SS : " + (this.world.snapshotList.snapshots[1].time() / 1000 || '--'), 2, 160, "#00FFFF");
-        }*/
-
-        this.world.debug();
+        this.snapshotCurrentTime = (this.remoteClock.getLocalTime() - this.snapshotList.getCurrentSnapshot().time())
+            / (this.snapshotList.getTargetSnapshot().time() - this.snapshotList.getCurrentSnapshot().time());
     }
 
     onNetworkMessage(byteBuffer) {
@@ -155,35 +96,6 @@ class MainScene extends Phaser.Scene {
             this.remoteClock.onTimeSyncResponse(byteBuffer);
         } else if (Event.WorldSnapshot.bufferHasIdentifier(byteBuffer)) {
             this.snapshotList.receiveSnapshot(Event.WorldSnapshot.getRootAsWorldSnapshot(byteBuffer));
-
-            var playerSnapshots = {};
-            var targetSnapshot = this.snapshotList.getTargetSnapshot();
-            for (i = 0; i < targetSnapshot.playersLength(); i++) {
-                var playerSnapshot = targetSnapshot.players(i);
-                playerSnapshots[playerSnapshot.id()] = playerSnapshot;
-            }
-            this.players.getChildren().forEach(function (player) { // TODO use named function
-                var playerSnapshot = playerSnapshots[player.getId()];
-                if (playerSnapshot) {
-                    player.updateTargetSnapshot(playerSnapshot);
-                    delete playerSnapshots[player.getId()];
-                } else {
-                    //player.kill();
-                }
-            });
-            for (var i in playerSnapshots) {
-                var remotePlayer = new RemotePlayer(this, playerSnapshots[i].x(), playerSnapshots[i].y(), 'hostile');
-                remotePlayer.updateTargetSnapshot(playerSnapshots[i]);
-                remotePlayer.updateTargetSnapshot(playerSnapshots[i]);
-                this.players.add(remotePlayer);
-            }
-            for (var i = 0; i < targetSnapshot.projectilesLength(); i++) {
-                var projectileSnapshot = targetSnapshot.projectiles(i);
-                // TODO only create once
-                if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
-                    //this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
-                }
-            }
         } else if (Event.PlayerJoined.bufferHasIdentifier(byteBuffer)) {
             this.playerJoined(Event.PlayerJoined.getRootAsPlayerJoined(byteBuffer));
         } else if (Event.PlayerConnected.bufferHasIdentifier(byteBuffer)) {
@@ -205,6 +117,7 @@ class MainScene extends Phaser.Scene {
         // TODO settings ?
         _playerId = event.id();
         _playerVelocityFactor = event.velocityFactor();
+        console.log(_playerVelocityFactor);
         _playerAngularVelocityFactor = event.angularVelocityFactor() * 2 * Math.PI / 360;
         _playerDecelerationFactor = event.decelerationFactor();
         _playerStartingXPosition = event.startingXPosition();
@@ -235,8 +148,8 @@ class MainScene extends Phaser.Scene {
     playerJoined(playerJoined) {
         const playerJoinedSnapshot = playerJoined.snapshot();
         const controlledPlayer = new ControlledPlayer(this, playerJoinedSnapshot.x(), playerJoinedSnapshot.y(), 'avatar');
-        controlledPlayer.updateTargetSnapshot(playerJoinedSnapshot);
-        controlledPlayer.updateTargetSnapshot(playerJoinedSnapshot);
+        controlledPlayer.receiveSnapshot(playerJoinedSnapshot);
+        controlledPlayer.receiveSnapshot(playerJoinedSnapshot);
         this.players.add(controlledPlayer, true);
     }
 
@@ -249,5 +162,4 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-export default MainScene
-
+export default MainScene;

@@ -2,8 +2,8 @@ import * as Phaser from "phaser";
 import RemoteSprite from "./RemoteSprite";
 
 class RemotePlayer extends RemoteSprite {
-    constructor(scene, x, y, key) {
-        super(scene, x, y, key);
+    constructor(scene, x, y, texture) {
+        super(scene, x, y, texture);
 
         //this.anchor.set(0.5);
 

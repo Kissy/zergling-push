@@ -45,7 +45,8 @@ public class MainLoop implements Runnable {
             long currentTime = System.nanoTime();
             deltaTime = (currentTime - lastExecutionTime) / 1_000_000f;
             lastExecutionTime = currentTime;
-            serverTime = System.nanoTime() - serverStartTime;
+
+            serverTime = System.currentTimeMillis() - serverStartTime;
 
             messagesQueue.forEach(this::dispatch);
 

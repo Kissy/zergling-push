@@ -38,5 +38,6 @@ new Phaser.Game({
     width: 1920,
     height: 960,
     title: 'Zergling Push',
+    backgroundColor: '#1E0835',
     scene: [BootScene, MainScene]
 });

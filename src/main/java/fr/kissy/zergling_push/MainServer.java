@@ -65,7 +65,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class MainServer {
 
-    public static final long TICK_RATE = 1000L / 20L;
+    //public static final long TICK_RATE = 1000L / 60L;
+    public static final long TICK_RATE = 1000L / 30L;
+    //public static final long TICK_RATE = 1000L / 10L;
     public static final String WEBSOCKET_PATH = "/websocket";
 
     public static void main(String[] args) throws Exception {

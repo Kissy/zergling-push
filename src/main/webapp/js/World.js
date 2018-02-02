@@ -91,7 +91,7 @@ var World = new Phaser.Class({
             this.players.getChildren().forEach(function (player) { // TODO use named function
                 var playerSnapshot = playerSnapshots[player.name];
                 if (playerSnapshot) {
-                    player.updateTargetSnapshot(playerSnapshot);
+                    player.receiveSnapshot(playerSnapshot);
                     delete playerSnapshots[player.name];
                 } else {
                     player.kill();
