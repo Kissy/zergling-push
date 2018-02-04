@@ -1,13 +1,17 @@
 import * as Phaser from "phaser";
 import RemoteSprite from "./RemoteSprite";
+import Thruster from "./Thruster";
 
 class RemotePlayer extends RemoteSprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
+        this.setDisplaySize(40.75, 43.25);
         //this.anchor.set(0.5);
 
-        //this.thruster = new ZerglingPush.Thruster(this.game, 1, 48);
+        //this.thruster = new Thruster(this.scene, 100, 48);
+        //this.thruster.parent = this;
+        //this.scene.sys.displayList.add(this.thruster);
         //this.addChild(this.thruster);
 
         /*this.thruster1 = new ZerglingPush.Thruster(this.game, 26, 38);

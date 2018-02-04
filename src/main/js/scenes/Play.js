@@ -25,14 +25,15 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('avatar', 'img/ship1.png');
-        this.load.image('hostile', 'img/ship1-enemy.png');
+        this.load.svg('avatar', 'img/ship1.svg');
+        this.load.svg('hostile', 'img/ship1-enemy.svg');
         this.load.image('laser', 'img/laser.png');
         this.load.image('shield_silver', 'img/shield_silver.png');
         this.load.spritesheet('fire', 'img/fire-sprite.png', {frameWidth: 10, frameHeight: 30, endFrame: 3});
     }
 
     create() {
+        this.cameras.main.setZoom(0.5); // TODO calculate a good zoom
         this.remoteClock = new RemoteClock(this);
 
         this.network = NetworkManager.get(this.sys.game);

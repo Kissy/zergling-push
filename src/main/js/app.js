@@ -32,11 +32,13 @@ var _messageQueue = [];
 var _players = {};
 */
 
+// TODO use defaultPlugins for NetworkManager
+
 new Phaser.Game({
     type: Phaser.CANVAS,
     parent: 'content',
-    width: 1920,
-    height: 960,
+    width: window.innerWidth,
+    height: window.innerHeight,
     title: 'Zergling Push',
     backgroundColor: '#1E0835',
     scene: [BootScene, MainScene]

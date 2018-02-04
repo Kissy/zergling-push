@@ -33,10 +33,22 @@ class ControlledPlayer extends RemotePlayer {
 
         // var self = this, event;
         const event = this.createPlayerMoved(delta);
-        this.inputQueue.push({
-            event: event,
-            sequence: this.inputSequence
-        });
+        const byteBuffer = new flatbuffers.ByteBuffer(event.asUint8Array());
+        const currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+
+        if (currentEvent.firing()) {
+            if (time > this.nextFireTime) {
+                this.nextFireTime += 2000;
+                let x = this.x + (this.displayHeight) * Math.sin(this.rotation);
+                let y = this.y - (this.displayHeight) * Math.cos(this.rotation);
+                let projectile = new Projectile(this.scene, x, y, 'laser');
+                projectile.setRotation(this.rotation);
+                projectile.setTime(time); // TODO find right time
+                this.scene.projectiles.add(projectile, true);
+            }
+        }
+
+        this.inputQueue.push(currentEvent);
 
         // TODO send only at 30 fps
         this.scene.network.send(event);
@@ -58,34 +70,18 @@ class ControlledPlayer extends RemotePlayer {
     update (time, delta) {
         super.update(time, delta);
 
+        // TODO do not extends RemoteSprite
         // Client prediction (apply queued inputs)
         this.rotation = this.targetSnapshot.rotation();
         this.x = this.targetSnapshot.x();
         this.y = this.targetSnapshot.y();
+
         for (let j = 0; j < this.inputQueue.length; j++) {
-            const currentInput = this.inputQueue[j];
-            const byteBuffer = new flatbuffers.ByteBuffer(currentInput.event.asUint8Array());
-            const currentEvent = Event.PlayerMoved.getRootAsPlayerMoved(byteBuffer);
+            const currentEvent = this.inputQueue[j];
             let duration = currentEvent.duration() / 1000;
             this.rotation += currentEvent.angularVelocity() * _playerAngularVelocityFactor * duration;
-            if (currentInput.done !== true && currentEvent.firing() === true) {
-                currentInput.done = true;
-            }
             this.x += currentEvent.velocity() * _playerVelocityFactor * Math.sin(this.rotation) * duration;
             this.y -= currentEvent.velocity() * _playerVelocityFactor * Math.cos(this.rotation) * duration;
-
-            if (currentEvent.firing()) {
-                if (time > this.nextFireTime) {
-                    console.log("firing");
-                    this.nextFireTime = time + 2000;
-                    let x = this.x + (this.height + 10) * Math.sin(this.rotation);
-                    let y = this.y - (this.height + 10) * Math.cos(this.rotation);
-                    let projectile = new Projectile(this.scene, x, y, 'laser');
-                    projectile.setRotation(this.rotation);
-                    projectile.setTime(time); // TODO find right time
-                    this.scene.projectiles.add(projectile, true);
-                }
-            }
         }
 
         // Detect collision
@@ -99,8 +95,8 @@ class ControlledPlayer extends RemotePlayer {
         super.receiveSnapshot(playerSnapshot);
 
         for (let i = 0; i < this.inputQueue.length; i++) {
-            let currentInput = this.inputQueue[i];
-            if (currentInput.sequence > playerSnapshot.sequence()) {
+            let currentEvent = this.inputQueue[i];
+            if (currentEvent.sequence() > playerSnapshot.sequence()) {
                 this.inputQueue.splice(0, i);
                 break;
             }
