@@ -4,9 +4,9 @@ import * as Phaser from "phaser";
 import NetworkManager from "./../NetworkManager";
 import ControlledPlayer from "../objects/ControlledPlayer";
 import SnapshotList from "../SnapshotList";
-import RemotePlayer from "../objects/RemotePlayer";
 import RemoteClock from "../RemoteClock";
 import Projectile from "../objects/Projectile";
+import RemotePlayer from "../objects/RemotePlayer";
 
 var _playerId;
 export var _playerVelocityFactor;
@@ -75,7 +75,8 @@ class MainScene extends Phaser.Scene {
                     player.receiveSnapshot(playerSnapshot);
                     delete playerSnapshots[player.getId()];
                 } else {
-                    //player.kill();
+                    player.setActive(false);
+                    player.setVisible(false);
                 }
             });
             for (let i in playerSnapshots) {

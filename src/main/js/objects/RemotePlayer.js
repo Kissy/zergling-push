@@ -1,91 +1,39 @@
+import Player from "./Player";
 import * as Phaser from "phaser";
-import RemoteSprite from "./RemoteSprite";
-import Thruster from "./Thruster";
 
-class RemotePlayer extends RemoteSprite {
+class RemotePlayer extends Player {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
-        this.setDisplaySize(40.75, 43.25);
-        //this.anchor.set(0.5);
-
-        //this.thruster = new Thruster(this.scene, 100, 48);
-        //this.thruster.parent = this;
-        //this.scene.sys.displayList.add(this.thruster);
-        //this.addChild(this.thruster);
-
-        /*this.thruster1 = new ZerglingPush.Thruster(this.game, 26, 38);
-        this.thruster1.scale.set(0.7);
-        this.addChild(this.thruster1);
-        this.thruster2 = new ZerglingPush.Thruster(this.game, -26, 38);
-        this.thruster2.scale.set(0.7);
-        this.addChild(this.thruster2);
-
-        this.shields = 3;
-        this.display = true;*/
+        /*this.currentSnapShotDebug = this.scene.add.sprite(x, y, texture);
+        this.currentSnapShotDebug.alpha = 0.3;
+        this.targetSnapShotDebug = this.scene.add.sprite(x, y, texture);
+        this.targetSnapShotDebug.alpha = 0.6;*/
     }
 
-    update (time, delta) {
-        super.update(time, delta);
+    update(time, delta) {
+        // Network reconciliation
+        const targetAngle = Phaser.Math.Angle.Wrap(this.targetSnapshot.rotation() - this.currentSnapshot.rotation());
+        this.rotation = this.currentSnapshot.rotation() + targetAngle * this.scene.getSnapshotCurrentTime();
+        this.x = Phaser.Math.Linear(this.currentSnapshot.x(), this.targetSnapshot.x(), this.scene.getSnapshotCurrentTime());
+        this.y = Phaser.Math.Linear(this.currentSnapshot.y(), this.targetSnapshot.y(), this.scene.getSnapshotCurrentTime());
+
+        /*this.currentSnapShotDebug.x = this.currentSnapshot.x();
+        this.currentSnapShotDebug.y = this.currentSnapshot.y();
+        this.currentSnapShotDebug.rotation = this.currentSnapshot.rotation();
+        this.targetSnapShotDebug.x = this.targetSnapshot.x();
+        this.targetSnapShotDebug.y = this.targetSnapshot.y();
+        this.targetSnapShotDebug.rotation = this.targetSnapshot.rotation();*/
+    }
+
+    receiveSnapshot(playerSnapshot) {
+        this.currentSnapshot = this.targetSnapshot;
+        this.targetSnapshot = playerSnapshot;
+    }
+
+    getId() {
+        return this.currentSnapshot.id();
     }
 }
 
 export default RemotePlayer
-
-
-
-/*
-var ZerglingPush = ZerglingPush || {};
-
-(function (window) {
-    function Player(game, remoteWorld, event, texture) {
-        RemoteSprite.call(this, game, remoteWorld, event, texture);
-
-        this.anchor.set(0.5);
-
-        //this.thruster = new ZerglingPush.Thruster(this.game, 1, 48);
-        //this.addChild(this.thruster);
-
-        this.thruster1 = new ZerglingPush.Thruster(this.game, 26, 38);
-        this.thruster1.scale.set(0.7);
-        this.addChild(this.thruster1);
-        this.thruster2 = new ZerglingPush.Thruster(this.game, -26, 38);
-        this.thruster2.scale.set(0.7);
-        this.addChild(this.thruster2);
-
-        this.shields = 3;
-        this.display = true;
-    }
-
-    Player.prototype = Object.create(RemoteSprite.prototype);
-    Player.prototype.constructor = Player;
-
-    Player.prototype.shot = function shot(event) {
-    };
-    Player.prototype.hit = function hit(event) {
-        this.shields--;
-    };
-    Player.prototype.update = function update(deltaTime) {
-        Object.getPrototypeOf(Player.prototype).update.call(this, deltaTime);
-        if (this.moved()) {
-            this.thruster1.start();
-            this.thruster2.start();
-        } else {
-            this.thruster1.stop();
-            this.thruster2.stop();
-        }
-
-        // this.residualVelocity = Math.max(this.residualVelocity - _playerDecelerationFactor, 0);
-        // var currentVelocity = (this.forwardVelocity + this.residualVelocity);
-        // var xVelocity = currentVelocity * Math.sin(this.rotation);
-        // var yVelocity = currentVelocity * Math.cos(this.rotation);
-        // this.x += xVelocity * _game.time.physicsElapsed;
-        // this.y -= yVelocity * _game.time.physicsElapsed;
-    };
-    Player.prototype.moved = function moved() {
-        return !this.position.equals(this.previousPosition);
-    };
-
-    window.Player = Player;
-})(window);
-*/

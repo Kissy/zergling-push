@@ -1,9 +1,9 @@
 import * as Phaser from "phaser";
-import RemotePlayer from "./RemotePlayer";
+import Player from "./Player";
 import {_playerAngularVelocityFactor, _playerVelocityFactor} from "../scenes/Play";
 import Projectile from "./Projectile";
 
-class ControlledPlayer extends RemotePlayer {
+class ControlledPlayer extends Player {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
@@ -68,9 +68,9 @@ class ControlledPlayer extends RemotePlayer {
     }
 
     update (time, delta) {
-        super.update(time, delta);
+        //super.update(time, delta);
 
-        // TODO do not extends RemoteSprite
+        // TODO do not extends RemotePlayer
         // Client prediction (apply queued inputs)
         this.rotation = this.targetSnapshot.rotation();
         this.x = this.targetSnapshot.x();
@@ -91,8 +91,12 @@ class ControlledPlayer extends RemotePlayer {
         }
     }
 
+    getId() {
+        return this.targetSnapshot.id();
+    }
+
     receiveSnapshot (playerSnapshot) {
-        super.receiveSnapshot(playerSnapshot);
+        this.targetSnapshot = playerSnapshot;
 
         for (let i = 0; i < this.inputQueue.length; i++) {
             let currentEvent = this.inputQueue[i];
@@ -105,9 +109,9 @@ class ControlledPlayer extends RemotePlayer {
 
     createPlayerMoved(delta) {
         const builder = new flatbuffers.Builder();
-        const idOffset = builder.createString(this.name);
+        //const idOffset = builder.createString(this.name);
         Event.PlayerMoved.startPlayerMoved(builder);
-        Event.PlayerMoved.addId(builder, idOffset);
+        //Event.PlayerMoved.addId(builder, idOffset);
         //Event.PlayerMoved.addTime(builder, this.time.now);
         Event.PlayerMoved.addDuration(builder, delta);
         Event.PlayerMoved.addSequence(builder, ++this.inputSequence);
@@ -119,27 +123,4 @@ class ControlledPlayer extends RemotePlayer {
     }
 }
 
-export default ControlledPlayer
-
-
-/*
-
-var SAMPLE_INPUT_RATE = 32;
-
-var ControlledPlayer = new Phaser.Class({
-    Extends: RemoteSprite,
-
-    update: function (time, delta) {
-        console.log(time);
-        Object.getPrototypeOf(ControlledPlayer.prototype).update.call(this, time, delta);
-
-
-
-    },
-
-    processInputs: function processInputs() {
-    }
-});
-
-
-*/
+export default ControlledPlayer;
