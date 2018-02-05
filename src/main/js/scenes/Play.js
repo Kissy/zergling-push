@@ -85,13 +85,28 @@ class MainScene extends Phaser.Scene {
                 remotePlayer.receiveSnapshot(playerSnapshots[i]);
                 this.players.add(remotePlayer, true);
             }
+            const projectileSnapshots = {};
             for (let i = 0; i < targetSnapshot.projectilesLength(); i++) {
-                var projectileSnapshot = targetSnapshot.projectiles(i);
-                // TODO only create once
-                //if (this.projectiles.getByName(projectileSnapshot.id()) == null) {
-                    //this.projectiles.add(new ZerglingPush.Projectile(this.game, projectileSnapshot));
-                //}
+                const projectileSnapshot = targetSnapshot.projectiles(i);
+                projectileSnapshots[projectileSnapshot.id()] = projectileSnapshot;
             }
+            this.projectiles.getChildren().forEach(function (projectile) { // TODO use named function
+                const projectileSnapshot = projectileSnapshots[projectile.getId()];
+                if (projectileSnapshot) {
+                    //projectile.receiveSnapshot(projectileSnapshot);
+                    delete projectileSnapshots[projectile.getId()];
+                } else {
+                    projectile.setActive(false);
+                    projectile.setVisible(false);
+                }
+            });
+            /*for (let i in playerSnapshots) {
+                let remotePlayer = new RemotePlayer(this, playerSnapshots[i].x(), playerSnapshots[i].y(), 'hostile');
+                remotePlayer.receiveSnapshot(playerSnapshots[i]);
+                remotePlayer.receiveSnapshot(playerSnapshots[i]);
+                this.players.add(remotePlayer, true);
+            }*/
+
         }
 
         this.snapshotCurrentTime = (this.remoteClock.getLocalTime() - this.snapshotList.getCurrentSnapshot().time())

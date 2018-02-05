@@ -10,6 +10,7 @@ class ControlledPlayer extends Player {
         this.inputSequence = 0;
         this.inputQueue = [];
         this.nextFireTime = 0;
+        this.nextShotId = 1;
 
         this.cursorKeys = this.scene.input.keyboard.addKeys({
             up:  Phaser.Input.Keyboard.KeyCodes.UP,
@@ -38,10 +39,11 @@ class ControlledPlayer extends Player {
 
         if (currentEvent.firing()) {
             if (time > this.nextFireTime) {
-                this.nextFireTime += 2000;
+                this.nextFireTime = time + 1000; // TODO get from server & sync from snapshots
                 let x = this.x + (this.displayHeight) * Math.sin(this.rotation);
                 let y = this.y - (this.displayHeight) * Math.cos(this.rotation);
                 let projectile = new Projectile(this.scene, x, y, 'laser');
+                projectile.id = this.getId() + this.nextShotId ++;
                 projectile.setRotation(this.rotation);
                 projectile.setTime(time); // TODO find right time
                 this.scene.projectiles.add(projectile, true);
@@ -68,9 +70,8 @@ class ControlledPlayer extends Player {
     }
 
     update (time, delta) {
-        //super.update(time, delta);
+        super.update(time, delta);
 
-        // TODO do not extends RemotePlayer
         // Client prediction (apply queued inputs)
         this.rotation = this.targetSnapshot.rotation();
         this.x = this.targetSnapshot.x();

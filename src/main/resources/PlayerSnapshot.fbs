@@ -9,6 +9,7 @@ table PlayerSnapshot {
     x: float;
     y: float;
     rotation: float;
+    shields: byte;
     shots: [PlayerShotSnapshot];
 }
 

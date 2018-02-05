@@ -91,12 +91,20 @@ Event.PlayerSnapshot.prototype.rotation = function() {
 };
 
 /**
+ * @returns {number}
+ */
+Event.PlayerSnapshot.prototype.shields = function() {
+  var offset = this.bb.__offset(this.bb_pos, 14);
+  return offset ? this.bb.readInt8(this.bb_pos + offset) : 0;
+};
+
+/**
  * @param {number} index
  * @param {Event.PlayerShotSnapshot=} obj
  * @returns {Event.PlayerShotSnapshot}
  */
 Event.PlayerSnapshot.prototype.shots = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? (obj || new Event.PlayerShotSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -104,7 +112,7 @@ Event.PlayerSnapshot.prototype.shots = function(index, obj) {
  * @returns {number}
  */
 Event.PlayerSnapshot.prototype.shotsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -112,7 +120,7 @@ Event.PlayerSnapshot.prototype.shotsLength = function() {
  * @param {flatbuffers.Builder} builder
  */
 Event.PlayerSnapshot.startPlayerSnapshot = function(builder) {
-  builder.startObject(6);
+  builder.startObject(7);
 };
 
 /**
@@ -157,10 +165,18 @@ Event.PlayerSnapshot.addRotation = function(builder, rotation) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {number} shields
+ */
+Event.PlayerSnapshot.addShields = function(builder, shields) {
+  builder.addFieldInt8(5, shields, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} shotsOffset
  */
 Event.PlayerSnapshot.addShots = function(builder, shotsOffset) {
-  builder.addFieldOffset(5, shotsOffset, 0);
+  builder.addFieldOffset(6, shotsOffset, 0);
 };
 
 /**

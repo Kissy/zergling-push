@@ -3,6 +3,7 @@ import * as Phaser from "phaser";
 class Projectile extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
+        this.setDisplaySize(10, 30);
 
         this.origin = new Phaser.Geom.Point(this.x, this.y);
         this.velocity = new Phaser.Math.Vector2(0, 0);
@@ -23,6 +24,10 @@ class Projectile extends Phaser.GameObjects.Sprite {
         let currentTime = (time - this.time) / 1000;
         this.x = this.origin.x + currentTime * this.velocity.x;
         this.y = this.origin.y + currentTime * this.velocity.y;
+    }
+
+    getId() {
+        return this.id;
     }
 }
 

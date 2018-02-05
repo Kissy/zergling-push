@@ -12,6 +12,8 @@ class RemotePlayer extends Player {
     }
 
     update(time, delta) {
+        super.update(time, delta);
+
         // Network reconciliation
         const targetAngle = Phaser.Math.Angle.Wrap(this.targetSnapshot.rotation() - this.currentSnapshot.rotation());
         this.rotation = this.currentSnapshot.rotation() + targetAngle * this.scene.getSnapshotCurrentTime();
@@ -24,6 +26,9 @@ class RemotePlayer extends Player {
         this.targetSnapShotDebug.x = this.targetSnapshot.x();
         this.targetSnapShotDebug.y = this.targetSnapshot.y();
         this.targetSnapShotDebug.rotation = this.targetSnapshot.rotation();*/
+
+
+        this.alpha = this.currentSnapshot.shields() / 3;
     }
 
     receiveSnapshot(playerSnapshot) {

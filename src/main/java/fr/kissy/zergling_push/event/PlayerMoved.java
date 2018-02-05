@@ -2,10 +2,11 @@
 
 package fr.kissy.zergling_push.event;
 
-import java.nio.*;
-import java.lang.*;
+import com.google.flatbuffers.FlatBufferBuilder;
+import com.google.flatbuffers.Table;
 
-import com.google.flatbuffers.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @SuppressWarnings("unused")
 public final class PlayerMoved extends Table {

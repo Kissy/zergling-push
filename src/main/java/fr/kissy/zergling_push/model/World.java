@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
+import io.netty.channel.DefaultChannelId;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
@@ -19,17 +20,22 @@ import java.util.Map;
 
 public class World {
     private final Map<ChannelId, Player> players;
-    private final List<Laser> projectiles;
+    private final List<Projectile> projectiles;
     private final ChannelGroup allPlayers = new DefaultChannelGroup("AllPlayers", GlobalEventExecutor.INSTANCE);
 
     public World() {
         this.players = new HashMap<>();
+        // Dummy
+        this.players.put(DefaultChannelId.newInstance(), new AIPlayer("test", 400, 400, 0, this, "test"));
         this.projectiles = new ArrayList<>();
     }
 
     public void update(double deltaTime) {
-        projectiles.parallelStream().forEach(l -> l.update(deltaTime));
-        projectiles.removeIf(Laser::expired);
+        projectiles.parallelStream().forEach(l -> {
+            l.update(deltaTime);
+            l.detectHit(players.values());
+        });
+        projectiles.removeIf(Projectile::expired);
     }
 
     public void playerJoined(Channel channel, PlayerJoined playerJoined) {
@@ -42,8 +48,8 @@ public class World {
         allPlayers.remove(channel);
     }
 
-    public void playerShot(Laser laser) {
-        projectiles.add(laser);
+    public void playerShot(Projectile projectile) {
+        projectiles.add(projectile);
     }
 
     public Player getPlayer(ChannelId id) {
@@ -57,8 +63,8 @@ public class World {
             playersOffsets.add(player.createPlayerSnapshotOffset(fbb));
         }
         List<Integer> projectilesOffsets = new ArrayList<>();
-        for (Laser laser : projectiles) {
-            projectilesOffsets.add(laser.createPlayerShotSnapshotOffset(fbb));
+        for (Projectile projectile : projectiles) {
+            projectilesOffsets.add(projectile.createPlayerShotSnapshotOffset(fbb));
         }
         int playersVectorOffset = WorldSnapshot.createPlayersVector(fbb, playersOffsets.stream().mapToInt(i -> i).toArray());
         int projectilesVectorOffset = WorldSnapshot.createProjectilesVector(fbb, projectilesOffsets.stream().mapToInt(i -> i).toArray());

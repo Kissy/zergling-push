@@ -12,9 +12,9 @@ import java.util.Date;
  */
 public class Hit {
     private final Player player;
-    private final Laser shot;
+    private final Projectile shot;
 
-    public Hit(Player player, Laser shot) {
+    public Hit(Player player, Projectile shot) {
         this.player = player;
         this.shot = shot;
     }

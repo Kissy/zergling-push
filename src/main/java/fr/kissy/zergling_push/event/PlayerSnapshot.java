@@ -2,10 +2,11 @@
 
 package fr.kissy.zergling_push.event;
 
-import java.nio.*;
-import java.lang.*;
+import com.google.flatbuffers.FlatBufferBuilder;
+import com.google.flatbuffers.Table;
 
-import com.google.flatbuffers.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @SuppressWarnings("unused")
 public final class PlayerSnapshot extends Table {
@@ -21,9 +22,10 @@ public final class PlayerSnapshot extends Table {
   public float x() { int o = __offset(8); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public float y() { int o = __offset(10); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   public float rotation() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public byte shields() { int o = __offset(14); return o != 0 ? bb.get(o + bb_pos) : 0; }
   public PlayerShotSnapshot shots(int j) { return shots(new PlayerShotSnapshot(), j); }
-  public PlayerShotSnapshot shots(PlayerShotSnapshot obj, int j) { int o = __offset(14); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int shotsLength() { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; }
+  public PlayerShotSnapshot shots(PlayerShotSnapshot obj, int j) { int o = __offset(16); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int shotsLength() { int o = __offset(16); return o != 0 ? __vector_len(o) : 0; }
 
   public static int createPlayerSnapshot(FlatBufferBuilder builder,
       int idOffset,
@@ -31,24 +33,27 @@ public final class PlayerSnapshot extends Table {
       float x,
       float y,
       float rotation,
+      byte shields,
       int shotsOffset) {
-    builder.startObject(6);
+    builder.startObject(7);
     PlayerSnapshot.addShots(builder, shotsOffset);
     PlayerSnapshot.addRotation(builder, rotation);
     PlayerSnapshot.addY(builder, y);
     PlayerSnapshot.addX(builder, x);
     PlayerSnapshot.addSequence(builder, sequence);
     PlayerSnapshot.addId(builder, idOffset);
+    PlayerSnapshot.addShields(builder, shields);
     return PlayerSnapshot.endPlayerSnapshot(builder);
   }
 
-  public static void startPlayerSnapshot(FlatBufferBuilder builder) { builder.startObject(6); }
+  public static void startPlayerSnapshot(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
   public static void addSequence(FlatBufferBuilder builder, long sequence) { builder.addInt(1, (int)sequence, (int)0L); }
   public static void addX(FlatBufferBuilder builder, float x) { builder.addFloat(2, x, 0.0f); }
   public static void addY(FlatBufferBuilder builder, float y) { builder.addFloat(3, y, 0.0f); }
   public static void addRotation(FlatBufferBuilder builder, float rotation) { builder.addFloat(4, rotation, 0.0f); }
-  public static void addShots(FlatBufferBuilder builder, int shotsOffset) { builder.addOffset(5, shotsOffset, 0); }
+  public static void addShields(FlatBufferBuilder builder, byte shields) { builder.addByte(5, shields, 0); }
+  public static void addShots(FlatBufferBuilder builder, int shotsOffset) { builder.addOffset(6, shotsOffset, 0); }
   public static int createShotsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startShotsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static int endPlayerSnapshot(FlatBufferBuilder builder) {

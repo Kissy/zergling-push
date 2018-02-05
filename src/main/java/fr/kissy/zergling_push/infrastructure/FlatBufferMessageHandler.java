@@ -18,7 +18,7 @@ package fr.kissy.zergling_push.infrastructure;
 import com.google.flatbuffers.FlatBufferBuilder;
 import fr.kissy.zergling_push.MainLoop;
 import fr.kissy.zergling_push.event.*;
-import fr.kissy.zergling_push.model.Laser;
+import fr.kissy.zergling_push.model.Projectile;
 import fr.kissy.zergling_push.model.Player;
 import fr.kissy.zergling_push.model.PlayerMessage;
 import fr.kissy.zergling_push.model.World;
@@ -85,7 +85,7 @@ public class FlatBufferMessageHandler extends SimpleChannelInboundHandler<Binary
         int idOffset = fbb.createString(channel.id().asShortText());
         int nameOffset = fbb.createString(channel.id().asShortText());
         int offset = PlayerConnected.createPlayerConnected(fbb, idOffset, nameOffset, STARTING_X, STARTING_Y, STARTING_ROTATION,
-                (float) Player.VELOCITY_FACTOR, (float) Player.ANGULAR_VELOCITY_FACTOR, (float) Player.DECELERATION_FACTOR, Laser.VELOCITY_FACTOR);
+                (float) Player.VELOCITY_FACTOR, (float) Player.ANGULAR_VELOCITY_FACTOR, (float) Player.DECELERATION_FACTOR, Projectile.VELOCITY_FACTOR);
         PlayerConnected.finishPlayerConnectedBuffer(fbb, offset);
         ByteBuf byteBuf = Unpooled.wrappedBuffer(fbb.dataBuffer());
         return new BinaryWebSocketFrame(byteBuf);
