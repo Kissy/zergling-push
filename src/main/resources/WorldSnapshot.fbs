@@ -1,7 +1,7 @@
 include "PlayerSnapshot.fbs";
 include "ProjectileSnapshot.fbs";
 
-namespace Event;
+namespace fr.kissy.zergling_push.event;
 file_identifier "WDSP";
 
 table WorldSnapshot {

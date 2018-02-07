@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.WorldSnapshot = function() {
+fr.kissy.zergling_push.event.WorldSnapshot = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.WorldSnapshot = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.WorldSnapshot}
+ * @returns {fr.kissy.zergling_push.event.WorldSnapshot}
  */
-Event.WorldSnapshot.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,61 +52,61 @@ Event.WorldSnapshot.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.WorldSnapshot=} obj
- * @returns {Event.WorldSnapshot}
+ * @param {fr.kissy.zergling_push.event.WorldSnapshot=} obj
+ * @returns {fr.kissy.zergling_push.event.WorldSnapshot}
  */
-Event.WorldSnapshot.getRootAsWorldSnapshot = function(bb, obj) {
-  return (obj || new Event.WorldSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.WorldSnapshot.getRootAsWorldSnapshot = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.WorldSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.WorldSnapshot.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.WorldSnapshot.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('WDSP');
 };
 
 /**
  * @returns {number}
  */
-Event.WorldSnapshot.prototype.time = function() {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.time = function() {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
 
 /**
  * @param {number} index
- * @param {Event.PlayerSnapshot=} obj
- * @returns {Event.PlayerSnapshot}
+ * @param {fr.kissy.zergling_push.event.PlayerSnapshot=} obj
+ * @returns {fr.kissy.zergling_push.event.PlayerSnapshot}
  */
-Event.WorldSnapshot.prototype.players = function(index, obj) {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.players = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 6);
-  return offset ? (obj || new Event.PlayerSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+  return offset ? (obj || new fr.kissy.zergling_push.event.PlayerSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
 /**
  * @returns {number}
  */
-Event.WorldSnapshot.prototype.playersLength = function() {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.playersLength = function() {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
 /**
  * @param {number} index
- * @param {Event.ProjectileSnapshot=} obj
- * @returns {Event.ProjectileSnapshot}
+ * @param {fr.kissy.zergling_push.event.ProjectileSnapshot=} obj
+ * @returns {fr.kissy.zergling_push.event.ProjectileSnapshot}
  */
-Event.WorldSnapshot.prototype.projectiles = function(index, obj) {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.projectiles = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 8);
-  return offset ? (obj || new Event.ProjectileSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+  return offset ? (obj || new fr.kissy.zergling_push.event.ProjectileSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
 /**
  * @returns {number}
  */
-Event.WorldSnapshot.prototype.projectilesLength = function() {
+fr.kissy.zergling_push.event.WorldSnapshot.prototype.projectilesLength = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
@@ -96,7 +114,7 @@ Event.WorldSnapshot.prototype.projectilesLength = function() {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.WorldSnapshot.startWorldSnapshot = function(builder) {
+fr.kissy.zergling_push.event.WorldSnapshot.startWorldSnapshot = function(builder) {
   builder.startObject(3);
 };
 
@@ -104,7 +122,7 @@ Event.WorldSnapshot.startWorldSnapshot = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {number} time
  */
-Event.WorldSnapshot.addTime = function(builder, time) {
+fr.kissy.zergling_push.event.WorldSnapshot.addTime = function(builder, time) {
   builder.addFieldInt32(0, time, 0);
 };
 
@@ -112,7 +130,7 @@ Event.WorldSnapshot.addTime = function(builder, time) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} playersOffset
  */
-Event.WorldSnapshot.addPlayers = function(builder, playersOffset) {
+fr.kissy.zergling_push.event.WorldSnapshot.addPlayers = function(builder, playersOffset) {
   builder.addFieldOffset(1, playersOffset, 0);
 };
 
@@ -121,7 +139,7 @@ Event.WorldSnapshot.addPlayers = function(builder, playersOffset) {
  * @param {Array.<flatbuffers.Offset>} data
  * @returns {flatbuffers.Offset}
  */
-Event.WorldSnapshot.createPlayersVector = function(builder, data) {
+fr.kissy.zergling_push.event.WorldSnapshot.createPlayersVector = function(builder, data) {
   builder.startVector(4, data.length, 4);
   for (var i = data.length - 1; i >= 0; i--) {
     builder.addOffset(data[i]);
@@ -133,7 +151,7 @@ Event.WorldSnapshot.createPlayersVector = function(builder, data) {
  * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
-Event.WorldSnapshot.startPlayersVector = function(builder, numElems) {
+fr.kissy.zergling_push.event.WorldSnapshot.startPlayersVector = function(builder, numElems) {
   builder.startVector(4, numElems, 4);
 };
 
@@ -141,7 +159,7 @@ Event.WorldSnapshot.startPlayersVector = function(builder, numElems) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} projectilesOffset
  */
-Event.WorldSnapshot.addProjectiles = function(builder, projectilesOffset) {
+fr.kissy.zergling_push.event.WorldSnapshot.addProjectiles = function(builder, projectilesOffset) {
   builder.addFieldOffset(2, projectilesOffset, 0);
 };
 
@@ -150,7 +168,7 @@ Event.WorldSnapshot.addProjectiles = function(builder, projectilesOffset) {
  * @param {Array.<flatbuffers.Offset>} data
  * @returns {flatbuffers.Offset}
  */
-Event.WorldSnapshot.createProjectilesVector = function(builder, data) {
+fr.kissy.zergling_push.event.WorldSnapshot.createProjectilesVector = function(builder, data) {
   builder.startVector(4, data.length, 4);
   for (var i = data.length - 1; i >= 0; i--) {
     builder.addOffset(data[i]);
@@ -162,7 +180,7 @@ Event.WorldSnapshot.createProjectilesVector = function(builder, data) {
  * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
-Event.WorldSnapshot.startProjectilesVector = function(builder, numElems) {
+fr.kissy.zergling_push.event.WorldSnapshot.startProjectilesVector = function(builder, numElems) {
   builder.startVector(4, numElems, 4);
 };
 
@@ -170,7 +188,7 @@ Event.WorldSnapshot.startProjectilesVector = function(builder, numElems) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.WorldSnapshot.endWorldSnapshot = function(builder) {
+fr.kissy.zergling_push.event.WorldSnapshot.endWorldSnapshot = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -179,9 +197,9 @@ Event.WorldSnapshot.endWorldSnapshot = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.WorldSnapshot.finishWorldSnapshotBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.WorldSnapshot.finishWorldSnapshotBuffer = function(builder, offset) {
   builder.finish(offset, 'WDSP');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

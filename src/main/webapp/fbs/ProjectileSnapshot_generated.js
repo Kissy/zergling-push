@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.ProjectileSnapshot = function() {
+fr.kissy.zergling_push.event.ProjectileSnapshot = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.ProjectileSnapshot = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.ProjectileSnapshot}
+ * @returns {fr.kissy.zergling_push.event.ProjectileSnapshot}
  */
-Event.ProjectileSnapshot.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,18 +52,18 @@ Event.ProjectileSnapshot.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.ProjectileSnapshot=} obj
- * @returns {Event.ProjectileSnapshot}
+ * @param {fr.kissy.zergling_push.event.ProjectileSnapshot=} obj
+ * @returns {fr.kissy.zergling_push.event.ProjectileSnapshot}
  */
-Event.ProjectileSnapshot.getRootAsProjectileSnapshot = function(bb, obj) {
-  return (obj || new Event.ProjectileSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.ProjectileSnapshot.getRootAsProjectileSnapshot = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.ProjectileSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.ProjectileSnapshot.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('PJSP');
 };
 
@@ -53,7 +71,7 @@ Event.ProjectileSnapshot.bufferHasIdentifier = function(bb) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Event.ProjectileSnapshot.prototype.id = function(optionalEncoding) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -61,7 +79,7 @@ Event.ProjectileSnapshot.prototype.id = function(optionalEncoding) {
 /**
  * @returns {number}
  */
-Event.ProjectileSnapshot.prototype.x = function() {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.x = function() {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -69,7 +87,7 @@ Event.ProjectileSnapshot.prototype.x = function() {
 /**
  * @returns {number}
  */
-Event.ProjectileSnapshot.prototype.y = function() {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.y = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -77,7 +95,7 @@ Event.ProjectileSnapshot.prototype.y = function() {
 /**
  * @returns {number}
  */
-Event.ProjectileSnapshot.prototype.rotation = function() {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.rotation = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -85,7 +103,7 @@ Event.ProjectileSnapshot.prototype.rotation = function() {
 /**
  * @returns {number}
  */
-Event.ProjectileSnapshot.prototype.time = function() {
+fr.kissy.zergling_push.event.ProjectileSnapshot.prototype.time = function() {
   var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
@@ -93,7 +111,7 @@ Event.ProjectileSnapshot.prototype.time = function() {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.ProjectileSnapshot.startProjectileSnapshot = function(builder) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.startProjectileSnapshot = function(builder) {
   builder.startObject(5);
 };
 
@@ -101,7 +119,7 @@ Event.ProjectileSnapshot.startProjectileSnapshot = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} idOffset
  */
-Event.ProjectileSnapshot.addId = function(builder, idOffset) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.addId = function(builder, idOffset) {
   builder.addFieldOffset(0, idOffset, 0);
 };
 
@@ -109,7 +127,7 @@ Event.ProjectileSnapshot.addId = function(builder, idOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {number} x
  */
-Event.ProjectileSnapshot.addX = function(builder, x) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.addX = function(builder, x) {
   builder.addFieldFloat32(1, x, 0.0);
 };
 
@@ -117,7 +135,7 @@ Event.ProjectileSnapshot.addX = function(builder, x) {
  * @param {flatbuffers.Builder} builder
  * @param {number} y
  */
-Event.ProjectileSnapshot.addY = function(builder, y) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.addY = function(builder, y) {
   builder.addFieldFloat32(2, y, 0.0);
 };
 
@@ -125,7 +143,7 @@ Event.ProjectileSnapshot.addY = function(builder, y) {
  * @param {flatbuffers.Builder} builder
  * @param {number} rotation
  */
-Event.ProjectileSnapshot.addRotation = function(builder, rotation) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.addRotation = function(builder, rotation) {
   builder.addFieldFloat32(3, rotation, 0.0);
 };
 
@@ -133,7 +151,7 @@ Event.ProjectileSnapshot.addRotation = function(builder, rotation) {
  * @param {flatbuffers.Builder} builder
  * @param {number} time
  */
-Event.ProjectileSnapshot.addTime = function(builder, time) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.addTime = function(builder, time) {
   builder.addFieldInt32(4, time, 0);
 };
 
@@ -141,7 +159,7 @@ Event.ProjectileSnapshot.addTime = function(builder, time) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.ProjectileSnapshot.endProjectileSnapshot = function(builder) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.endProjectileSnapshot = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -150,9 +168,9 @@ Event.ProjectileSnapshot.endProjectileSnapshot = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.ProjectileSnapshot.finishProjectileSnapshotBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.ProjectileSnapshot.finishProjectileSnapshotBuffer = function(builder, offset) {
   builder.finish(offset, 'PJSP');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

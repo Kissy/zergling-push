@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.PlayerConnect = function() {
+fr.kissy.zergling_push.event.PlayerConnect = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.PlayerConnect = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.PlayerConnect}
+ * @returns {fr.kissy.zergling_push.event.PlayerConnect}
  */
-Event.PlayerConnect.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.PlayerConnect.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,25 +52,25 @@ Event.PlayerConnect.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.PlayerConnect=} obj
- * @returns {Event.PlayerConnect}
+ * @param {fr.kissy.zergling_push.event.PlayerConnect=} obj
+ * @returns {fr.kissy.zergling_push.event.PlayerConnect}
  */
-Event.PlayerConnect.getRootAsPlayerConnect = function(bb, obj) {
-  return (obj || new Event.PlayerConnect).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.PlayerConnect.getRootAsPlayerConnect = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.PlayerConnect).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.PlayerConnect.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.PlayerConnect.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('PLCO');
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.PlayerConnect.startPlayerConnect = function(builder) {
+fr.kissy.zergling_push.event.PlayerConnect.startPlayerConnect = function(builder) {
   builder.startObject(0);
 };
 
@@ -60,7 +78,7 @@ Event.PlayerConnect.startPlayerConnect = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.PlayerConnect.endPlayerConnect = function(builder) {
+fr.kissy.zergling_push.event.PlayerConnect.endPlayerConnect = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -69,9 +87,9 @@ Event.PlayerConnect.endPlayerConnect = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.PlayerConnect.finishPlayerConnectBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.PlayerConnect.finishPlayerConnectBuffer = function(builder, offset) {
   builder.finish(offset, 'PLCO');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

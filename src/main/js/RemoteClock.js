@@ -2,6 +2,8 @@
 
 import * as Phaser from "phaser";
 
+const Event = fr.kissy.zergling_push.event;
+
 const clientDelay = 100;
 
 class RemoteClock {

@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.TimeSyncResponse = function() {
+fr.kissy.zergling_push.event.TimeSyncResponse = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.TimeSyncResponse = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.TimeSyncResponse}
+ * @returns {fr.kissy.zergling_push.event.TimeSyncResponse}
  */
-Event.TimeSyncResponse.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.TimeSyncResponse.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,25 +52,25 @@ Event.TimeSyncResponse.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.TimeSyncResponse=} obj
- * @returns {Event.TimeSyncResponse}
+ * @param {fr.kissy.zergling_push.event.TimeSyncResponse=} obj
+ * @returns {fr.kissy.zergling_push.event.TimeSyncResponse}
  */
-Event.TimeSyncResponse.getRootAsTimeSyncResponse = function(bb, obj) {
-  return (obj || new Event.TimeSyncResponse).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.TimeSyncResponse.getRootAsTimeSyncResponse = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.TimeSyncResponse).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.TimeSyncResponse.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.TimeSyncResponse.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('TSRS');
 };
 
 /**
  * @returns {number}
  */
-Event.TimeSyncResponse.prototype.time = function() {
+fr.kissy.zergling_push.event.TimeSyncResponse.prototype.time = function() {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
@@ -60,7 +78,7 @@ Event.TimeSyncResponse.prototype.time = function() {
 /**
  * @returns {number}
  */
-Event.TimeSyncResponse.prototype.serverTime = function() {
+fr.kissy.zergling_push.event.TimeSyncResponse.prototype.serverTime = function() {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
@@ -68,7 +86,7 @@ Event.TimeSyncResponse.prototype.serverTime = function() {
 /**
  * @returns {number}
  */
-Event.TimeSyncResponse.prototype.serverStartTime = function() {
+fr.kissy.zergling_push.event.TimeSyncResponse.prototype.serverStartTime = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
@@ -76,7 +94,7 @@ Event.TimeSyncResponse.prototype.serverStartTime = function() {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.TimeSyncResponse.startTimeSyncResponse = function(builder) {
+fr.kissy.zergling_push.event.TimeSyncResponse.startTimeSyncResponse = function(builder) {
   builder.startObject(3);
 };
 
@@ -84,7 +102,7 @@ Event.TimeSyncResponse.startTimeSyncResponse = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {number} time
  */
-Event.TimeSyncResponse.addTime = function(builder, time) {
+fr.kissy.zergling_push.event.TimeSyncResponse.addTime = function(builder, time) {
   builder.addFieldInt32(0, time, 0);
 };
 
@@ -92,7 +110,7 @@ Event.TimeSyncResponse.addTime = function(builder, time) {
  * @param {flatbuffers.Builder} builder
  * @param {number} serverTime
  */
-Event.TimeSyncResponse.addServerTime = function(builder, serverTime) {
+fr.kissy.zergling_push.event.TimeSyncResponse.addServerTime = function(builder, serverTime) {
   builder.addFieldInt32(1, serverTime, 0);
 };
 
@@ -100,7 +118,7 @@ Event.TimeSyncResponse.addServerTime = function(builder, serverTime) {
  * @param {flatbuffers.Builder} builder
  * @param {number} serverStartTime
  */
-Event.TimeSyncResponse.addServerStartTime = function(builder, serverStartTime) {
+fr.kissy.zergling_push.event.TimeSyncResponse.addServerStartTime = function(builder, serverStartTime) {
   builder.addFieldInt32(2, serverStartTime, 0);
 };
 
@@ -108,7 +126,7 @@ Event.TimeSyncResponse.addServerStartTime = function(builder, serverStartTime) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.TimeSyncResponse.endTimeSyncResponse = function(builder) {
+fr.kissy.zergling_push.event.TimeSyncResponse.endTimeSyncResponse = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -117,9 +135,9 @@ Event.TimeSyncResponse.endTimeSyncResponse = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.TimeSyncResponse.finishTimeSyncResponseBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.TimeSyncResponse.finishTimeSyncResponseBuffer = function(builder, offset) {
   builder.finish(offset, 'TSRS');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

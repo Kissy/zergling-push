@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.PlayerLeaved = function() {
+fr.kissy.zergling_push.event.PlayerLeaved = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.PlayerLeaved = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.PlayerLeaved}
+ * @returns {fr.kissy.zergling_push.event.PlayerLeaved}
  */
-Event.PlayerLeaved.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.PlayerLeaved.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,18 +52,18 @@ Event.PlayerLeaved.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.PlayerLeaved=} obj
- * @returns {Event.PlayerLeaved}
+ * @param {fr.kissy.zergling_push.event.PlayerLeaved=} obj
+ * @returns {fr.kissy.zergling_push.event.PlayerLeaved}
  */
-Event.PlayerLeaved.getRootAsPlayerLeaved = function(bb, obj) {
-  return (obj || new Event.PlayerLeaved).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.PlayerLeaved.getRootAsPlayerLeaved = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.PlayerLeaved).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.PlayerLeaved.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.PlayerLeaved.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('PLLV');
 };
 
@@ -53,7 +71,7 @@ Event.PlayerLeaved.bufferHasIdentifier = function(bb) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Event.PlayerLeaved.prototype.id = function(optionalEncoding) {
+fr.kissy.zergling_push.event.PlayerLeaved.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -61,7 +79,7 @@ Event.PlayerLeaved.prototype.id = function(optionalEncoding) {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.PlayerLeaved.startPlayerLeaved = function(builder) {
+fr.kissy.zergling_push.event.PlayerLeaved.startPlayerLeaved = function(builder) {
   builder.startObject(1);
 };
 
@@ -69,7 +87,7 @@ Event.PlayerLeaved.startPlayerLeaved = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} idOffset
  */
-Event.PlayerLeaved.addId = function(builder, idOffset) {
+fr.kissy.zergling_push.event.PlayerLeaved.addId = function(builder, idOffset) {
   builder.addFieldOffset(0, idOffset, 0);
 };
 
@@ -77,7 +95,7 @@ Event.PlayerLeaved.addId = function(builder, idOffset) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.PlayerLeaved.endPlayerLeaved = function(builder) {
+fr.kissy.zergling_push.event.PlayerLeaved.endPlayerLeaved = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -86,9 +104,9 @@ Event.PlayerLeaved.endPlayerLeaved = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.PlayerLeaved.finishPlayerLeavedBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.PlayerLeaved.finishPlayerLeavedBuffer = function(builder, offset) {
   builder.finish(offset, 'PLLV');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

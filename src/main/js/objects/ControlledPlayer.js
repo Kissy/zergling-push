@@ -3,6 +3,8 @@ import Player from "./Player";
 import {_playerAngularVelocityFactor, _playerVelocityFactor} from "../scenes/Play";
 import Projectile from "./Projectile";
 
+const Event = fr.kissy.zergling_push.event;
+
 class ControlledPlayer extends Player {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);

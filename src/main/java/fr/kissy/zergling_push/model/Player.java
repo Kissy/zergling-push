@@ -33,7 +33,6 @@ public class Player extends WorldObject {
     private Channel channel;
     private String name;
     private List<Projectile> shots;
-    private List<Projectile> newShots;
     private int shields = 3;
     private long lastInputSequence = 0;
     private double lastFiringTime = FIRE_RATE_MS;
@@ -43,7 +42,6 @@ public class Player extends WorldObject {
         super(id, x, y, rotation);
         this.world = world;
         this.name = name;
-        this.newShots = new ArrayList<>();
     }
 
     public Player(World world, Channel channel, PlayerJoined event, List<Projectile> shots) {
@@ -52,7 +50,6 @@ public class Player extends WorldObject {
         this.channel = channel;
         this.name = event.name();
         this.shots = shots;
-        this.newShots = new ArrayList<>();
         if (this.channel != null) {
             this.channel.writeAndFlush(new BinaryWebSocketFrame(createPlayerJoined()));
         }
@@ -89,10 +86,7 @@ public class Player extends WorldObject {
 
     public int createPlayerSnapshotOffset(FlatBufferBuilder fbb) {
         int idOffset = fbb.createString(id);
-        List<Integer> newShotsOffsets = new ArrayList<>();
-        newShots.clear();
-        int playerShotsVectorOffset = PlayerSnapshot.createShotsVector(fbb, newShotsOffsets.stream().mapToInt(i -> i).toArray());
-        return PlayerSnapshot.createPlayerSnapshot(fbb, idOffset, this.lastInputSequence, (float) x, (float) y, (float) rotation, (byte) this.shields, playerShotsVectorOffset);
+        return PlayerSnapshot.createPlayerSnapshot(fbb, idOffset, this.lastInputSequence, (float) x, (float) y, (float) rotation, (byte) this.shields);
     }
 
     public boolean isHitBy(Projectile shot) {

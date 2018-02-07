@@ -1,4 +1,4 @@
-namespace Event;
+namespace fr.kissy.zergling_push.event;
 file_identifier "PJSP";
 
 table ProjectileSnapshot {

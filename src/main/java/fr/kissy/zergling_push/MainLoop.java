@@ -69,27 +69,6 @@ public class MainLoop implements Runnable {
         }
     }
 
-    private void detectCollisions() {
-        List<Hit> hits = players.values().stream()
-                .flatMap(player -> player.getShots().stream())
-                .flatMap(shot ->
-                        players.values().stream()
-                                .filter(shot::canHit)
-                                .filter(player -> player.isHitBy(shot))
-                                .map(player -> new Hit(player, shot))
-                                .collect(Collectors.toList()).stream()
-                )
-                .collect(Collectors.toList());
-
-        for (Hit hit : hits) {
-            // TODO call in stream directly
-            ByteBuf message = hit.process();
-            // TODO send with world snapshot
-            allPlayers.write(new BinaryWebSocketFrame(message));
-        }
-        allPlayers.flush();
-    }
-
     private void dispatch(PlayerMessage playerMessage) {
         Channel player = playerMessage.getPlayer();
         ByteBuffer byteBuffer = playerMessage.getMessage().nioBuffer();

@@ -1,6 +1,4 @@
-include "PlayerShotSnapshot.fbs";
-
-namespace Event;
+namespace fr.kissy.zergling_push.event;
 file_identifier "PLSP";
 
 table PlayerSnapshot {
@@ -10,7 +8,6 @@ table PlayerSnapshot {
     y: float;
     rotation: float;
     shields: byte;
-    shots: [PlayerShotSnapshot];
 }
 
 root_type PlayerSnapshot;

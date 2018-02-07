@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.PlayerConnected = function() {
+fr.kissy.zergling_push.event.PlayerConnected = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.PlayerConnected = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.PlayerConnected}
+ * @returns {fr.kissy.zergling_push.event.PlayerConnected}
  */
-Event.PlayerConnected.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,18 +52,18 @@ Event.PlayerConnected.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.PlayerConnected=} obj
- * @returns {Event.PlayerConnected}
+ * @param {fr.kissy.zergling_push.event.PlayerConnected=} obj
+ * @returns {fr.kissy.zergling_push.event.PlayerConnected}
  */
-Event.PlayerConnected.getRootAsPlayerConnected = function(bb, obj) {
-  return (obj || new Event.PlayerConnected).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.PlayerConnected.getRootAsPlayerConnected = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.PlayerConnected).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.PlayerConnected.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.PlayerConnected.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('PLCN');
 };
 
@@ -53,7 +71,7 @@ Event.PlayerConnected.bufferHasIdentifier = function(bb) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Event.PlayerConnected.prototype.id = function(optionalEncoding) {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -62,7 +80,7 @@ Event.PlayerConnected.prototype.id = function(optionalEncoding) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Event.PlayerConnected.prototype.name = function(optionalEncoding) {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.name = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -70,7 +88,7 @@ Event.PlayerConnected.prototype.name = function(optionalEncoding) {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.startingXPosition = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.startingXPosition = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -78,7 +96,7 @@ Event.PlayerConnected.prototype.startingXPosition = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.startingYPosition = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.startingYPosition = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -86,7 +104,7 @@ Event.PlayerConnected.prototype.startingYPosition = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.startingRotation = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.startingRotation = function() {
   var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -94,7 +112,7 @@ Event.PlayerConnected.prototype.startingRotation = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.velocityFactor = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.velocityFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -102,7 +120,7 @@ Event.PlayerConnected.prototype.velocityFactor = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.angularVelocityFactor = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.angularVelocityFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -110,7 +128,7 @@ Event.PlayerConnected.prototype.angularVelocityFactor = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.decelerationFactor = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.decelerationFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 18);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -118,7 +136,7 @@ Event.PlayerConnected.prototype.decelerationFactor = function() {
 /**
  * @returns {number}
  */
-Event.PlayerConnected.prototype.laserVelocityFactor = function() {
+fr.kissy.zergling_push.event.PlayerConnected.prototype.laserVelocityFactor = function() {
   var offset = this.bb.__offset(this.bb_pos, 20);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -126,7 +144,7 @@ Event.PlayerConnected.prototype.laserVelocityFactor = function() {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Event.PlayerConnected.startPlayerConnected = function(builder) {
+fr.kissy.zergling_push.event.PlayerConnected.startPlayerConnected = function(builder) {
   builder.startObject(9);
 };
 
@@ -134,7 +152,7 @@ Event.PlayerConnected.startPlayerConnected = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} idOffset
  */
-Event.PlayerConnected.addId = function(builder, idOffset) {
+fr.kissy.zergling_push.event.PlayerConnected.addId = function(builder, idOffset) {
   builder.addFieldOffset(0, idOffset, 0);
 };
 
@@ -142,7 +160,7 @@ Event.PlayerConnected.addId = function(builder, idOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} nameOffset
  */
-Event.PlayerConnected.addName = function(builder, nameOffset) {
+fr.kissy.zergling_push.event.PlayerConnected.addName = function(builder, nameOffset) {
   builder.addFieldOffset(1, nameOffset, 0);
 };
 
@@ -150,7 +168,7 @@ Event.PlayerConnected.addName = function(builder, nameOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {number} startingXPosition
  */
-Event.PlayerConnected.addStartingXPosition = function(builder, startingXPosition) {
+fr.kissy.zergling_push.event.PlayerConnected.addStartingXPosition = function(builder, startingXPosition) {
   builder.addFieldFloat32(2, startingXPosition, 0.0);
 };
 
@@ -158,7 +176,7 @@ Event.PlayerConnected.addStartingXPosition = function(builder, startingXPosition
  * @param {flatbuffers.Builder} builder
  * @param {number} startingYPosition
  */
-Event.PlayerConnected.addStartingYPosition = function(builder, startingYPosition) {
+fr.kissy.zergling_push.event.PlayerConnected.addStartingYPosition = function(builder, startingYPosition) {
   builder.addFieldFloat32(3, startingYPosition, 0.0);
 };
 
@@ -166,7 +184,7 @@ Event.PlayerConnected.addStartingYPosition = function(builder, startingYPosition
  * @param {flatbuffers.Builder} builder
  * @param {number} startingRotation
  */
-Event.PlayerConnected.addStartingRotation = function(builder, startingRotation) {
+fr.kissy.zergling_push.event.PlayerConnected.addStartingRotation = function(builder, startingRotation) {
   builder.addFieldFloat32(4, startingRotation, 0.0);
 };
 
@@ -174,7 +192,7 @@ Event.PlayerConnected.addStartingRotation = function(builder, startingRotation) 
  * @param {flatbuffers.Builder} builder
  * @param {number} velocityFactor
  */
-Event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
+fr.kissy.zergling_push.event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
   builder.addFieldFloat32(5, velocityFactor, 0.0);
 };
 
@@ -182,7 +200,7 @@ Event.PlayerConnected.addVelocityFactor = function(builder, velocityFactor) {
  * @param {flatbuffers.Builder} builder
  * @param {number} angularVelocityFactor
  */
-Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVelocityFactor) {
+fr.kissy.zergling_push.event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVelocityFactor) {
   builder.addFieldFloat32(6, angularVelocityFactor, 0.0);
 };
 
@@ -190,7 +208,7 @@ Event.PlayerConnected.addAngularVelocityFactor = function(builder, angularVeloci
  * @param {flatbuffers.Builder} builder
  * @param {number} decelerationFactor
  */
-Event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFactor) {
+fr.kissy.zergling_push.event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFactor) {
   builder.addFieldFloat32(7, decelerationFactor, 0.0);
 };
 
@@ -198,7 +216,7 @@ Event.PlayerConnected.addDecelerationFactor = function(builder, decelerationFact
  * @param {flatbuffers.Builder} builder
  * @param {number} laserVelocityFactor
  */
-Event.PlayerConnected.addLaserVelocityFactor = function(builder, laserVelocityFactor) {
+fr.kissy.zergling_push.event.PlayerConnected.addLaserVelocityFactor = function(builder, laserVelocityFactor) {
   builder.addFieldFloat32(8, laserVelocityFactor, 0.0);
 };
 
@@ -206,7 +224,7 @@ Event.PlayerConnected.addLaserVelocityFactor = function(builder, laserVelocityFa
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Event.PlayerConnected.endPlayerConnected = function(builder) {
+fr.kissy.zergling_push.event.PlayerConnected.endPlayerConnected = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -215,9 +233,9 @@ Event.PlayerConnected.endPlayerConnected = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.PlayerConnected.finishPlayerConnectedBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.PlayerConnected.finishPlayerConnectedBuffer = function(builder, offset) {
   builder.finish(offset, 'PLCN');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;

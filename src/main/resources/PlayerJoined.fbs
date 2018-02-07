@@ -1,6 +1,6 @@
 include "PlayerSnapshot.fbs";
 
-namespace Event;
+namespace fr.kissy.zergling_push.event;
 file_identifier "PLJN";
 
 table PlayerJoined {

@@ -19,6 +19,8 @@ var _playerFireRate;
 var _laserFullVelocity;
 var _remoteClientDelay = 100; // TODO send from server ?
 
+const Event = fr.kissy.zergling_push.event;
+
 class MainScene extends Phaser.Scene {
     constructor() {
         super({key: 'Main'});

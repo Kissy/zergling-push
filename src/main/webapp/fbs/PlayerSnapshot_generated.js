@@ -4,12 +4,30 @@
  * @const
  * @namespace
  */
-var Event = Event || {};
+var fr = fr || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy = fr.kissy || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push = fr.kissy.zergling_push || {};
+
+/**
+ * @const
+ * @namespace
+ */
+fr.kissy.zergling_push.event = fr.kissy.zergling_push.event || {};
 
 /**
  * @constructor
  */
-Event.PlayerSnapshot = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -24,9 +42,9 @@ Event.PlayerSnapshot = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Event.PlayerSnapshot}
+ * @returns {fr.kissy.zergling_push.event.PlayerSnapshot}
  */
-Event.PlayerSnapshot.prototype.__init = function(i, bb) {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -34,18 +52,18 @@ Event.PlayerSnapshot.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Event.PlayerSnapshot=} obj
- * @returns {Event.PlayerSnapshot}
+ * @param {fr.kissy.zergling_push.event.PlayerSnapshot=} obj
+ * @returns {fr.kissy.zergling_push.event.PlayerSnapshot}
  */
-Event.PlayerSnapshot.getRootAsPlayerSnapshot = function(bb, obj) {
-  return (obj || new Event.PlayerSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+fr.kissy.zergling_push.event.PlayerSnapshot.getRootAsPlayerSnapshot = function(bb, obj) {
+  return (obj || new fr.kissy.zergling_push.event.PlayerSnapshot).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
  * @returns {boolean}
  */
-Event.PlayerSnapshot.bufferHasIdentifier = function(bb) {
+fr.kissy.zergling_push.event.PlayerSnapshot.bufferHasIdentifier = function(bb) {
   return bb.__has_identifier('PLSP');
 };
 
@@ -53,7 +71,7 @@ Event.PlayerSnapshot.bufferHasIdentifier = function(bb) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Event.PlayerSnapshot.prototype.id = function(optionalEncoding) {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.id = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -61,7 +79,7 @@ Event.PlayerSnapshot.prototype.id = function(optionalEncoding) {
 /**
  * @returns {number}
  */
-Event.PlayerSnapshot.prototype.sequence = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.sequence = function() {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
 };
@@ -69,7 +87,7 @@ Event.PlayerSnapshot.prototype.sequence = function() {
 /**
  * @returns {number}
  */
-Event.PlayerSnapshot.prototype.x = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.x = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -77,7 +95,7 @@ Event.PlayerSnapshot.prototype.x = function() {
 /**
  * @returns {number}
  */
-Event.PlayerSnapshot.prototype.y = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.y = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -85,7 +103,7 @@ Event.PlayerSnapshot.prototype.y = function() {
 /**
  * @returns {number}
  */
-Event.PlayerSnapshot.prototype.rotation = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.rotation = function() {
   var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
 };
@@ -93,41 +111,23 @@ Event.PlayerSnapshot.prototype.rotation = function() {
 /**
  * @returns {number}
  */
-Event.PlayerSnapshot.prototype.shields = function() {
+fr.kissy.zergling_push.event.PlayerSnapshot.prototype.shields = function() {
   var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.readInt8(this.bb_pos + offset) : 0;
 };
 
 /**
- * @param {number} index
- * @param {Event.PlayerShotSnapshot=} obj
- * @returns {Event.PlayerShotSnapshot}
- */
-Event.PlayerSnapshot.prototype.shots = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? (obj || new Event.PlayerShotSnapshot).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
-};
-
-/**
- * @returns {number}
- */
-Event.PlayerSnapshot.prototype.shotsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
  * @param {flatbuffers.Builder} builder
  */
-Event.PlayerSnapshot.startPlayerSnapshot = function(builder) {
-  builder.startObject(7);
+fr.kissy.zergling_push.event.PlayerSnapshot.startPlayerSnapshot = function(builder) {
+  builder.startObject(6);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} idOffset
  */
-Event.PlayerSnapshot.addId = function(builder, idOffset) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addId = function(builder, idOffset) {
   builder.addFieldOffset(0, idOffset, 0);
 };
 
@@ -135,7 +135,7 @@ Event.PlayerSnapshot.addId = function(builder, idOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {number} sequence
  */
-Event.PlayerSnapshot.addSequence = function(builder, sequence) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addSequence = function(builder, sequence) {
   builder.addFieldInt32(1, sequence, 0);
 };
 
@@ -143,7 +143,7 @@ Event.PlayerSnapshot.addSequence = function(builder, sequence) {
  * @param {flatbuffers.Builder} builder
  * @param {number} x
  */
-Event.PlayerSnapshot.addX = function(builder, x) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addX = function(builder, x) {
   builder.addFieldFloat32(2, x, 0.0);
 };
 
@@ -151,7 +151,7 @@ Event.PlayerSnapshot.addX = function(builder, x) {
  * @param {flatbuffers.Builder} builder
  * @param {number} y
  */
-Event.PlayerSnapshot.addY = function(builder, y) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addY = function(builder, y) {
   builder.addFieldFloat32(3, y, 0.0);
 };
 
@@ -159,7 +159,7 @@ Event.PlayerSnapshot.addY = function(builder, y) {
  * @param {flatbuffers.Builder} builder
  * @param {number} rotation
  */
-Event.PlayerSnapshot.addRotation = function(builder, rotation) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addRotation = function(builder, rotation) {
   builder.addFieldFloat32(4, rotation, 0.0);
 };
 
@@ -167,44 +167,15 @@ Event.PlayerSnapshot.addRotation = function(builder, rotation) {
  * @param {flatbuffers.Builder} builder
  * @param {number} shields
  */
-Event.PlayerSnapshot.addShields = function(builder, shields) {
+fr.kissy.zergling_push.event.PlayerSnapshot.addShields = function(builder, shields) {
   builder.addFieldInt8(5, shields, 0);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} shotsOffset
- */
-Event.PlayerSnapshot.addShots = function(builder, shotsOffset) {
-  builder.addFieldOffset(6, shotsOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {Array.<flatbuffers.Offset>} data
  * @returns {flatbuffers.Offset}
  */
-Event.PlayerSnapshot.createShotsVector = function(builder, data) {
-  builder.startVector(4, data.length, 4);
-  for (var i = data.length - 1; i >= 0; i--) {
-    builder.addOffset(data[i]);
-  }
-  return builder.endVector();
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-Event.PlayerSnapshot.startShotsVector = function(builder, numElems) {
-  builder.startVector(4, numElems, 4);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @returns {flatbuffers.Offset}
- */
-Event.PlayerSnapshot.endPlayerSnapshot = function(builder) {
+fr.kissy.zergling_push.event.PlayerSnapshot.endPlayerSnapshot = function(builder) {
   var offset = builder.endObject();
   return offset;
 };
@@ -213,9 +184,9 @@ Event.PlayerSnapshot.endPlayerSnapshot = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} offset
  */
-Event.PlayerSnapshot.finishPlayerSnapshotBuffer = function(builder, offset) {
+fr.kissy.zergling_push.event.PlayerSnapshot.finishPlayerSnapshotBuffer = function(builder, offset) {
   builder.finish(offset, 'PLSP');
 };
 
 // Exports for Node.js and RequireJS
-this.Event = Event;
+this.fr = fr;
