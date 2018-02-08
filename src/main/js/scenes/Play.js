@@ -31,12 +31,16 @@ class MainScene extends Phaser.Scene {
         this.load.svg('hostile', 'img/ship1-enemy.svg');
         this.load.image('laser', 'img/laser.png');
         this.load.image('shield_silver', 'img/shield_silver.png');
+        this.load.image('grid', 'img/grid-hexa.png');
         this.load.spritesheet('fire', 'img/fire-sprite.png', {frameWidth: 10, frameHeight: 30, endFrame: 3});
     }
 
     create() {
-        this.cameras.main.setZoom(0.5); // TODO calculate a good zoom
+        //this.cameras.main.setZoom(1); // TODO calculate a good zoom
         this.remoteClock = new RemoteClock(this);
+
+        var background = this.add.tileSprite(1920 / 2, 960 / 2, 1920, 960, 'grid');
+        background.alpha = 0.3;
 
         this.network = NetworkManager.get(this.sys.game);
         this.network.on('message', this.onNetworkMessage, this);
@@ -175,6 +179,7 @@ class MainScene extends Phaser.Scene {
         controlledPlayer.receiveSnapshot(playerJoinedSnapshot);
         controlledPlayer.receiveSnapshot(playerJoinedSnapshot);
         this.players.add(controlledPlayer, true);
+        this.cameras.main.startFollow(controlledPlayer);
     }
 
     getSnapshotCurrentTime() {

@@ -130,7 +130,6 @@ public class Player extends WorldObject {
     private void shot(long time) {
         float shotX = (float) (this.x + (_playerHeight + 10) * Math.sin(this.rotation));
         float shotY = (float) (this.y - (_playerHeight + 10) * Math.cos(this.rotation));
-        System.out.println(nextShotId);
         this.world.playerShot(new Projectile(this, id + String.valueOf(this.nextShotId++), shotX, shotY, this.rotation, time));
         this.lastFiringTime = 0;
     }
