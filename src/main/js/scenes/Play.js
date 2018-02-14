@@ -27,8 +27,10 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.svg('avatar', 'img/ship1.svg');
-        this.load.svg('hostile', 'img/ship1-enemy.svg');
+        //this.load.svg('avatar', 'img/ship1.svg');
+        this.load.image('avatar', 'img/ship1.png');
+        //this.load.svg('hostile', 'img/ship1-enemy.svg');
+        this.load.image('hostile', 'img/ship1-enemy.png');
         this.load.image('laser', 'img/laser.png');
         this.load.image('shield_silver', 'img/shield_silver.png');
         this.load.image('grid', 'img/grid-hexa.png');
@@ -40,7 +42,7 @@ class MainScene extends Phaser.Scene {
         this.remoteClock = new RemoteClock(this);
 
         var background = this.add.tileSprite(1920 / 2, 960 / 2, 1920, 960, 'grid');
-        background.alpha = 0.3;
+        background.alpha = 0.1;
 
         this.network = NetworkManager.get(this.sys.game);
         this.network.on('message', this.onNetworkMessage, this);
@@ -99,6 +101,8 @@ class MainScene extends Phaser.Scene {
             this.projectiles.getChildren().forEach(function (projectile) { // TODO use named function
                 const projectileSnapshot = projectileSnapshots[projectile.getId()];
                 if (projectileSnapshot) {
+                    projectile.setActive(true);
+                    projectile.setVisible(true);
                     //projectile.receiveSnapshot(projectileSnapshot);
                     delete projectileSnapshots[projectile.getId()];
                 } else {

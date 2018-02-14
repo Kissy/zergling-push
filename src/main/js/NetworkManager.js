@@ -10,7 +10,7 @@ class NetworkManager extends Phaser.EventEmitter {
     }
 
     connect() {
-        this.webSocket = new WebSocket("ws://localhost:8080/websocket");
+        this.webSocket = new WebSocket("ws://172.16.3.8:8080/websocket");
         this.webSocket.binaryType = 'arraybuffer';
         this.webSocket.onopen = this.onWebSocketOpen.bind(this);
         this.webSocket.onmessage = this.onWebSocketMessage.bind(this);

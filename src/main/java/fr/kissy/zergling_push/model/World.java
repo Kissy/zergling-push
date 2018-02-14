@@ -27,6 +27,8 @@ public class World {
         this.players = new HashMap<>();
         // Dummy
         this.players.put(DefaultChannelId.newInstance(), new AIPlayer("test", 400, 400, 0, this, "test"));
+        this.players.put(DefaultChannelId.newInstance(), new AIPlayer("test-2", 600, 800, 0, this, "test-2"));
+        this.players.put(DefaultChannelId.newInstance(), new AIPlayer("test-3", 200, 600, 0, this, "test-3"));
         this.projectiles = new ArrayList<>();
     }
 
